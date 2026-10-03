@@ -66,7 +66,7 @@ export default function Scene({
 				size={1024}
 			/>
 			<Suspense fallback={null}>
-				<Light />
+				<LiaText />
 				{/* @ts-expect-error hopefully just an issue with React 19 RC */}
 				<motion.group
 					initial={{ y: -3 }}
@@ -145,20 +145,22 @@ function CameraRig({
 }
 
 // Glowing "LIA" Typography Light Object
-function Light() {
+function LiaText() {
 	const liaColor = useLiaColor()
+	const { size } = useThree()
+	const isMobile = size.width < 768
 
 	return (
-		<group position={[0, 0.2, -2.5]}>
+		<group position={isMobile ? [-0.15, 0.92, -2.5] : [0, 0.2, -2.5]}>
 			<Text
-				fontSize={2.5}
-				letterSpacing={0.12}
+				fontSize={isMobile ? 0.88 : 2.5}
+				letterSpacing={isMobile ? 0.1 : 0.12}
 				anchorX="center"
 				anchorY="middle"
 				color="#ffffff"
 			>
 				LIA
-				<meshStandardMaterial emissive={liaColor} emissiveIntensity={3} toneMapped={false} />
+				<meshStandardMaterial emissive={liaColor} emissiveIntensity={3.5} toneMapped={false} />
 			</Text>
 		</group>
 	)
