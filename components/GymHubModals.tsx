@@ -1,7 +1,10 @@
 'use client'
+'use no memo'
+/* eslint-disable @next/next/no-img-element */
 
 import { useState, useMemo } from 'react'
 import { useGymModal, type GymModalType } from '@/store/gymHub'
+import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
 
 // --- DATA STRUCTURES ---
 
@@ -360,6 +363,10 @@ export default function GymHubModals() {
 	const [newMemberPlan, setNewMemberPlan] = useState('3 Months Hypertrophy')
 	const [maintenanceLogged, setMaintenanceLogged] = useState(false)
 
+	// Exercises view mode & inspected item
+	const [exerciseSubView, setExerciseSubView] = useState<'studio' | 'list'>('studio')
+	const [inspectedExerciseId, setInspectedExerciseId] = useState<string>('lat-pulldown')
+
 	const showToast = (msg: string) => {
 		setToastText(msg)
 		setTimeout(() => setToastText(null), 3000)
@@ -394,10 +401,10 @@ export default function GymHubModals() {
 			)}
 
 			{/* Modal Container */}
-			<div className="relative z-10 w-full max-w-4xl max-h-[90dvh] overflow-hidden rounded-3xl border border-white/20 bg-neutral-950/98 shadow-2xl backdrop-blur-2xl flex flex-col text-white">
+			<div className="relative z-10 w-full max-w-5xl lg:max-w-6xl max-h-[92dvh] overflow-hidden rounded-3xl border border-white/20 bg-neutral-950/98 shadow-2xl backdrop-blur-2xl flex flex-col text-white">
 				
 				{/* Top Bar with Navigation Tabs */}
-				<div className="flex items-center justify-between border-b border-white/10 px-5 py-4 bg-white/[0.02]">
+				<div className="flex items-center justify-between border-b border-white/10 px-4 sm:px-6 py-3.5 bg-white/[0.02]">
 					<div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
 						<button
 							onClick={() => openModal('exercises')}
@@ -464,91 +471,161 @@ export default function GymHubModals() {
 				</div>
 
 				{/* Modal Content Body */}
-				<div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+				<div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 no-scrollbar">
 
-					{/* 1. EXERCISES LIBRARY */}
+					{/* 1. EXERCISES LIBRARY & 3D BIOMECHANICS STUDIO */}
 					{activeModal === 'exercises' && (
 						<div>
-							<div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-								<div>
-									<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
-										Hypertrophy Exercise Vault
-									</h2>
-									<p className="text-xs text-white/60">
-										Golden Era form cues, motor-unit recruitment angles, and evidence-based progressive overload.
-									</p>
-								</div>
-								{/* Search */}
-								<div className="relative min-w-[240px]">
-									<input
-										type="text"
-										value={exerciseSearch}
-										onChange={(e) => setExerciseSearch(e.target.value)}
-										placeholder="Search exercises, muscles..."
-										className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2 text-xs text-white placeholder-white/40 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
-									/>
-									{exerciseSearch && (
-										<button
-											onClick={() => setExerciseSearch('')}
-											className="absolute right-2.5 top-2.5 text-xs text-white/40 hover:text-white"
-										>
-											✕
-										</button>
-									)}
-								</div>
-							</div>
-
-							{/* Muscle Category Filter Pills */}
-							<div className="mb-5 flex flex-wrap gap-2">
-								{['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'].map((muscle) => (
+							{/* Sub-View Switcher: 3D Biomechanics Studio vs Catalog */}
+							<div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4 mb-5">
+								<div className="flex items-center gap-2">
 									<button
-										key={muscle}
-										onClick={() => setSelectedMuscle(muscle)}
-										className={`rounded-full px-3 py-1 text-xs font-semibold tracking-wider transition-all ${
-											selectedMuscle === muscle
-												? 'bg-amber-400 text-black shadow-md'
-												: 'border border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white'
+										onClick={() => setExerciseSubView('studio')}
+										className={`rounded-xl px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+											exerciseSubView === 'studio'
+												? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
+												: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 										}`}
 									>
-										{muscle}
+										<span>🎚️ 3D Biomechanics Studio</span>
+										<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
 									</button>
-								))}
+									<button
+										onClick={() => setExerciseSubView('list')}
+										className={`rounded-xl px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+											exerciseSubView === 'list'
+												? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
+												: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+										}`}
+									>
+										📋 Exercise Library ({EXERCISES_DATA.length})
+									</button>
+								</div>
+								<div className="text-[11px] text-white/50">
+									{exerciseSubView === 'studio'
+										? 'Interactive rep scrubber, muscle heatmap & joint angles'
+										: 'Browse all exercise protocols'}
+								</div>
 							</div>
 
-							{/* Exercises Grid */}
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-								{filteredExercises.map((ex) => (
-									<div
-										key={ex.id}
-										className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-amber-400/50 hover:bg-white/[0.06] flex flex-col justify-between"
-									>
+							{exerciseSubView === 'studio' ? (
+								<ExerciseBiomechanicsEngine
+									initialExerciseId={inspectedExerciseId}
+									onBack={() => setExerciseSubView('list')}
+								/>
+							) : (
+								<div>
+									<div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 										<div>
-											<div className="flex items-start justify-between gap-2 mb-1.5">
-												<h3 className="font-heading text-base font-bold text-white tracking-wide">
-													{ex.name}
-												</h3>
-												<span className="rounded bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 uppercase tracking-wider shrink-0 border border-amber-400/20">
-													{ex.level}
-												</span>
-											</div>
-											<div className="mb-2.5 flex items-center gap-2 text-xs">
-												<span className="font-semibold text-white/90">{ex.muscle}</span>
-												<span className="text-white/30">•</span>
-												<span className="text-amber-300/80">{ex.target}</span>
-											</div>
-											<p className="text-xs text-white/70 leading-relaxed italic bg-black/40 rounded-xl p-2.5 border border-white/5 mb-3">
-												&ldquo;{ex.cue}&rdquo;
+											<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
+												Hypertrophy Exercise Vault
+											</h2>
+											<p className="text-xs text-white/60">
+												Golden Era form cues, motor-unit recruitment angles, and evidence-based progressive overload.
 											</p>
 										</div>
-										<div className="flex items-center justify-between border-t border-white/10 pt-2.5 text-[11px] text-white/60">
-											<div className="flex items-center gap-1.5 text-white/80 font-medium">
-												<span>🎯 {ex.setsReps}</span>
-											</div>
-											<span className="text-white/40 truncate max-w-[140px]">{ex.equipment}</span>
+										{/* Search */}
+										<div className="relative min-w-[240px]">
+											<input
+												type="text"
+												value={exerciseSearch}
+												onChange={(e) => setExerciseSearch(e.target.value)}
+												placeholder="Search exercises, muscles..."
+												className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2 text-xs text-white placeholder-white/40 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+											/>
+											{exerciseSearch && (
+												<button
+													onClick={() => setExerciseSearch('')}
+													className="absolute right-2.5 top-2.5 text-xs text-white/40 hover:text-white"
+												>
+													✕
+												</button>
+											)}
 										</div>
 									</div>
-								))}
-							</div>
+
+									{/* Muscle Category Filter Pills */}
+									<div className="mb-5 flex flex-wrap gap-2">
+										{['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'].map((muscle) => (
+											<button
+												key={muscle}
+												onClick={() => setSelectedMuscle(muscle)}
+												className={`rounded-full px-3 py-1 text-xs font-semibold tracking-wider transition-all ${
+													selectedMuscle === muscle
+														? 'bg-amber-400 text-black shadow-md'
+														: 'border border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white'
+												}`}
+											>
+												{muscle}
+											</button>
+										))}
+									</div>
+
+									{/* Exercises Grid */}
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+										{filteredExercises.map((ex) => {
+											const matchingBioId =
+												ex.name.toLowerCase().includes('lat') ? 'lat-pulldown' :
+												ex.name.toLowerCase().includes('incline') ? 'incline-press' :
+												ex.name.toLowerCase().includes('squat') ? 'barbell-squat' :
+												ex.name.toLowerCase().includes('overhead') || ex.name.toLowerCase().includes('shoulder') ? 'shoulder-press' :
+												ex.name.toLowerCase().includes('bicep') || ex.name.toLowerCase().includes('curl') ? 'bicep-curl' :
+												ex.name.toLowerCase().includes('tricep') || ex.name.toLowerCase().includes('pushdown') ? 'tricep-pushdown' :
+												'lat-pulldown'
+
+											return (
+												<div
+													key={ex.id}
+													className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-amber-400/50 hover:bg-white/[0.06] flex flex-col justify-between group cursor-pointer"
+													onClick={() => {
+														setInspectedExerciseId(matchingBioId)
+														setExerciseSubView('studio')
+													}}
+												>
+													<div>
+														<div className="flex items-start gap-3 mb-2.5">
+															<img
+																src={`/exercises/${matchingBioId}.jpg`}
+																alt={ex.name}
+																className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-white/10 shrink-0 group-hover:border-amber-400/60 transition-all shadow-md"
+															/>
+															<div className="flex-1 min-w-0">
+																<div className="flex items-start justify-between gap-1 mb-1">
+																	<h3 className="font-heading text-base font-bold text-white tracking-wide group-hover:text-amber-300 transition-colors truncate">
+																		{ex.name}
+																	</h3>
+																	<span className="rounded bg-amber-400/10 px-2 py-0.5 text-[9px] font-bold text-amber-400 uppercase tracking-wider shrink-0 border border-amber-400/20">
+																		{ex.level}
+																	</span>
+																</div>
+																<div className="flex items-center gap-2 text-xs mb-1">
+																	<span className="font-semibold text-white/90">{ex.muscle}</span>
+																	<span className="text-white/30">•</span>
+																	<span className="text-amber-300/80 truncate">{ex.target}</span>
+																</div>
+																<span className="text-[10px] text-amber-400/90 flex items-center gap-1 font-semibold">
+																	<span>⚡ Real Athlete & Machine</span>
+																</span>
+															</div>
+														</div>
+														<p className="text-xs text-white/70 leading-relaxed italic bg-black/40 rounded-xl p-2.5 border border-white/5 mb-3">
+															&ldquo;{ex.cue}&rdquo;
+														</p>
+													</div>
+													<div className="flex items-center justify-between border-t border-white/10 pt-2.5 text-[11px] text-white/60">
+														<div className="flex items-center gap-1.5 text-white/80 font-medium">
+															<span>🎯 {ex.setsReps}</span>
+														</div>
+														<span className="text-amber-400 font-semibold group-hover:underline flex items-center gap-1">
+															Inspect Form & Setup →
+														</span>
+													</div>
+												</div>
+											)
+										})}
+									</div>
+								</div>
+							)}
 						</div>
 					)}
 
