@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 
 const EVENT_NAME = 'lia-color-change'
-const liaStore = { color: '#ffffff' }
+const liaStore = { color: '#ffe082' }
 
 export function setLiaColor(color: string) {
 	liaStore.color = color

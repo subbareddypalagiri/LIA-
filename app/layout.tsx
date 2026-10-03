@@ -1,4 +1,5 @@
-import * as Nav from '@/components/Nav'
+import HeaderNav from '@/components/HeaderNav'
+import GymHubModals from '@/components/GymHubModals'
 import MemberTrackerModal from '@/components/MemberTrackerModal'
 import MobileStudioControls from '@/components/MobileStudioControls'
 import type { Metadata } from 'next'
@@ -71,19 +72,14 @@ export default function RootLayout({
 								IRON CLUB
 							</span>
 						</div>
-						<Nav.Root className="hidden md:block">
-							<Nav.Item active={true}>Sanctum</Nav.Item>
-							<Nav.Item>Hypertrophy</Nav.Item>
-							<Nav.Item>Biomechanics</Nav.Item>
-							<Nav.Item>Anatomy</Nav.Item>
-							<Nav.Item>Standard</Nav.Item>
-						</Nav.Root>
+						<HeaderNav />
 						<div className="flex items-center gap-1.5 justify-self-end sm:gap-2.5">
 							<MemberTrackerModal />
 							<MobileStudioControls />
 						</div>
 					</div>
 				</header>
+				<GymHubModals />
 				{children}
 			</body>
 		</html>

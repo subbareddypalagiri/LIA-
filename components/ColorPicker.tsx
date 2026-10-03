@@ -3,8 +3,9 @@
 import { useLiaColor, setLiaColor } from '@/store/liaColor'
 
 const PRESET_COLORS = [
+	{ name: 'Gold', hex: '#ffe082' },
 	{ name: 'White', hex: '#ffffff' },
-	{ name: 'Gold', hex: '#ffb700' },
+	{ name: 'Amber', hex: '#ffb700' },
 	{ name: 'Cyan', hex: '#00e5ff' },
 	{ name: 'Red', hex: '#ff0055' },
 	{ name: 'Green', hex: '#00ff66' },

@@ -7,6 +7,7 @@ import ColorPicker from './ColorPicker'
 import { FONT_OPTIONS, useFontTheme, setFontTheme, type FontOption } from '@/store/fontTheme'
 import { BG_THEMES, useBgTheme, setBgTheme, type BgTheme } from '@/store/bgTheme'
 import { useLiaColor, setLiaColor } from '@/store/liaColor'
+import { openGymModal } from '@/store/gymHub'
 
 const PRESET_COLORS = [
 	{ name: 'White', hex: '#ffffff' },
@@ -109,6 +110,95 @@ export default function MobileStudioControls() {
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
 								</svg>
 							</button>
+						</div>
+
+						{/* Gym Features & Owner Tools */}
+						<div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-400/[0.05] p-3">
+							<div className="mb-2 flex items-center justify-between">
+								<span className="text-[11px] font-bold tracking-wider uppercase text-amber-300">
+									Gym Hub & Management
+								</span>
+								<span className="rounded bg-amber-400/20 px-1.5 py-0.2 text-[9px] font-bold text-amber-400 uppercase">
+									Interactive
+								</span>
+							</div>
+							<div className="grid grid-cols-2 gap-2">
+								<button
+									type="button"
+									onClick={() => {
+										setIsOpen(false)
+										openGymModal('exercises')
+									}}
+									className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 text-left hover:border-amber-400 transition-colors"
+								>
+									<span className="text-base">🏋️</span>
+									<div>
+										<div className="text-xs font-bold text-white">Exercises</div>
+										<div className="text-[9px] text-white/50">Form cues & cues</div>
+									</div>
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsOpen(false)
+										openGymModal('splits')
+									}}
+									className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 text-left hover:border-amber-400 transition-colors"
+								>
+									<span className="text-base">📋</span>
+									<div>
+										<div className="text-xs font-bold text-white">Workout Splits</div>
+										<div className="text-[9px] text-white/50">PPL & Arnold</div>
+									</div>
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsOpen(false)
+										openGymModal('equipment')
+									}}
+									className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 text-left hover:border-amber-400 transition-colors"
+								>
+									<span className="text-base">⚡</span>
+									<div>
+										<div className="text-xs font-bold text-white">Equipment</div>
+										<div className="text-[9px] text-white/50">Heavy dumbbells</div>
+									</div>
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsOpen(false)
+										openGymModal('timings')
+									}}
+									className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 text-left hover:border-amber-400 transition-colors"
+								>
+									<span className="text-base">⏰</span>
+									<div>
+										<div className="text-xs font-bold text-white">Timings</div>
+										<div className="text-[9px] text-white/50">Morning / Evening</div>
+									</div>
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsOpen(false)
+										openGymModal('owner')
+									}}
+									className="col-span-2 flex items-center justify-between rounded-xl border border-amber-400/50 bg-amber-400/20 p-2.5 text-left hover:bg-amber-400/30 transition-colors"
+								>
+									<div className="flex items-center gap-2">
+										<span className="text-lg">👑</span>
+										<div>
+											<div className="text-xs font-bold text-amber-200">Owner Desk</div>
+											<div className="text-[10px] text-white/70">Revenue, pending fees & attendance</div>
+										</div>
+									</div>
+									<span className="rounded bg-black/40 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+										Admin →
+									</span>
+								</button>
+							</div>
 						</div>
 
 						{/* Section 1: Typography */}

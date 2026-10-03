@@ -333,7 +333,8 @@ export const BG_THEMES: BgTheme[] = [
 ]
 
 const EVENT_NAME = 'bg-theme-change'
-const themeStore = { current: BG_THEMES[0] }
+const defaultTheme = BG_THEMES.find((t) => t.id === 'imperial-gold') ?? BG_THEMES[2]
+const themeStore = { current: defaultTheme }
 
 function applyDomBackground(color: string) {
 	if (typeof document !== 'undefined') {
