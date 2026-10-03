@@ -43,7 +43,11 @@ export default function Scene({
 	const rimColor = liaColor === bgTheme.suggestedLiaColor ? (bgTheme.rimColor ?? liaColor) : liaColor
 
 	return (
-		<Canvas {...props} camera={{ position: [20, 0, -5], fov: 8 }}>
+		<Canvas
+			{...props}
+			dpr={[1, typeof window !== 'undefined' && window.innerWidth < 768 ? 1.5 : 2]}
+			camera={{ position: [20, 0, -5], fov: 8 }}
+		>
 			{/* {!control && ( */}
 			<CameraRig
 				cameraLookAt={cameraLookAt}

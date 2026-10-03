@@ -265,11 +265,11 @@ function BottomAlignedSection({
 
 	return (
 		<Section className={clsx('content-end', className)} {...props}>
-			<motion.div style={{ opacity }} ref={innerRef} className="grid-guides grid gap-4">
-				<TitleTag className="col-span-2 font-heading uppercase tracking-wide font-black ~text-5xl/8xl guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-3 guides-5:justify-self-end guides-5:text-right guides-5:~guides-5:~max-w-[20rem]/[28.75rem]">
+			<motion.div style={{ opacity }} ref={innerRef} className="grid-guides grid gap-4 max-md:gap-2">
+				<TitleTag className="col-span-2 font-heading uppercase tracking-wide font-black ~text-5xl/8xl guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-3 guides-5:justify-self-end guides-5:text-right guides-5:~guides-5:~max-w-[20rem]/[28.75rem] max-md:text-[clamp(2rem,7.5vw,3.25rem)] max-md:text-left max-md:leading-none">
 					{title}
 				</TitleTag>
-				<p className="col-span-2 max-w-prose justify-self-center text-sm text-white/70 guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-2 guides-5:~lg:~mt-8/16 guides-5:~lg:~p-4/8 guides-5:lg:col-span-1">
+				<p className="col-span-2 max-w-prose justify-self-center text-sm text-white/70 guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-2 guides-5:~lg:~mt-8/16 guides-5:~lg:~p-4/8 guides-5:lg:col-span-1 max-md:text-[clamp(0.85rem,2.8vw,0.95rem)] max-md:text-left max-md:mt-2.5 max-md:leading-relaxed">
 					{children}
 				</p>
 			</motion.div>
@@ -325,9 +325,9 @@ function BottomAlignedSectionWithIntro({
 				style={{ opacity }}
 				ref={scope}
 				// TODO: generalize this for any section:
-				className="grid-guides mb-[calc(100vh-100svh)] grid gap-4" // env(safe-area-inset-bottom) didn't work for some reason
+				className="grid-guides mb-[calc(100vh-100svh)] grid gap-4 max-md:gap-2" // env(safe-area-inset-bottom) didn't work for some reason
 			>
-				<TitleTag className="col-span-2 font-heading uppercase tracking-wide font-black ~text-5xl/8xl guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-3 guides-5:justify-self-end guides-5:text-right guides-5:~guides-5:~max-w-[20rem]/[28.75rem]">
+				<TitleTag className="col-span-2 font-heading uppercase tracking-wide font-black ~text-5xl/8xl guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-3 guides-5:justify-self-end guides-5:text-right guides-5:~guides-5:~max-w-[20rem]/[28.75rem] max-md:text-[clamp(2rem,7.5vw,3.25rem)] max-md:text-left max-md:leading-none">
 					<SplitText
 						characterRef={(el, index) => {
 							characterRefs.current[index] = el
@@ -338,7 +338,7 @@ function BottomAlignedSectionWithIntro({
 				</TitleTag>
 				<p
 					ref={contentRef}
-					className="col-span-2 max-w-prose justify-self-center text-sm text-white/70 guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-2 guides-5:~lg:~mt-8/16 guides-5:~lg:~p-4/8 guides-5:lg:col-span-1"
+					className="col-span-2 max-w-prose justify-self-center text-sm text-white/70 guides-4:col-span-2 guides-4:col-start-2 guides-5:col-span-2 guides-5:~lg:~mt-8/16 guides-5:~lg:~p-4/8 guides-5:lg:col-span-1 max-md:text-[clamp(0.85rem,2.8vw,0.95rem)] max-md:text-left max-md:mt-2.5 max-md:leading-relaxed"
 				>
 					{children}
 				</p>
@@ -416,24 +416,24 @@ function LeftAlignedSection({ items, ...props }: LeftAlignedSectionProps) {
 	return (
 		<Section
 			{...props}
-			className="grid-guides grid content-end items-center gap-4 guides-4:content-center"
+			className="grid-guides grid content-end items-center gap-4 guides-4:content-center max-md:px-2"
 		>
-			<div ref={scope} className="col-span-2 guides-4:col-start-2">
-				<dl className="~space-y-6/12">
+			<div ref={scope} className="col-span-2 guides-4:col-start-2 max-md:w-full">
+				<dl className="~space-y-6/12 max-md:space-y-3">
 					{items.map(({ title, content }, i) => (
 						<div
 							ref={(el) => {
 								divRefs.current[i] = el
 							}}
 							key={title}
-							className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-all hover:border-amber-400/40 hover:bg-white/[0.06]"
+							className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-all hover:border-amber-400/40 hover:bg-white/[0.06] max-md:bg-neutral-950/85 max-md:border-white/15 max-md:p-4 max-md:shadow-xl max-md:backdrop-blur-md"
 						>
-							<div className="mb-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-amber-400">
+							<div className="mb-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-amber-400 max-md:text-[11px]">
 								<span className="rounded bg-amber-400/10 px-1.5 py-0.5">0{i + 1}</span>
 								<span className="text-white/20">{'//'}</span>
 								<span className="text-[10px] uppercase tracking-widest text-white/50">PROTOCOL</span>
 							</div>
-							<dt className="font-heading uppercase tracking-wide ~text-2xl/4xl font-extrabold text-white">
+							<dt className="font-heading uppercase tracking-wide ~text-2xl/4xl font-extrabold text-white max-md:text-[clamp(1.25rem,4.5vw,1.75rem)] max-md:leading-snug">
 								<SplitText
 									characterRef={(el, index) => {
 										characterRefs.current[i][index] = el
@@ -446,7 +446,7 @@ function LeftAlignedSection({ items, ...props }: LeftAlignedSectionProps) {
 								ref={(el) => {
 									contentRefs.current[i] = el
 								}}
-								className="mt-3 max-w-prose text-xs leading-relaxed text-white/70"
+								className="mt-3 max-w-prose text-xs leading-relaxed text-white/70 max-md:text-[clamp(0.825rem,2.5vw,0.9rem)] max-md:text-white/80 max-md:mt-2"
 							>
 								{content}
 							</dd>
@@ -525,12 +525,12 @@ function BottomAlignedSection2({
 
 	return (
 		<Section {...props} className="content-end">
-			<div ref={scope} className="grid-guides grid gap-4">
+			<div ref={scope} className="grid-guides grid gap-4 max-md:gap-2">
 				<div
 					ref={titleWrapperRef}
 					className="col-span-2 guides-4:col-start-2 guides-5:max-lg:col-span-3 guides-5:max-lg:col-start-2"
 				>
-					<h2 className="font-heading uppercase tracking-wide font-black ~text-4xl/7xl">
+					<h2 className="font-heading uppercase tracking-wide font-black ~text-4xl/7xl max-md:text-[clamp(1.75rem,6vw,2.75rem)] max-md:leading-tight">
 						<SplitText
 							characterRef={(el, i) => {
 								characterRefs.current[i] = el
@@ -544,7 +544,7 @@ function BottomAlignedSection2({
 					ref={content1WrapperRef}
 					className="guides-4:col-start-2 guides-4:row-start-2 guides-5:col-span-1 guides-5:max-lg:col-span-2 guides-5:max-lg:col-start-2 guides-5:lg:col-start-4"
 				>
-					<p ref={content1Ref} className="max-w-prose text-xs text-white/70">
+					<p ref={content1Ref} className="max-w-prose text-xs text-white/70 max-md:text-[clamp(0.85rem,2.8vw,0.95rem)] max-md:leading-relaxed">
 						{content1}
 					</p>
 				</div>
@@ -552,7 +552,7 @@ function BottomAlignedSection2({
 					ref={content2WrapperRef}
 					className="guides-4:col-start-3 guides-4:row-start-2 guides-5:col-span-1 guides-5:max-lg:col-span-2 guides-5:max-lg:col-start-4 guides-5:lg:col-start-5"
 				>
-					<p ref={content2Ref} className="max-w-prose text-xs text-white/70">
+					<p ref={content2Ref} className="max-w-prose text-xs text-white/70 max-md:text-[clamp(0.85rem,2.8vw,0.95rem)] max-md:leading-relaxed">
 						{content2}
 					</p>
 				</div>

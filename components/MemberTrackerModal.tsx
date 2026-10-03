@@ -218,18 +218,21 @@ export default function MemberTrackerModal() {
 
 			{/* Main Modal Overlay */}
 			{isOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+				<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6">
 					<div
 						className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
 						onClick={() => setIsOpen(false)}
 					/>
 
-					<div className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/20 bg-neutral-950/95 shadow-2xl backdrop-blur-2xl">
+					<div className="relative flex max-h-[92dvh] sm:max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/20 bg-neutral-950/98 shadow-2xl backdrop-blur-2xl">
+						{/* Mobile pull handle */}
+						<div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-white/20 sm:hidden" />
+
 						{/* Header Bar */}
-						<div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+						<div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5 sm:px-6 sm:py-5">
 							<div>
-								<div className="flex items-center gap-3">
-									<h2 className="font-serif text-2xl font-bold tracking-tight text-white">
+								<div className="flex items-center gap-2 sm:gap-3">
+									<h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
 										LIA IRON CLUB
 									</h2>
 									<span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-amber-400 uppercase">
@@ -295,12 +298,12 @@ export default function MemberTrackerModal() {
 						)}
 
 						{/* Filter & Search Bar */}
-						<div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-6 py-3.5">
+						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-6 sm:py-3.5">
 							{/* Filter Tabs */}
-							<div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 p-1 text-xs">
+							<div className="flex flex-wrap items-center gap-1 sm:gap-1.5 rounded-xl border border-white/10 bg-white/5 p-1 text-xs">
 								<button
 									onClick={() => setFilter('all')}
-									className={`rounded-lg px-3 py-1 transition-all ${
+									className={`rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
 										filter === 'all' ? 'bg-white/20 font-medium text-white' : 'text-white/50 hover:text-white'
 									}`}
 								>
@@ -308,13 +311,13 @@ export default function MemberTrackerModal() {
 								</button>
 								<button
 									onClick={() => setFilter('expiring')}
-									className={`flex items-center gap-1 rounded-lg px-3 py-1 transition-all ${
+									className={`flex items-center gap-1 rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
 										filter === 'expiring'
 											? 'bg-amber-500/30 font-medium text-amber-300'
 											: 'text-white/50 hover:text-white'
 									}`}
 								>
-									<span>Expiring in 3 Days</span>
+									<span>Expiring</span>
 									{expiringCount > 0 && (
 										<span className="rounded-full bg-amber-500/40 px-1.5 py-0.2 text-[10px] text-amber-200">
 											{expiringCount}
@@ -323,7 +326,7 @@ export default function MemberTrackerModal() {
 								</button>
 								<button
 									onClick={() => setFilter('active')}
-									className={`rounded-lg px-3 py-1 transition-all ${
+									className={`rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
 										filter === 'active'
 											? 'bg-emerald-500/20 font-medium text-emerald-300'
 											: 'text-white/50 hover:text-white'
@@ -333,7 +336,7 @@ export default function MemberTrackerModal() {
 								</button>
 								<button
 									onClick={() => setFilter('expired')}
-									className={`rounded-lg px-3 py-1 transition-all ${
+									className={`rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
 										filter === 'expired'
 											? 'bg-red-500/20 font-medium text-red-300'
 											: 'text-white/50 hover:text-white'
@@ -344,16 +347,16 @@ export default function MemberTrackerModal() {
 							</div>
 
 							{/* Search Input */}
-							<div className="relative">
+							<div className="relative w-full sm:w-56">
 								<input
 									type="text"
 									placeholder="Search member, mail, plan..."
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
-									className="w-56 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 pl-8 text-xs text-white placeholder-white/30 focus:border-white/30 focus:outline-none"
+									className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 sm:py-1.5 pl-8 text-sm sm:text-xs text-white placeholder-white/30 focus:border-white/30 focus:outline-none"
 								/>
 								<svg
-									className="absolute left-2.5 top-2 size-3.5 text-white/40"
+									className="absolute left-2.5 top-2.5 sm:top-2 size-3.5 text-white/40"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -364,7 +367,7 @@ export default function MemberTrackerModal() {
 						</div>
 
 						{/* Member List Grid */}
-						<div className="flex-1 overflow-y-auto p-6">
+						<div className="flex-1 overflow-y-auto p-4 sm:p-6">
 							{filteredMembers.length === 0 ? (
 								<div className="py-16 text-center text-sm text-white/40">
 									No members found matching your filter.

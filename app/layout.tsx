@@ -1,8 +1,6 @@
 import * as Nav from '@/components/Nav'
-import ColorPicker from '@/components/ColorPicker'
-import BgThemePicker from '@/components/BgThemePicker'
 import MemberTrackerModal from '@/components/MemberTrackerModal'
-import FontPicker from '@/components/FontPicker'
+import MobileStudioControls from '@/components/MobileStudioControls'
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import { Oswald, Bebas_Neue, Space_Grotesk, Cinzel } from 'next/font/google'
@@ -80,31 +78,9 @@ export default function RootLayout({
 							<Nav.Item>Anatomy</Nav.Item>
 							<Nav.Item>Standard</Nav.Item>
 						</Nav.Root>
-						<div className="flex items-center gap-2 justify-self-end sm:gap-2.5">
+						<div className="flex items-center gap-1.5 justify-self-end sm:gap-2.5">
 							<MemberTrackerModal />
-							<FontPicker />
-							<BgThemePicker />
-							<ColorPicker />
-							<button className="cursor-not-allowed">
-								<svg
-									width="22"
-									height="22"
-									viewBox="0 0 22 22"
-									fill="none"
-									className="size-[1.375rem]"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<rect width="4" height="4" fill="#D9D9D9" />
-									<rect x="9" width="4" height="4" fill="#D9D9D9" />
-									<rect x="18" width="4" height="4" fill="#D9D9D9" />
-									<rect y="9" width="4" height="4" fill="#D9D9D9" />
-									<rect x="9" y="9" width="4" height="4" fill="#D9D9D9" />
-									<rect x="18" y="9" width="4" height="4" fill="#D9D9D9" />
-									<rect y="18" width="4" height="4" fill="#D9D9D9" />
-									<rect x="9" y="18" width="4" height="4" fill="#D9D9D9" />
-									<rect x="18" y="18" width="4" height="4" fill="#D9D9D9" />
-								</svg>
-							</button>
+							<MobileStudioControls />
 						</div>
 					</div>
 				</header>
