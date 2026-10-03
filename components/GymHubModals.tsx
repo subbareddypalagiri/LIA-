@@ -537,7 +537,7 @@ export default function GymHubModals() {
 												<span className="text-amber-300/80">{ex.target}</span>
 											</div>
 											<p className="text-xs text-white/70 leading-relaxed italic bg-black/40 rounded-xl p-2.5 border border-white/5 mb-3">
-												"{ex.cue}"
+												&ldquo;{ex.cue}&rdquo;
 											</p>
 										</div>
 										<div className="flex items-center justify-between border-t border-white/10 pt-2.5 text-[11px] text-white/60">
@@ -823,7 +823,7 @@ export default function GymHubModals() {
 
 								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
 									<div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-1">
-										Today's Check-ins
+										Today&apos;s Check-ins
 									</div>
 									<div className="font-heading text-2xl font-black text-white">{checkInCount}</div>
 									<div className="text-[10px] text-emerald-400 mt-1">Peak evening batch active</div>
