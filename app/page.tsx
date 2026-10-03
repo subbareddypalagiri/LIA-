@@ -430,7 +430,7 @@ function LeftAlignedSection({ items, ...props }: LeftAlignedSectionProps) {
 						>
 							<div className="mb-2 flex items-center gap-2 font-mono text-xs font-semibold tracking-wider text-amber-400">
 								<span className="rounded bg-amber-400/10 px-1.5 py-0.5">0{i + 1}</span>
-								<span className="text-white/20">//</span>
+								<span className="text-white/20">{'//'}</span>
 								<span className="text-[10px] uppercase tracking-widest text-white/50">PROTOCOL</span>
 							</div>
 							<dt className="font-heading uppercase tracking-wide ~text-2xl/4xl font-extrabold text-white">

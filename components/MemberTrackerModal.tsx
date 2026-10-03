@@ -81,7 +81,7 @@ export default function MemberTrackerModal() {
 		try {
 			const saved = localStorage.getItem('lia_gym_members')
 			if (saved) {
-				setMembers(JSON.parse(saved))
+				setMembers(JSON.parse(saved) as GymMember[])
 			} else {
 				setMembers(INITIAL_MEMBERS)
 				localStorage.setItem('lia_gym_members', JSON.stringify(INITIAL_MEMBERS))
