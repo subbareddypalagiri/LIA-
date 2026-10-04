@@ -161,7 +161,7 @@ export default function PwaInstallPrompt() {
               </div>
               <div className="flex items-start gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-500/20 font-bold text-amber-400">2</span>
-                <p>Scroll down and select <span className="font-semibold text-white">"Add to Home Screen"</span> (➕).</p>
+                <p>Scroll down and select <span className="font-semibold text-white">&quot;Add to Home Screen&quot;</span> (➕).</p>
               </div>
               <div className="flex items-start gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-500/20 font-bold text-amber-400">3</span>
