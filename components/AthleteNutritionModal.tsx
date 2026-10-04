@@ -230,7 +230,7 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 						</div>
 						<div>
 							<div className="flex items-center gap-2">
-								<h2 className="font-heading text-base sm:text-xl font-black uppercase tracking-wider text-white">
+								<h2 className="text-base sm:text-xl font-bold tracking-tight text-white">
 									Macro Hypertrophy Architect
 								</h2>
 								<span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[9px] font-bold text-amber-300 uppercase">
@@ -466,9 +466,9 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 										<div className="text-[10px] uppercase font-bold tracking-wider text-amber-400">
 											Daily Hypertrophy Target
 										</div>
-										<div className="font-heading text-3xl sm:text-4xl font-black text-white mt-0.5">
+										<div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-0.5">
 											{macros.targetCalories.toLocaleString('en-IN')}{' '}
-											<span className="text-sm font-sans font-normal text-white/60">kcal / day</span>
+											<span className="text-sm font-normal text-neutral-400">kcal / day</span>
 										</div>
 									</div>
 									<div className="text-right">
@@ -485,7 +485,7 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 										<div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
 											Protein (4 kcal/g)
 										</div>
-										<div className="font-heading text-2xl sm:text-3xl font-black text-emerald-300 mt-1">
+										<div className="text-2xl sm:text-3xl font-bold tracking-tight text-emerald-300 mt-1">
 											{macros.proteinGrams}g
 										</div>
 										<div className="text-[10px] text-emerald-400/80 mt-0.5">
@@ -498,7 +498,7 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 										<div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
 											Carbs (4 kcal/g)
 										</div>
-										<div className="font-heading text-2xl sm:text-3xl font-black text-amber-300 mt-1">
+										<div className="text-2xl sm:text-3xl font-bold tracking-tight text-amber-300 mt-1">
 											{macros.carbGrams}g
 										</div>
 										<div className="text-[10px] text-amber-400/80 mt-0.5">
@@ -511,7 +511,7 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 										<div className="text-[10px] font-bold uppercase tracking-wider text-rose-400">
 											Fats (9 kcal/g)
 										</div>
-										<div className="font-heading text-2xl sm:text-3xl font-black text-rose-300 mt-1">
+										<div className="text-2xl sm:text-3xl font-bold tracking-tight text-rose-300 mt-1">
 											{macros.fatGrams}g
 										</div>
 										<div className="text-[10px] text-rose-400/80 mt-0.5">
@@ -565,25 +565,25 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 								<div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
 									<div className="rounded-xl border border-white/5 bg-black/40 p-2.5">
 										<div className="text-[10px] text-white/40 uppercase">Calories / Meal</div>
-										<div className="font-heading text-lg font-bold text-white mt-0.5">
+										<div className="text-lg font-bold tracking-tight text-white mt-0.5">
 											{Math.round(macros.targetCalories / mealCount)} kcal
 										</div>
 									</div>
 									<div className="rounded-xl border border-white/5 bg-black/40 p-2.5">
 										<div className="text-[10px] text-emerald-400/80 uppercase">Protein / Meal</div>
-										<div className="font-heading text-lg font-bold text-emerald-300 mt-0.5">
+										<div className="text-lg font-bold tracking-tight text-emerald-300 mt-0.5">
 											{Math.round(macros.proteinGrams / mealCount)}g
 										</div>
 									</div>
 									<div className="rounded-xl border border-white/5 bg-black/40 p-2.5">
 										<div className="text-[10px] text-amber-400/80 uppercase">Carbs / Meal</div>
-										<div className="font-heading text-lg font-bold text-amber-300 mt-0.5">
+										<div className="text-lg font-bold tracking-tight text-amber-300 mt-0.5">
 											{Math.round(macros.carbGrams / mealCount)}g
 										</div>
 									</div>
 									<div className="rounded-xl border border-white/5 bg-black/40 p-2.5">
 										<div className="text-[10px] text-rose-400/80 uppercase">Fats / Meal</div>
-										<div className="font-heading text-lg font-bold text-rose-300 mt-0.5">
+										<div className="text-lg font-bold tracking-tight text-rose-300 mt-0.5">
 											{Math.round(macros.fatGrams / mealCount)}g
 										</div>
 									</div>

@@ -5,7 +5,7 @@ import MobileStudioControls from '@/components/MobileStudioControls'
 import PwaInstallPrompt from '@/components/PwaInstallPrompt'
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
-import { Oswald, Bebas_Neue, Space_Grotesk, Cinzel } from 'next/font/google'
+import { Oswald, Bebas_Neue, Space_Grotesk, Cinzel, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 
 const cera = localFont({
@@ -20,6 +20,11 @@ const cera = localFont({
 		}
 	],
 	variable: '--font-cera'
+})
+
+const jakarta = Plus_Jakarta_Sans({
+	subsets: ['latin'],
+	variable: '--font-jakarta'
 })
 
 const oswald = Oswald({
@@ -79,7 +84,7 @@ export default function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={`relative scroll-smooth bg-black text-white ${cera.variable} ${oswald.variable} ${bebas.variable} ${spaceGrotesk.variable} ${cinzel.variable}`}
+			className={`relative scroll-smooth bg-black text-white ${cera.variable} ${jakarta.variable} ${oswald.variable} ${bebas.variable} ${spaceGrotesk.variable} ${cinzel.variable}`}
 		>
 			<body
 				className="~header-py-6/12"

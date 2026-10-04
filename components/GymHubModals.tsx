@@ -538,10 +538,10 @@ export default function GymHubModals() {
 					{activeModal === 'splits' && (
 						<div>
 							<div className="mb-6">
-								<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
+								<h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
 									Battle-Tested Training Splits
 								</h2>
-								<p className="text-xs text-white/60">
+								<p className="text-xs text-neutral-400 mt-1">
 									Select your preferred training frequency and execution blueprint.
 								</p>
 							</div>
@@ -552,22 +552,22 @@ export default function GymHubModals() {
 									<button
 										key={prog.id}
 										onClick={() => setActiveSplitId(prog.id)}
-										className={`rounded-2xl border p-4 text-left transition-all ${
+										className={`relative rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer ${
 											activeSplitId === prog.id
-												? 'border-amber-400 bg-amber-400/10 shadow-lg'
-												: 'border-white/10 bg-white/5 hover:border-white/20'
+												? 'border-amber-400/60 bg-gradient-to-b from-amber-500/15 via-amber-500/[0.03] to-neutral-950 shadow-[0_0_24px_rgba(245,158,11,0.18),inset_0_1px_0_rgba(251,191,36,0.35)]'
+												: 'border-white/[0.08] bg-neutral-900/60 hover:border-white/20 hover:bg-neutral-900/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
 										}`}
 									>
-										<div className="flex items-center justify-between mb-1">
-											<span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+										<div className="flex items-center justify-between mb-2">
+											<span className="rounded-md bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
 												{prog.daysPerWeek}
 											</span>
-											<span className="text-[10px] text-white/40">{prog.difficulty}</span>
+											<span className="text-[10px] font-medium text-neutral-400">{prog.difficulty}</span>
 										</div>
-										<h3 className="font-heading text-base font-bold text-white mb-1">
+										<h3 className="text-base font-bold text-white mb-1.5 tracking-tight">
 											{prog.name}
 										</h3>
-										<p className="text-[11px] text-white/60 line-clamp-2">{prog.tagline}</p>
+										<p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">{prog.tagline}</p>
 									</button>
 								))}
 							</div>
@@ -579,8 +579,8 @@ export default function GymHubModals() {
 									<div className="space-y-4">
 										<div className="flex items-center justify-between border-b border-white/10 pb-3">
 											<div>
-												<h3 className="text-base font-bold text-white">{currentProg.name} Schedule</h3>
-												<p className="text-xs text-white/60">{currentProg.tagline}</p>
+												<h3 className="text-base font-bold text-white tracking-tight">{currentProg.name} Schedule</h3>
+												<p className="text-xs text-neutral-400 mt-0.5">{currentProg.tagline}</p>
 											</div>
 											<button
 												onClick={() => {
@@ -590,7 +590,7 @@ export default function GymHubModals() {
 													navigator.clipboard?.writeText(routineText)
 													showToast(`Copied ${currentProg.name} Routine to Clipboard!`)
 												}}
-												className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all flex items-center gap-1.5"
+												className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all flex items-center gap-1.5 cursor-pointer"
 											>
 												<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -603,17 +603,17 @@ export default function GymHubModals() {
 											{currentProg.days.map((d, i) => (
 												<div
 													key={i}
-													className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 hover:border-white/20 transition-all"
+													className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/20 transition-all"
 												>
-													<div className="flex items-center justify-between mb-2">
-														<span className="font-heading text-sm font-bold text-white tracking-wide">
+													<div className="flex items-center justify-between mb-2.5">
+														<span className="text-sm font-bold text-white tracking-tight">
 															{d.day}
 														</span>
-														<span className="rounded bg-white/10 px-2 py-0.5 text-[10px] text-amber-300 font-medium">
+														<span className="rounded-md border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
 															{d.focus}
 														</span>
 													</div>
-													<ul className="space-y-1.5 text-xs text-white/70">
+													<ul className="space-y-1.5 text-xs text-neutral-300 font-normal">
 														{d.exercises.map((ex, eIdx) => (
 															<li key={eIdx} className="flex items-center gap-2">
 																<span className="size-1 rounded-full bg-amber-400 shrink-0" />
@@ -634,10 +634,10 @@ export default function GymHubModals() {
 					{activeModal === 'equipment' && (
 						<div>
 							<div className="mb-6">
-								<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
+								<h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
 									Heavy Iron & Biomechanical Gear
 								</h2>
-								<p className="text-xs text-white/60">
+								<p className="text-xs text-neutral-400 mt-1">
 									Every barbell, cable stack, and plate-loaded station is calibrated for zero joint shearing and optimal resistance curves.
 								</p>
 							</div>
@@ -646,20 +646,20 @@ export default function GymHubModals() {
 								{EQUIPMENT_DATA.map((eq, i) => (
 									<div
 										key={i}
-										className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:border-amber-400/40 transition-all"
+										className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-amber-400/40 hover:bg-neutral-900/90 transition-all"
 									>
 										<div className="flex items-start justify-between gap-2 mb-2">
 											<div>
 												<span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-0.5">
 													{eq.category}
 												</span>
-												<h3 className="font-heading text-lg font-bold text-white">{eq.name}</h3>
+												<h3 className="text-base font-bold text-white tracking-tight">{eq.name}</h3>
 											</div>
 											<span className="rounded bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 shrink-0">
 												{eq.status}
 											</span>
 										</div>
-										<p className="text-xs text-white/70 mb-3">{eq.specs}</p>
+										<p className="text-xs text-neutral-300 mb-3 leading-relaxed">{eq.specs}</p>
 										<div className="rounded-xl bg-black/40 p-2.5 text-[11px] font-mono text-white/80 border border-white/5 flex items-center gap-2">
 											<span className="text-amber-400">Inventory:</span>
 											<span>{eq.quantity}</span>
@@ -674,58 +674,58 @@ export default function GymHubModals() {
 					{activeModal === 'timings' && (
 						<div>
 							<div className="mb-6">
-								<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
+								<h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
 									Training Batches & Operating Hours
 								</h2>
-								<p className="text-xs text-white/60">
+								<p className="text-xs text-neutral-400 mt-1">
 									Structured training slots with dedicated floor coaches and biomechanics guidance.
 								</p>
 							</div>
 
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 								{/* Morning */}
-								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+								<div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
 									<div className="flex items-center gap-2.5 mb-3">
 										<div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 text-amber-400 border border-amber-400/20">
 											<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 												<circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41" />
 											</svg>
 										</div>
-										<h3 className="font-heading text-lg font-bold text-white">Morning Sessions</h3>
+										<h3 className="text-base font-bold text-white tracking-tight">Morning Sessions</h3>
 										<span className="ml-auto rounded bg-amber-400/10 text-amber-400 px-2 py-0.5 text-[10px] font-bold">
 											05:30 AM – 11:30 AM
 										</span>
 									</div>
-									<div className="space-y-3 text-xs text-white/80">
+									<div className="space-y-3 text-xs text-neutral-300">
 										<div className="border-l-2 border-amber-400 pl-3">
 											<div className="font-bold text-white">05:30 AM – 07:30 AM</div>
-											<div className="text-white/60">Early Bird Powerlifters & Heavy Compounds</div>
+											<div className="text-neutral-400">Early Bird Powerlifters & Heavy Compounds</div>
 										</div>
 										<div className="border-l-2 border-white/20 pl-3">
 											<div className="font-bold text-white">07:30 AM – 09:30 AM</div>
-											<div className="text-white/60">Executive & Professional Hypertrophy</div>
+											<div className="text-neutral-400">Executive & Professional Hypertrophy</div>
 										</div>
 										<div className="border-l-2 border-white/20 pl-3">
 											<div className="font-bold text-white">09:30 AM – 11:30 AM</div>
-											<div className="text-white/60">Cardio Conditioning & Dedicated Floor Coaching</div>
+											<div className="text-neutral-400">Cardio Conditioning & Dedicated Floor Coaching</div>
 										</div>
 									</div>
 								</div>
 
 								{/* Evening */}
-								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+								<div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
 									<div className="flex items-center gap-2.5 mb-3">
 										<div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 text-amber-400 border border-amber-400/20">
 											<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 												<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
 											</svg>
 										</div>
-										<h3 className="font-heading text-lg font-bold text-white">Evening Sessions</h3>
+										<h3 className="text-base font-bold text-white tracking-tight">Evening Sessions</h3>
 										<span className="ml-auto rounded bg-amber-400/10 text-amber-400 px-2 py-0.5 text-[10px] font-bold">
 											04:30 PM – 10:30 PM
 										</span>
 									</div>
-									<div className="space-y-3 text-xs text-white/80">
+									<div className="space-y-3 text-xs text-neutral-300">
 										<div className="border-l-2 border-amber-400 pl-3">
 											<div className="font-bold text-white">04:30 PM – 06:30 PM</div>
 											<div className="text-white/60">Student & Athletic Hypertrophy Batch</div>

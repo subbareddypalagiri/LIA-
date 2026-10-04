@@ -13,18 +13,18 @@ export interface FontOption {
 
 export const FONT_OPTIONS: FontOption[] = [
 	{
-		id: 'oswald',
-		name: 'Oswald (Heavy Iron)',
-		category: 'Condensed Power',
-		fontFamily: 'var(--font-oswald)',
-		badge: '🔥 Power'
+		id: 'jakarta',
+		name: 'Plus Jakarta Sans (Haute Modern)',
+		category: 'Luxury Geometric',
+		fontFamily: 'var(--font-jakarta)',
+		badge: '✨ Elite'
 	},
 	{
-		id: 'bebas',
-		name: 'Bebas Neue (Power Plates)',
-		category: 'Industrial All-Caps',
-		fontFamily: 'var(--font-bebas)',
-		badge: '🏋️ Plates'
+		id: 'cera',
+		name: 'Cera Pro (Swiss Geometry)',
+		category: 'Architectural Clean',
+		fontFamily: 'var(--font-cera)',
+		badge: '📐 Clean'
 	},
 	{
 		id: 'space',
@@ -41,11 +41,18 @@ export const FONT_OPTIONS: FontOption[] = [
 		badge: '🏛️ God'
 	},
 	{
-		id: 'cera',
-		name: 'Cera Pro (Minimal Clean)',
-		category: 'Swiss Precision',
-		fontFamily: 'var(--font-cera)',
-		badge: '📐 Clean'
+		id: 'oswald',
+		name: 'Oswald (Heavy Iron)',
+		category: 'Condensed Power',
+		fontFamily: 'var(--font-oswald)',
+		badge: '🔥 Power'
+	},
+	{
+		id: 'bebas',
+		name: 'Bebas Neue (Power Plates)',
+		category: 'Industrial All-Caps',
+		fontFamily: 'var(--font-bebas)',
+		badge: '🏋️ Plates'
 	}
 ]
 

@@ -304,7 +304,7 @@ export default function MemberTrackerModal() {
 						<div className="flex items-center justify-between border-b border-white/10 px-3.5 py-2.5 sm:px-6 sm:py-3 bg-neutral-950">
 							<div className="min-w-0 pr-2">
 								<div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
-									<h2 className="font-heading text-base sm:text-xl font-black tracking-wider text-white uppercase truncate">
+									<h2 className="text-base sm:text-xl font-bold tracking-tight text-white uppercase truncate">
 										LIA IRON CLUB
 									</h2>
 									<span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold tracking-wider text-amber-400 uppercase whitespace-nowrap">
@@ -590,7 +590,7 @@ export default function MemberTrackerModal() {
 
 															{/* Member Details */}
 															<div className="min-w-0 flex-1">
-																<h4 className="truncate font-heading text-sm sm:text-base font-bold text-white uppercase tracking-wide">
+																<h4 className="truncate text-sm sm:text-base font-bold text-white tracking-tight">
 																	{member.name}
 																</h4>
 																<div className="text-[11px] sm:text-xs text-white/60 truncate">{member.email}</div>

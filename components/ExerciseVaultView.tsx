@@ -217,74 +217,74 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 					const studioId = getBiomechanicsStudioId(ex.name)
 
 					return (
-						<div
-							key={ex.id}
-							className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.04] p-2.5 sm:p-3 transition-all hover:border-amber-400/60 hover:bg-white/[0.08] cursor-pointer shadow-lg hover:shadow-amber-400/10"
-							onClick={() => {
-								setSelectedExerciseDetail(ex)
-								setDetailPhase('start')
-							}}
-						>
-							<div>
-								{/* Card Top Action Bar: Bookmark & Difficulty Tag */}
-								<div className="flex items-center justify-between mb-2">
-									<button
-										type="button"
-										onClick={(e) => toggleSave(ex.id, e)}
-										className={`flex size-7 items-center justify-center rounded-lg border transition-all ${
-											isSaved
-												? 'border-amber-400 bg-amber-400 text-black font-bold shadow-md'
-												: 'border-white/10 bg-black/40 text-white/40 hover:text-white'
-										}`}
-										title={isSaved ? 'Remove bookmark' : 'Bookmark exercise'}
-									>
-										<svg className="size-3.5 fill-current" viewBox="0 0 24 24">
-											<path d="M5 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v19.143a.5.5 0 0 1-.777.416L12 18.018l-6.223 4.541A.5.5 0 0 1 5 22.143V3z" />
-										</svg>
-									</button>
+							<div
+								key={ex.id}
+								className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-2.5 sm:p-3 transition-all duration-200 hover:border-amber-400/50 hover:bg-neutral-900/90 cursor-pointer shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:shadow-amber-400/10"
+								onClick={() => {
+									setSelectedExerciseDetail(ex)
+									setDetailPhase('start')
+								}}
+							>
+								<div>
+									{/* Card Top Action Bar: Bookmark & Difficulty Tag */}
+									<div className="flex items-center justify-between mb-2">
+										<button
+											type="button"
+											onClick={(e) => toggleSave(ex.id, e)}
+											className={`flex size-7 items-center justify-center rounded-lg border transition-all ${
+												isSaved
+													? 'border-amber-400 bg-amber-400 text-black font-bold shadow-md'
+													: 'border-white/10 bg-black/40 text-white/40 hover:text-white'
+											}`}
+											title={isSaved ? 'Remove bookmark' : 'Bookmark exercise'}
+										>
+											<svg className="size-3.5 fill-current" viewBox="0 0 24 24">
+												<path d="M5 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v19.143a.5.5 0 0 1-.777.416L12 18.018l-6.223 4.541A.5.5 0 0 1 5 22.143V3z" />
+											</svg>
+										</button>
 
-									<span
-										className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
-											ex.difficulty === 'beginner'
-												? 'bg-emerald-400/10 border-emerald-400/30 text-emerald-300'
-												: ex.difficulty === 'expert'
-												? 'bg-rose-400/10 border-rose-400/30 text-rose-300'
-												: 'bg-amber-400/10 border-amber-400/20 text-amber-300'
-										}`}
-									>
-										{ex.difficulty}
-									</span>
-								</div>
-
-								{/* Centered RepDB 2D Illustration with Hover Dual-Phase */}
-								<div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-white flex items-center justify-center p-2 mb-2.5 shadow-sm">
-									{/* Default Start Position */}
-									<img
-										src={ex.startImage || ex.peakImage}
-										alt={ex.name}
-										loading="lazy"
-										className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105 group-hover:opacity-0"
-									/>
-									{/* Hover Peak Contraction Position */}
-									{ex.peakImage && (
-										<img
-											src={ex.peakImage}
-											alt={`${ex.name} peak contraction`}
-											loading="lazy"
-											className="absolute inset-0 h-full w-full object-contain p-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:scale-105"
-										/>
-									)}
-									{/* Phase Indicator Badge */}
-									<div className="absolute bottom-1 right-1 rounded bg-black/60 px-1 py-0.5 text-[8px] font-medium text-white/70 backdrop-blur-sm pointer-events-none">
-										Start ⇄ Peak
+										<span
+											className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${
+												ex.difficulty === 'beginner'
+													? 'bg-emerald-400/10 border-emerald-400/30 text-emerald-300'
+													: ex.difficulty === 'expert'
+													? 'bg-rose-400/10 border-rose-400/30 text-rose-300'
+													: 'bg-amber-400/10 border-amber-400/20 text-amber-300'
+											}`}
+										>
+											{ex.difficulty}
+										</span>
 									</div>
-								</div>
 
-								{/* Exercise Name & Primary Muscle */}
-								<div className="space-y-1 mb-2">
-									<h4 className="font-heading text-xs sm:text-sm font-bold tracking-wide text-white group-hover:text-amber-300 transition-colors line-clamp-2">
-										{ex.name}
-									</h4>
+									{/* Centered RepDB 2D Illustration with Hover Dual-Phase */}
+									<div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-white flex items-center justify-center p-2 mb-2.5 shadow-sm">
+										{/* Default Start Position */}
+										<img
+											src={ex.startImage || ex.peakImage}
+											alt={ex.name}
+											loading="lazy"
+											className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105 group-hover:opacity-0"
+										/>
+										{/* Hover Peak Contraction Position */}
+										{ex.peakImage && (
+											<img
+												src={ex.peakImage}
+												alt={`${ex.name} peak contraction`}
+												loading="lazy"
+												className="absolute inset-0 h-full w-full object-contain p-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:scale-105"
+											/>
+										)}
+										{/* Phase Indicator Badge */}
+										<div className="absolute bottom-1 right-1 rounded bg-black/60 px-1 py-0.5 text-[8px] font-medium text-white/70 backdrop-blur-sm pointer-events-none">
+											Start ⇄ Peak
+										</div>
+									</div>
+
+									{/* Exercise Name & Primary Muscle */}
+									<div className="space-y-1 mb-2">
+										<h4 className="text-xs sm:text-sm font-bold tracking-tight text-white group-hover:text-amber-300 transition-colors line-clamp-2">
+											{ex.name}
+										</h4>
 									<div className="flex flex-wrap items-center gap-1">
 										<span className="rounded bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 capitalize">
 											{ex.primaryMuscles[0] || ex.bodyPart}
@@ -357,7 +357,7 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 										{selectedExerciseDetail.equipment}
 									</span>
 								</div>
-								<h3 className="font-heading text-xl sm:text-2xl font-black uppercase tracking-wide text-white">
+								<h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
 									{selectedExerciseDetail.name}
 								</h3>
 							</div>

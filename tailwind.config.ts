@@ -24,13 +24,14 @@ export default {
 				'18': '4.5rem'
 			},
 			fontFamily: {
-				sans: ['var(--font-cera)', 'sans-serif'],
-				serif: ['var(--font-heading)', 'var(--font-oswald)', 'Baskerville', 'serif'],
-				heading: ['var(--font-heading)', 'var(--font-oswald)', 'sans-serif'],
-				oswald: ['var(--font-oswald)', 'sans-serif'],
-				bebas: ['var(--font-bebas)', 'sans-serif'],
+				sans: ['var(--font-jakarta)', 'var(--font-cera)', 'sans-serif'],
+				heading: ['var(--font-heading)', 'var(--font-jakarta)', 'var(--font-cera)', 'sans-serif'],
+				jakarta: ['var(--font-jakarta)', 'sans-serif'],
+				cera: ['var(--font-cera)', 'sans-serif'],
 				space: ['var(--font-space)', 'sans-serif'],
-				cinzel: ['var(--font-cinzel)', 'serif']
+				cinzel: ['var(--font-cinzel)', 'serif'],
+				oswald: ['var(--font-oswald)', 'sans-serif'],
+				bebas: ['var(--font-bebas)', 'sans-serif']
 			},
 			fontSize: {
 				sm: ['0.8125rem', '1.1rem'],
