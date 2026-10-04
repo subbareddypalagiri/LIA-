@@ -23,6 +23,7 @@ export interface OwnerProfile {
 	upiId: string
 	monthlyTarget: number
 	todayCheckins: number
+	ownerPassword?: string
 }
 
 const DEFAULT_OWNER_PROFILE: OwnerProfile = {
@@ -32,7 +33,8 @@ const DEFAULT_OWNER_PROFILE: OwnerProfile = {
 	email: 'subbareddy123sub@gmail.com',
 	upiId: 'liaironclub@okhdfcbank',
 	monthlyTarget: 180000,
-	todayCheckins: 48
+	todayCheckins: 48,
+	ownerPassword: 'Subba@LIA2026'
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -160,7 +162,8 @@ export async function fetchOwnerProfileData(): Promise<OwnerProfile> {
 					email: data.email,
 					upiId: data.upi_id,
 					monthlyTarget: data.monthly_target || 180000,
-					todayCheckins: data.today_checkins || 48
+					todayCheckins: data.today_checkins || 48,
+					ownerPassword: data.owner_password || 'Subba@LIA2026'
 				}
 				setStorage('lia_owner_profile', profile)
 				return profile
@@ -188,6 +191,7 @@ export async function saveOwnerProfileData(profile: OwnerProfile): Promise<void>
 				upi_id: profile.upiId,
 				monthly_target: profile.monthlyTarget,
 				today_checkins: profile.todayCheckins,
+				owner_password: profile.ownerPassword,
 				updated_at: new Date().toISOString()
 			})
 		} catch (e) {

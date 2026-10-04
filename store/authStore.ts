@@ -79,6 +79,10 @@ function setStoredUser(user: AuthUser | null) {
 	} catch {}
 }
 
+export function updateSessionUser(user: AuthUser | null) {
+	setStoredUser(user)
+}
+
 export function useAuth() {
 	const [user, setUser] = useState<AuthUser | null>(getStoredUser)
 

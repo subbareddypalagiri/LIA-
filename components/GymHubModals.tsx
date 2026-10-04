@@ -8,7 +8,7 @@ import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
 import ExerciseVaultView from './ExerciseVaultView'
 import AuthModal from './AuthModal'
 import MemberProfileModal from './MemberProfileModal'
-import { useAuth } from '@/store/authStore'
+import { useAuth, updateSessionUser } from '@/store/authStore'
 import {
 	fetchOwnerProfileData,
 	saveOwnerProfileData,
@@ -229,6 +229,7 @@ export default function GymHubModals() {
 		todayCheckins: 48
 	})
 	const [isEditingProfile, setIsEditingProfile] = useState(false)
+	const [ownerPasswordInput, setOwnerPasswordInput] = useState('')
 	const [cloudSyncActive, setCloudSyncActive] = useState(false)
 
 	useEffect(() => {
@@ -281,43 +282,58 @@ export default function GymHubModals() {
 					<div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
 						<button
 							onClick={() => openModal('exercises')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'exercises'
 									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
 									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 							}`}
 						>
-							🏋️ Exercises
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12" />
+							</svg>
+							<span>Exercises</span>
 						</button>
 						<button
 							onClick={() => openModal('splits')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'splits'
 									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
 									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 							}`}
 						>
-							📋 Workout Splits
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+								<rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+								<path d="M9 14l2 2 4-4" />
+							</svg>
+							<span>Workout Splits</span>
 						</button>
 						<button
 							onClick={() => openModal('equipment')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'equipment'
 									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
 									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 							}`}
 						>
-							⚡ Equipment
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+							</svg>
+							<span>Equipment</span>
 						</button>
 						<button
 							onClick={() => openModal('timings')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'timings'
 									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
 									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 							}`}
 						>
-							⏰ Timings
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<circle cx="12" cy="12" r="10" />
+								<polyline points="12 6 12 12 16 14" />
+							</svg>
+							<span>Timings</span>
 						</button>
 						{/* Role-Based Tab: Owner Desk if owner, My Pass if member, or Login if guest */}
 						{isOwner && (
@@ -329,7 +345,10 @@ export default function GymHubModals() {
 										: 'border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
 								}`}
 							>
-								<span>👑 Owner Desk</span>
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+									<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+								</svg>
+								<span>Owner Desk</span>
 								<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
 							</button>
 						)}
@@ -339,7 +358,12 @@ export default function GymHubModals() {
 								onClick={() => openModal('my-membership')}
 								className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
 							>
-								<span>🪪 My Pass ({user?.name.split(' ')[0]})</span>
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+									<rect width="18" height="18" x="3" y="3" rx="2" />
+									<circle cx="12" cy="10" r="3" />
+									<path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+								</svg>
+								<span>My Pass ({user?.name.split(' ')[0]})</span>
 								<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
 							</button>
 						)}
@@ -349,7 +373,11 @@ export default function GymHubModals() {
 								onClick={() => openModal('auth')}
 								className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20"
 							>
-								<span>🔐 Login / Pass</span>
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+									<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+									<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+								</svg>
+								<span>Login / Pass</span>
 							</button>
 						)}
 
@@ -395,18 +423,24 @@ export default function GymHubModals() {
 												: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 										}`}
 									>
-										<span>🎚️ 3D Biomechanics Studio</span>
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<line x1="4" x2="4" y1="21" y2="14" /><line x1="4" x2="4" y1="10" y2="3" /><line x1="12" x2="12" y1="21" y2="12" /><line x1="12" x2="12" y1="8" y2="3" /><line x1="20" x2="20" y1="21" y2="16" /><line x1="20" x2="20" y1="12" y2="3" /><line x1="1" x2="7" y1="14" y2="14" /><line x1="9" x2="15" y1="8" y2="8" /><line x1="17" x2="23" y1="16" y2="16" />
+										</svg>
+										<span>3D Biomechanics Studio</span>
 										<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
 									</button>
 									<button
 										onClick={() => setExerciseSubView('list')}
-										className={`rounded-xl px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+										className={`rounded-xl px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
 											exerciseSubView === 'list'
 												? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
 												: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 										}`}
 									>
-										📋 Exercise Vault (609)
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" />
+										</svg>
+										<span>Exercise Vault (609)</span>
 									</button>
 								</div>
 								<div className="text-[11px] text-white/50">
@@ -584,8 +618,12 @@ export default function GymHubModals() {
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 								{/* Morning */}
 								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-									<div className="flex items-center gap-2 mb-3">
-										<span className="text-xl">🌅</span>
+									<div className="flex items-center gap-2.5 mb-3">
+										<div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 text-amber-400 border border-amber-400/20">
+											<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+												<circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41" />
+											</svg>
+										</div>
 										<h3 className="font-heading text-lg font-bold text-white">Morning Sessions</h3>
 										<span className="ml-auto rounded bg-amber-400/10 text-amber-400 px-2 py-0.5 text-[10px] font-bold">
 											05:30 AM – 11:30 AM
@@ -609,8 +647,12 @@ export default function GymHubModals() {
 
 								{/* Evening */}
 								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-									<div className="flex items-center gap-2 mb-3">
-										<span className="text-xl">🌙</span>
+									<div className="flex items-center gap-2.5 mb-3">
+										<div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 text-amber-400 border border-amber-400/20">
+											<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+												<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+											</svg>
+										</div>
 										<h3 className="font-heading text-lg font-bold text-white">Evening Sessions</h3>
 										<span className="ml-auto rounded bg-amber-400/10 text-amber-400 px-2 py-0.5 text-[10px] font-bold">
 											04:30 PM – 10:30 PM
@@ -698,7 +740,10 @@ export default function GymHubModals() {
 									}}
 									className="rounded-xl border border-amber-400 bg-amber-400 text-black px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-lg hover:bg-amber-300 transition-all flex items-center gap-1.5 self-start sm:self-center"
 								>
-									<span>⚡ Quick Check-in</span>
+									<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+										<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+									</svg>
+									<span>Quick Check-in</span>
 									<span className="rounded-full bg-black/20 px-1.5 py-0.2 text-[10px]">+{checkInCount}</span>
 								</button>
 							</div>
@@ -706,8 +751,10 @@ export default function GymHubModals() {
 							{/* Owner Identity & Cloud Sync Banner */}
 							<div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
 								<div className="flex items-center gap-3.5">
-									<div className="size-12 rounded-2xl border border-amber-400/40 bg-amber-400/10 flex items-center justify-center text-xl font-bold text-amber-300 shrink-0">
-										👑
+									<div className="size-12 rounded-2xl border border-amber-400/40 bg-amber-400/10 flex items-center justify-center text-amber-300 shrink-0">
+										<svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+										</svg>
 									</div>
 									<div>
 										<div className="flex items-center gap-2">
@@ -717,9 +764,10 @@ export default function GymHubModals() {
 											</span>
 										</div>
 										<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/60 mt-0.5">
-											<span>🏢 {ownerProfile.gymName}</span>
-											<span>📞 {ownerProfile.phone}</span>
-											<span className="font-mono text-amber-300/90">UPI: {ownerProfile.upiId}</span>
+											<span>{ownerProfile.gymName}</span>
+											<span>• {ownerProfile.email}</span>
+											<span>• {ownerProfile.phone}</span>
+											<span className="font-mono text-amber-300/90">• UPI: {ownerProfile.upiId}</span>
 										</div>
 									</div>
 								</div>
@@ -744,30 +792,38 @@ export default function GymHubModals() {
 									<button
 										type="button"
 										onClick={() => setIsEditingProfile(!isEditingProfile)}
-										className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all shrink-0"
+										className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all shrink-0 flex items-center gap-1.5"
 									>
-										{isEditingProfile ? 'Close' : 'Edit Profile ✏️'}
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+										</svg>
+										<span>{isEditingProfile ? 'Close' : 'Edit Credentials'}</span>
 									</button>
 								</div>
 							</div>
 
 							{/* Owner Profile Editor Drawer (When Open) */}
 							{isEditingProfile && (
-								<div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] p-4.5 space-y-4">
-									<div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-										<h4 className="font-heading text-sm font-bold text-white uppercase tracking-wider">
-											Edit Gym Owner Profile & Payment Settings
-										</h4>
-										<span className="text-[10px] text-amber-400 font-semibold">Instant Local & Cloud Sync</span>
+								<div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] p-5 space-y-4">
+									<div className="flex items-center justify-between border-b border-white/10 pb-3">
+										<div>
+											<h4 className="font-heading text-sm font-bold text-white uppercase tracking-wider">
+												Edit Owner Profile & Security Credentials
+											</h4>
+											<p className="text-[11px] text-white/50">Change your login email, master password, UPI ID and gym targets.</p>
+										</div>
+										<span className="text-[10px] text-amber-400 font-semibold bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-lg">
+											Instant Local & Cloud Sync
+										</span>
 									</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+									<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
 										<div>
 											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Owner Name</label>
 											<input
 												type="text"
 												value={ownerProfile.ownerName}
 												onChange={(e) => setOwnerProfile({ ...ownerProfile, ownerName: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
 											/>
 										</div>
 										<div>
@@ -776,7 +832,26 @@ export default function GymHubModals() {
 												type="text"
 												value={ownerProfile.gymName}
 												onChange={(e) => setOwnerProfile({ ...ownerProfile, gymName: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+											/>
+										</div>
+										<div>
+											<label className="text-[10px] uppercase font-semibold text-amber-300 block mb-1">Owner Login Email</label>
+											<input
+												type="email"
+												value={ownerProfile.email}
+												onChange={(e) => setOwnerProfile({ ...ownerProfile, email: e.target.value.trim().toLowerCase() })}
+												className="w-full rounded-xl border border-amber-400/40 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+											/>
+										</div>
+										<div>
+											<label className="text-[10px] uppercase font-semibold text-amber-300 block mb-1">Change Master Password</label>
+											<input
+												type="text"
+												placeholder="Leave blank to keep current password"
+												value={ownerPasswordInput}
+												onChange={(e) => setOwnerPasswordInput(e.target.value)}
+												className="w-full rounded-xl border border-amber-400/40 bg-neutral-900 px-3.5 py-2 text-white placeholder-white/30 focus:border-amber-400 focus:outline-none font-mono"
 											/>
 										</div>
 										<div>
@@ -785,7 +860,7 @@ export default function GymHubModals() {
 												type="tel"
 												value={ownerProfile.phone}
 												onChange={(e) => setOwnerProfile({ ...ownerProfile, phone: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
 											/>
 										</div>
 										<div>
@@ -794,21 +869,50 @@ export default function GymHubModals() {
 												type="text"
 												value={ownerProfile.upiId}
 												onChange={(e) => setOwnerProfile({ ...ownerProfile, upiId: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+											/>
+										</div>
+										<div>
+											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Monthly Target (₹)</label>
+											<input
+												type="number"
+												value={ownerProfile.monthlyTarget}
+												onChange={(e) => setOwnerProfile({ ...ownerProfile, monthlyTarget: Number(e.target.value) })}
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
 											/>
 										</div>
 									</div>
-									<div className="flex justify-end gap-2 pt-2">
+									<div className="flex justify-end gap-2 pt-2 border-t border-white/10">
 										<button
 											type="button"
 											onClick={() => {
-												saveOwnerProfileData(ownerProfile)
+												const updatedProfile = { ...ownerProfile }
+												if (ownerPasswordInput.trim()) {
+													if (ownerPasswordInput.trim().length < 6) {
+														showToast('Password must be at least 6 characters.')
+														return
+													}
+													updatedProfile.ownerPassword = ownerPasswordInput.trim()
+												}
+												saveOwnerProfileData(updatedProfile)
+												setOwnerProfile(updatedProfile)
+												if (user) {
+													updateSessionUser({
+														...user,
+														email: updatedProfile.email,
+														name: updatedProfile.ownerName
+													})
+												}
+												setOwnerPasswordInput('')
 												setIsEditingProfile(false)
-												showToast('✅ Owner profile updated successfully!')
+												showToast('Owner credentials & profile saved successfully!')
 											}}
-											className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-1.5 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shadow-md"
+											className="rounded-xl border border-amber-400 bg-amber-400 px-5 py-2 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shadow-md flex items-center gap-1.5"
 										>
-											Save Profile Changes
+											<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+												<polyline points="20 6 9 17 4 12" />
+											</svg>
+											<span>Save Profile & Credentials</span>
 										</button>
 									</div>
 								</div>
