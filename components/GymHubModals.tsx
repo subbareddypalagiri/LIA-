@@ -5,6 +5,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useGymModal, type GymModalType } from '@/store/gymHub'
 import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
+import ExerciseVaultView from './ExerciseVaultView'
 import {
 	fetchOwnerProfileData,
 	saveOwnerProfileData,
@@ -14,166 +15,6 @@ import {
 } from '@/lib/supabase'
 
 // --- DATA STRUCTURES ---
-
-interface Exercise {
-	id: string
-	name: string
-	muscle: 'Biceps' | 'Triceps' | 'Chest' | 'Back' | 'Legs' | 'Shoulders' | 'Arms' | 'Core'
-	target: string
-	setsReps: string
-	equipment: string
-	cue: string
-	level: 'Heavy Mass' | 'Isolation' | 'Compound'
-	image: string
-	biomechanicsId: string
-}
-
-const EXERCISES_DATA: Exercise[] = [
-	{
-		id: 'ex-chest-1',
-		name: 'Barbell Flat Bench Press',
-		muscle: 'Chest',
-		target: 'Sternal Mid & Lower Pecs',
-		setsReps: '4 Sets × 6–8 Reps',
-		equipment: 'Olympic Barbell & Flat Bench',
-		cue: 'Drive feet into platform, touch lower sternum, and press explosively while maintaining scapular retraction.',
-		level: 'Compound',
-		image: '/exercises/card-flat-bench-press.jpg',
-		biomechanicsId: 'incline-press'
-	},
-	{
-		id: 'ex-back-1',
-		name: 'Heavy Cable Lat Pulldown',
-		muscle: 'Back',
-		target: 'Latissimus Dorsi Width & V-Taper',
-		setsReps: '4 Sets × 10–12 Reps',
-		equipment: 'Cable Lat Tower + Wide Lat Bar',
-		cue: 'Drive elbows down into back pockets, arch sternum to bar, avoid backwards swing.',
-		level: 'Compound',
-		image: '/exercises/card-lat-pulldown.jpg',
-		biomechanicsId: 'lat-pulldown'
-	},
-	{
-		id: 'ex-legs-1',
-		name: 'Olympic Barbell Back Squat',
-		muscle: 'Legs',
-		target: 'Quadriceps, Glutes & Adductors',
-		setsReps: '5 Sets × 5–8 Reps',
-		equipment: 'Power Cage + Olympic Barbell',
-		cue: 'Brace core, break at hips and knees together, hit parallel depth, drive through mid-foot.',
-		level: 'Compound',
-		image: '/exercises/card-barbell-squat.jpg',
-		biomechanicsId: 'barbell-squat'
-	},
-	{
-		id: 'ex-shoulder-1',
-		name: 'Seated Dumbbell Overhead Press',
-		muscle: 'Shoulders',
-		target: '3D Anterior & Lateral Deltoids',
-		setsReps: '4 Sets × 8–10 Reps',
-		equipment: '75° Utility Bench + Heavy DBs',
-		cue: 'Press in scapular plane 30° forward, avoid flaring elbows 90° to protect rotator cuff.',
-		level: 'Heavy Mass',
-		image: '/exercises/card-shoulder-press.jpg',
-		biomechanicsId: 'shoulder-press'
-	},
-	{
-		id: 'ex-bicep-1',
-		name: 'Dumbbell Biceps Curl',
-		muscle: 'Biceps',
-		target: 'Biceps Brachii (Short & Long Heads)',
-		setsReps: '4 Sets × 10–12 Reps',
-		equipment: 'Standing Free Weights / Dumbbells',
-		cue: 'Keep elbows tucked to ribs, curl smoothly without swinging torso, squeeze at top.',
-		level: 'Isolation',
-		image: '/exercises/dumbbell-bicep-curl.jpg',
-		biomechanicsId: 'bicep-curl'
-	},
-	{
-		id: 'ex-tricep-1',
-		name: 'Cable Single Arm Triceps Pushdown',
-		muscle: 'Triceps',
-		target: 'Triceps Brachii (Lateral & Medial Heads)',
-		setsReps: '4 Sets × 12–15 Reps',
-		equipment: 'Single Cable Pulley + Ergonomic Grip',
-		cue: 'Pin elbow firmly beside torso, drive handle downward to complete elbow extension.',
-		level: 'Isolation',
-		image: '/exercises/cable-tricep-pushdown.jpg',
-		biomechanicsId: 'tricep-pushdown'
-	},
-	{
-		id: 'ex-chest-2',
-		name: '30° Incline Dumbbell Press',
-		muscle: 'Chest',
-		target: 'Clavicular Upper Pecs',
-		setsReps: '4 Sets × 8–10 Reps',
-		equipment: '30° Incline Bench, Heavy DBs',
-		cue: 'Retract scapula, keep elbows angled at 45°, feel deep eccentric stretch without bouncing.',
-		level: 'Heavy Mass',
-		image: '/exercises/card-incline-press.jpg',
-		biomechanicsId: 'incline-press'
-	},
-	{
-		id: 'ex-back-2',
-		name: 'Seated Cable Low Row',
-		muscle: 'Back',
-		target: 'Mid-Back Rhomboids & Lats Thickness',
-		setsReps: '4 Sets × 10–12 Reps',
-		equipment: 'Cable Low Row Bench + V-Bar',
-		cue: 'Keep chest high, pull elbows straight back past torso, retract scapulae firmly.',
-		level: 'Heavy Mass',
-		image: '/exercises/card-seated-cable-row.jpg',
-		biomechanicsId: 'lat-pulldown'
-	},
-	{
-		id: 'ex-shoulder-2',
-		name: 'Dumbbell Lateral Raise',
-		muscle: 'Shoulders',
-		target: 'Lateral Deltoid Capped Width',
-		setsReps: '4 Sets × 12–15 Reps',
-		equipment: 'Standing Dumbbells',
-		cue: 'Slight forward lean, raise arms in scapular plane with pinkies slightly higher, avoid shrugging.',
-		level: 'Isolation',
-		image: '/exercises/card-lateral-raise.jpg',
-		biomechanicsId: 'shoulder-press'
-	},
-	{
-		id: 'ex-bicep-2',
-		name: 'Dumbbell Seated Incline Curl',
-		muscle: 'Biceps',
-		target: 'Biceps Brachii Peak & Brachialis',
-		setsReps: '4 Sets × 10–12 Reps',
-		equipment: 'Utility Flat Bench + Heavy Dumbbells',
-		cue: 'Seated posture eliminates cheat momentum. Supinate wrists as you reach peak contraction.',
-		level: 'Isolation',
-		image: '/exercises/dumbbell-seated-curl.jpg',
-		biomechanicsId: 'bicep-curl'
-	},
-	{
-		id: 'ex-chest-3',
-		name: 'Standing Cable Pec Fly',
-		muscle: 'Chest',
-		target: 'Sternal Head & Inner Pec Crossover',
-		setsReps: '4 Sets × 12–15 Reps',
-		equipment: 'Dual Cable Pulley Tower',
-		cue: 'Bring handles across center line, feel maximal peak contraction on inner chest fibers.',
-		level: 'Isolation',
-		image: '/exercises/card-cable-pec-fly.jpg',
-		biomechanicsId: 'incline-press'
-	},
-	{
-		id: 'ex-bicep-3',
-		name: 'Alternate Dumbbell Biceps Curl',
-		muscle: 'Biceps',
-		target: 'Biceps Brachii Hypertrophy',
-		setsReps: '4 Sets × 8–10 Reps',
-		equipment: 'Standing Dumbbells',
-		cue: 'Alternate arms deliberately, giving 100% focus and mind-muscle connection per side.',
-		level: 'Isolation',
-		image: '/exercises/alternate-bicep-curl.jpg',
-		biomechanicsId: 'bicep-curl'
-	}
-]
 
 interface SplitDay {
 	day: string
@@ -364,8 +205,6 @@ export default function GymHubModals() {
 	const { activeModal, closeModal, openModal } = useGymModal()
 
 	// Modals internal states
-	const [selectedMuscle, setSelectedMuscle] = useState<string>('All')
-	const [exerciseSearch, setExerciseSearch] = useState('')
 	const [activeSplitId, setActiveSplitId] = useState('ppl')
 	const [toastText, setToastText] = useState<string | null>(null)
 
@@ -396,41 +235,14 @@ export default function GymHubModals() {
 		})
 	}, [])
 
-	// Exercises view mode & inspected item (default to Library grid matching reference app)
+	// Exercises view mode & inspected item (default to Vault list)
 	const [exerciseSubView, setExerciseSubView] = useState<'studio' | 'list'>('list')
 	const [inspectedExerciseId, setInspectedExerciseId] = useState<string>('bicep-curl')
-	const [savedIds, setSavedIds] = useState<string[]>(['ex-bicep-1', 'ex-tricep-1'])
 
 	const showToast = (msg: string) => {
 		setToastText(msg)
 		setTimeout(() => setToastText(null), 3000)
 	}
-
-	const toggleSave = (id: string, e: React.MouseEvent) => {
-		e.stopPropagation()
-		setSavedIds((prev) => {
-			const exists = prev.includes(id)
-			const next = exists ? prev.filter((x) => x !== id) : [...prev, id]
-			showToast(exists ? 'Removed from saved' : 'Saved to favorites 🔖')
-			return next
-		})
-	}
-
-	const filteredExercises = useMemo(() => {
-		return EXERCISES_DATA.filter((ex) => {
-			const matchesMuscle =
-				selectedMuscle === 'All'
-					? true
-					: selectedMuscle === 'Saved 🔖'
-					? savedIds.includes(ex.id)
-					: ex.muscle === selectedMuscle
-			const matchesSearch =
-				ex.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
-				ex.target.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
-				ex.equipment.toLowerCase().includes(exerciseSearch.toLowerCase())
-			return matchesMuscle && matchesSearch
-		})
-	}, [selectedMuscle, exerciseSearch, savedIds])
 
 	if (!activeModal) return null
 
@@ -547,13 +359,13 @@ export default function GymHubModals() {
 												: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
 										}`}
 									>
-										📋 Exercise Library ({EXERCISES_DATA.length})
+										📋 Exercise Vault (609)
 									</button>
 								</div>
 								<div className="text-[11px] text-white/50">
 									{exerciseSubView === 'studio'
 										? 'Interactive rep scrubber, muscle heatmap & joint angles'
-										: 'Browse all exercise protocols'}
+										: 'Browse 609 movement protocols & dual-phase forms'}
 								</div>
 							</div>
 
@@ -563,122 +375,13 @@ export default function GymHubModals() {
 									onBack={() => setExerciseSubView('list')}
 								/>
 							) : (
-								<div>
-									<div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-										<div>
-											<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
-												Hypertrophy Exercise Vault
-											</h2>
-											<p className="text-xs text-white/60">
-												Golden Era form cues, motor-unit recruitment angles, and evidence-based progressive overload.
-											</p>
-										</div>
-										{/* Search */}
-										<div className="relative min-w-[240px]">
-											<input
-												type="text"
-												value={exerciseSearch}
-												onChange={(e) => setExerciseSearch(e.target.value)}
-												placeholder="Search exercises, muscles..."
-												className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2 text-xs text-white placeholder-white/40 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
-											/>
-											{exerciseSearch && (
-												<button
-													onClick={() => setExerciseSearch('')}
-													className="absolute right-2.5 top-2.5 text-xs text-white/40 hover:text-white"
-												>
-													✕
-												</button>
-											)}
-										</div>
-									</div>
-
-									{/* Muscle Category Filter Pills */}
-									<div className="mb-5 flex flex-wrap gap-2">
-										{['All', 'Biceps', 'Triceps', 'Chest', 'Back', 'Legs', 'Shoulders', 'Saved 🔖'].map((muscle) => (
-											<button
-												key={muscle}
-												onClick={() => setSelectedMuscle(muscle)}
-												className={`rounded-full px-3 py-1 text-xs font-semibold tracking-wider transition-all ${
-													selectedMuscle === muscle
-														? 'bg-amber-400 text-black shadow-md font-bold'
-														: 'border border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white'
-												}`}
-											>
-												{muscle}
-											</button>
-										))}
-									</div>
-
-									{/* 2-Column Responsive Exercise Library Grid (Matching Phone Reference App) */}
-									<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-										{filteredExercises.map((ex) => {
-											const isSaved = savedIds.includes(ex.id)
-
-											return (
-												<div
-													key={ex.id}
-													className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.04] p-2.5 sm:p-3 transition-all hover:border-amber-400/60 hover:bg-white/[0.08] cursor-pointer shadow-lg hover:shadow-amber-400/10"
-													onClick={() => {
-														setInspectedExerciseId(ex.biomechanicsId)
-														setExerciseSubView('studio')
-													}}
-												>
-													<div>
-														{/* Card Top Action Bar: Bookmark & Level Tag */}
-														<div className="flex items-center justify-between mb-2">
-															<button
-																type="button"
-																onClick={(e) => toggleSave(ex.id, e)}
-																className={`flex size-7 items-center justify-center rounded-lg border transition-all ${
-																	isSaved
-																		? 'border-amber-400 bg-amber-400 text-black font-bold shadow-md'
-																		: 'border-white/10 bg-black/40 text-white/40 hover:text-white'
-																}`}
-																title={isSaved ? 'Remove bookmark' : 'Bookmark exercise'}
-															>
-																<svg className="size-3.5 fill-current" viewBox="0 0 24 24">
-																	<path d="M5 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v19.143a.5.5 0 0 1-.777.416L12 18.018l-6.223 4.541A.5.5 0 0 1 5 22.143V3z" />
-																</svg>
-															</button>
-
-															<span className="rounded bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-300">
-																{ex.level}
-															</span>
-														</div>
-
-														{/* Centered Anatomical Muscular Body Illustration */}
-														<div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-white flex items-center justify-center p-2 mb-2.5 shadow-sm">
-															<img
-																src={ex.image}
-																alt={ex.name}
-																className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-															/>
-														</div>
-
-														{/* Exercise Name & Muscle Category */}
-														<div className="space-y-0.5 mb-2">
-															<h4 className="font-heading text-xs sm:text-sm font-bold tracking-wide text-white group-hover:text-amber-300 transition-colors line-clamp-2">
-																{ex.name}
-															</h4>
-															<span className="text-[11px] font-semibold text-white/50 block">
-																{ex.muscle}
-															</span>
-														</div>
-													</div>
-
-													{/* Card Footer: Sets & Tap Cue */}
-													<div className="border-t border-white/10 pt-2 flex items-center justify-between text-[10px] text-white/60">
-														<span className="font-medium text-white/80">{ex.setsReps}</span>
-														<span className="text-amber-400 font-semibold group-hover:underline">
-															View Form →
-														</span>
-													</div>
-												</div>
-											)
-										})}
-									</div>
-								</div>
+								<ExerciseVaultView
+									onOpenStudio={(studioId) => {
+										setInspectedExerciseId(studioId)
+										setExerciseSubView('studio')
+									}}
+									showToast={showToast}
+								/>
 							)}
 						</div>
 					)}

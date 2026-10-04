@@ -16,8 +16,8 @@ export default {
 	theme: {
 		screens,
 		fontSize,
-		colors,
 		extend: {
+			colors,
 			spacing: {
 				'4.5': '1.125rem',
 				'15': '3.75rem',
