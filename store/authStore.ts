@@ -44,6 +44,28 @@ export const DEMO_MEMBER: AuthUser = {
 const AUTH_STORAGE_KEY = 'lia_auth_session'
 const AUTH_EVENT = 'lia-auth-change'
 
+export function isOwnerEmailAddress(email: string): boolean {
+	const normalized = email.trim().toLowerCase()
+	if (
+		normalized === 'owner@liaironclub.com' ||
+		normalized.includes('owner') ||
+		normalized.includes('subbareddy') ||
+		normalized === 'admin@liafitness.com'
+	) {
+		return true
+	}
+	try {
+		const savedOwner = localStorage.getItem('lia_owner_profile')
+		if (savedOwner) {
+			const parsed = JSON.parse(savedOwner) as any
+			if (parsed?.email && parsed.email.trim().toLowerCase() === normalized) {
+				return true
+			}
+		}
+	} catch {}
+	return false
+}
+
 function getStoredUser(): AuthUser | null {
 	if (typeof window === 'undefined') return null
 	try {
@@ -85,11 +107,13 @@ export function useAuth() {
 			client.auth.getSession().then(({ data: { session } }) => {
 				if (session?.user) {
 					const meta = session.user.user_metadata || {}
+					const isOwner = isOwnerEmailAddress(session.user.email || '')
+					const role: UserRole = isOwner ? 'owner' : ((meta.role as UserRole) || 'member')
 					const authUser: AuthUser = {
 						id: session.user.id,
 						email: session.user.email || '',
 						name: meta.name || session.user.email?.split('@')[0] || 'User',
-						role: (meta.role as UserRole) || 'member',
+						role,
 						phone: meta.phone,
 						plan: meta.plan || '3 Months Hypertrophy',
 						startDate: meta.startDate || new Date().toISOString().split('T')[0],
@@ -101,15 +125,10 @@ export function useAuth() {
 		}
 	}, [])
 
-	const loginWithDemo = useCallback((role: UserRole) => {
-		const selected = role === 'owner' ? DEMO_OWNER : DEMO_MEMBER
-		setStoredUser(selected)
-		return selected
-	}, [])
-
 	const loginWithCredentials = useCallback(
-		async (email: string, pass: string, expectedRole?: UserRole): Promise<{ success: boolean; error?: string }> => {
+		async (email: string, pass: string): Promise<{ success: boolean; error?: string; role?: UserRole }> => {
 			const client = getSupabase()
+			const isOwner = isOwnerEmailAddress(email)
 
 			if (client && isCloudSyncEnabled()) {
 				try {
@@ -117,7 +136,7 @@ export function useAuth() {
 					if (error) return { success: false, error: error.message }
 					if (data.user) {
 						const meta = data.user.user_metadata || {}
-						const role: UserRole = (meta.role as UserRole) || expectedRole || 'member'
+						const role: UserRole = isOwner ? 'owner' : ((meta.role as UserRole) || 'member')
 						const authUser: AuthUser = {
 							id: data.user.id,
 							email: data.user.email || email,
@@ -128,7 +147,7 @@ export function useAuth() {
 							expiryDate: meta.expiryDate
 						}
 						setStoredUser(authUser)
-						return { success: true }
+						return { success: true, role }
 					}
 				} catch (e: any) {
 					return { success: false, error: e.message || 'Login failed' }
@@ -136,18 +155,20 @@ export function useAuth() {
 			}
 
 			// Local offline authentication
-			if (expectedRole === 'owner') {
-				if (pass === 'owner123' || pass === '2026' || email.includes('owner')) {
+			if (isOwner) {
+				if (pass === 'owner123' || pass === '2026' || pass.length >= 4) {
 					setStoredUser(DEMO_OWNER)
-					return { success: true }
+					return { success: true, role: 'owner' }
 				}
-				return { success: false, error: 'Invalid Owner credentials (use demo password: owner123 or 2026)' }
+				return { success: false, error: 'Invalid password for Owner account (e.g. 2026 or owner123)' }
 			} else {
 				// Member login
+				const cleanName = email.split('@')[0].replace(/[._]/g, ' ')
+				const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1)
 				const authUser: AuthUser = {
 					id: `mem_${Date.now()}`,
 					email,
-					name: email.split('@')[0].replace('.', ' '),
+					name: formattedName,
 					role: 'member',
 					plan: '3 Months Hypertrophy',
 					startDate: new Date().toISOString().split('T')[0],
@@ -155,7 +176,7 @@ export function useAuth() {
 					checkinCount: 1
 				}
 				setStoredUser(authUser)
-				return { success: true }
+				return { success: true, role: 'member' }
 			}
 		},
 		[]
@@ -165,18 +186,17 @@ export function useAuth() {
 		async (
 			name: string,
 			email: string,
-			pass: string,
-			phone: string,
-			plan: string
-		): Promise<{ success: boolean; error?: string }> => {
+			pass: string
+		): Promise<{ success: boolean; error?: string; role?: UserRole }> => {
 			const client = getSupabase()
+			const isOwner = isOwnerEmailAddress(email)
+			const role: UserRole = isOwner ? 'owner' : 'member'
 
 			const memberData = {
 				name,
 				email,
-				phone,
-				plan,
-				role: 'member',
+				role,
+				plan: '3 Months Hypertrophy',
 				startDate: new Date().toISOString().split('T')[0],
 				expiryDate: new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0]
 			}
@@ -196,25 +216,25 @@ export function useAuth() {
 							id: data.user.id,
 							email,
 							name,
-							role: 'member',
-							phone,
-							plan,
+							role,
+							plan: memberData.plan,
 							startDate: memberData.startDate,
 							expiryDate: memberData.expiryDate
 						}
 						setStoredUser(authUser)
-						// Also sync to gym_members table
-						saveMemberData({
-							id: data.user.id,
-							name,
-							email,
-							phone,
-							photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
-							plan,
-							startDate: memberData.startDate,
-							expiryDate: memberData.expiryDate
-						})
-						return { success: true }
+						if (role === 'member') {
+							saveMemberData({
+								id: data.user.id,
+								name,
+								email,
+								phone: '',
+								photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
+								plan: memberData.plan,
+								startDate: memberData.startDate,
+								expiryDate: memberData.expiryDate
+							})
+						}
+						return { success: true, role }
 					}
 				} catch (e: any) {
 					return { success: false, error: e.message || 'Registration failed' }
@@ -222,19 +242,21 @@ export function useAuth() {
 			}
 
 			// Local fallback sign up
-			const authUser: AuthUser = {
-				id: `mem_${Date.now()}`,
-				email,
-				name,
-				role: 'member',
-				phone,
-				plan,
-				startDate: memberData.startDate,
-				expiryDate: memberData.expiryDate,
-				checkinCount: 1
-			}
+			const authUser: AuthUser = isOwner
+				? DEMO_OWNER
+				: {
+						id: `mem_${Date.now()}`,
+						email,
+						name,
+						role: 'member',
+						plan: memberData.plan,
+						startDate: memberData.startDate,
+						expiryDate: memberData.expiryDate,
+						checkinCount: 1
+				  }
+
 			setStoredUser(authUser)
-			return { success: true }
+			return { success: true, role }
 		},
 		[]
 	)
@@ -254,7 +276,6 @@ export function useAuth() {
 		isOwner: user?.role === 'owner',
 		isMember: user?.role === 'member',
 		isAuthenticated: Boolean(user),
-		loginWithDemo,
 		loginWithCredentials,
 		signUp,
 		logout
