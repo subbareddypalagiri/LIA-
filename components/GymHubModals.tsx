@@ -11,154 +11,160 @@ import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
 interface Exercise {
 	id: string
 	name: string
-	muscle: 'Chest' | 'Back' | 'Legs' | 'Shoulders' | 'Arms' | 'Core'
+	muscle: 'Biceps' | 'Triceps' | 'Chest' | 'Back' | 'Legs' | 'Shoulders' | 'Arms' | 'Core'
 	target: string
 	setsReps: string
 	equipment: string
 	cue: string
 	level: 'Heavy Mass' | 'Isolation' | 'Compound'
+	image: string
+	biomechanicsId: string
 }
 
 const EXERCISES_DATA: Exercise[] = [
 	{
-		id: 'ex-1',
+		id: 'ex-bicep-1',
+		name: 'Dumbbell Biceps Curl',
+		muscle: 'Biceps',
+		target: 'Biceps Brachii (Short & Long Heads)',
+		setsReps: '4 Sets × 10–12 Reps',
+		equipment: 'Standing Free Weights / Dumbbells',
+		cue: 'Keep elbows tucked to ribs, curl smoothly without swinging torso, squeeze at top.',
+		level: 'Isolation',
+		image: '/exercises/dumbbell-bicep-curl.jpg',
+		biomechanicsId: 'bicep-curl'
+	},
+	{
+		id: 'ex-bicep-2',
+		name: 'Dumbbell Seated Curl',
+		muscle: 'Biceps',
+		target: 'Biceps Brachii Peak & Brachialis',
+		setsReps: '4 Sets × 10–12 Reps',
+		equipment: 'Utility Flat Bench + Heavy Dumbbells',
+		cue: 'Seated posture eliminates cheat momentum. Supinate wrists as you reach peak contraction.',
+		level: 'Isolation',
+		image: '/exercises/dumbbell-seated-curl.jpg',
+		biomechanicsId: 'bicep-curl'
+	},
+	{
+		id: 'ex-tricep-1',
+		name: 'Cable Single Arm Triceps Pushdown',
+		muscle: 'Triceps',
+		target: 'Triceps Brachii (Lateral & Medial Heads)',
+		setsReps: '4 Sets × 12–15 Reps',
+		equipment: 'Single Cable Pulley + Ergonomic Grip',
+		cue: 'Pin elbow firmly beside torso, drive handle downward to complete elbow extension.',
+		level: 'Isolation',
+		image: '/exercises/cable-tricep-pushdown.jpg',
+		biomechanicsId: 'tricep-pushdown'
+	},
+	{
+		id: 'ex-bicep-3',
+		name: 'Alternate Biceps Curl',
+		muscle: 'Biceps',
+		target: 'Biceps Brachii Hypertrophy',
+		setsReps: '4 Sets × 8–10 Reps',
+		equipment: 'Standing Dumbbells',
+		cue: 'Alternate arms deliberately, giving 100% focus and mind-muscle connection per side.',
+		level: 'Isolation',
+		image: '/exercises/alternate-bicep-curl.jpg',
+		biomechanicsId: 'bicep-curl'
+	},
+	{
+		id: 'ex-chest-1',
 		name: 'Incline Dumbbell Press',
 		muscle: 'Chest',
 		target: 'Clavicular Upper Pecs',
 		setsReps: '4 Sets × 8–10 Reps',
 		equipment: '30° Incline Bench, Heavy DBs',
-		cue: 'Retract scapula, keep elbows angled at 45°, feel the deep eccentric stretch without bottom bouncing.',
-		level: 'Heavy Mass'
+		cue: 'Retract scapula, keep elbows angled at 45°, feel deep eccentric stretch without bouncing.',
+		level: 'Heavy Mass',
+		image: '/exercises/card-incline-press.jpg',
+		biomechanicsId: 'incline-press'
 	},
 	{
-		id: 'ex-2',
+		id: 'ex-back-1',
+		name: 'Heavy Cable Lat Pulldown',
+		muscle: 'Back',
+		target: 'Latissimus Dorsi Width & V-Taper',
+		setsReps: '4 Sets × 10–12 Reps',
+		equipment: 'Cable Lat Tower + Wide Lat Bar',
+		cue: 'Drive elbows down into back pockets, arch sternum to bar, avoid backwards swing.',
+		level: 'Compound',
+		image: '/exercises/card-lat-pulldown.jpg',
+		biomechanicsId: 'lat-pulldown'
+	},
+	{
+		id: 'ex-legs-1',
+		name: 'Olympic Barbell Back Squat',
+		muscle: 'Legs',
+		target: 'Quadriceps, Glutes & Adductors',
+		setsReps: '5 Sets × 5–8 Reps',
+		equipment: 'Power Cage + Olympic Barbell',
+		cue: 'Brace core, break at hips and knees together, hit parallel depth, drive through mid-foot.',
+		level: 'Compound',
+		image: '/exercises/card-barbell-squat.jpg',
+		biomechanicsId: 'barbell-squat'
+	},
+	{
+		id: 'ex-shoulder-1',
+		name: 'Seated Dumbbell Overhead Press',
+		muscle: 'Shoulders',
+		target: '3D Anterior & Lateral Deltoids',
+		setsReps: '4 Sets × 8–10 Reps',
+		equipment: '75° Utility Bench + Heavy DBs',
+		cue: 'Press in scapular plane 30° forward, avoid flaring elbows 90° to protect rotator cuff.',
+		level: 'Heavy Mass',
+		image: '/exercises/card-shoulder-press.jpg',
+		biomechanicsId: 'shoulder-press'
+	},
+	{
+		id: 'ex-chest-2',
 		name: 'Barbell Flat Bench Press',
 		muscle: 'Chest',
 		target: 'Sternal Mid & Lower Pecs',
 		setsReps: '4 Sets × 6–8 Reps',
 		equipment: 'Olympic Barbell & Bench',
-		cue: 'Drive feet through the platform, slight natural arch, touch lower sternum and press explosively.',
-		level: 'Compound'
+		cue: 'Drive feet into platform, touch lower sternum and press explosively.',
+		level: 'Compound',
+		image: '/exercises/card-incline-press.jpg',
+		biomechanicsId: 'incline-press'
 	},
 	{
-		id: 'ex-3',
-		name: 'Cable Pec Deck Fly',
-		muscle: 'Chest',
-		target: 'Inner Sternal Cleavage',
-		setsReps: '3 Sets × 12–15 Reps',
-		equipment: 'Dual Cable Station',
-		cue: 'Maintain slight elbow bend, squeeze hard at peak contraction for a strict 1-second pause.',
-		level: 'Isolation'
+		id: 'ex-tricep-2',
+		name: 'Cable Tricep Rope Pushdown',
+		muscle: 'Triceps',
+		target: 'Triceps Horseshoe Lateral Head',
+		setsReps: '4 Sets × 12–15 Reps',
+		equipment: 'Cable Pulley Tower + Dual Knot Rope',
+		cue: 'Flare rope ends outward at bottom lockout for intense lateral head squeeze.',
+		level: 'Isolation',
+		image: '/exercises/cable-tricep-pushdown.jpg',
+		biomechanicsId: 'tricep-pushdown'
 	},
 	{
-		id: 'ex-4',
-		name: 'Barbell Bent-Over Row',
-		muscle: 'Back',
-		target: 'Lats & Rhomboid Thickness',
-		setsReps: '4 Sets × 8–10 Reps',
-		equipment: 'Olympic Barbell',
-		cue: 'Hinge at hips at 45°, pull barbell towards belly button, squeeze shoulder blades together.',
-		level: 'Heavy Mass'
-	},
-	{
-		id: 'ex-5',
-		name: 'Neutral Grip Lat Pulldown',
-		muscle: 'Back',
-		target: 'Latissimus Dorsi Width',
-		setsReps: '4 Sets × 10–12 Reps',
-		equipment: 'Cable Lat Tower',
-		cue: 'Drive with elbows downwards, arch chest to the bar, avoid excessive backward momentum.',
-		level: 'Compound'
-	},
-	{
-		id: 'ex-6',
+		id: 'ex-back-2',
 		name: 'Chest-Supported T-Bar Row',
 		muscle: 'Back',
-		target: 'Mid-Back & Spinal Erectors',
+		target: 'Mid-Back & Rhomboid Thickness',
 		setsReps: '3 Sets × 10–12 Reps',
-		equipment: 'Plate-Loaded T-Bar',
+		equipment: 'Plate-Loaded T-Bar Machine',
 		cue: 'Isolates back without lower back fatigue. Full stretch at bottom, squeeze traps at top.',
-		level: 'Heavy Mass'
+		level: 'Heavy Mass',
+		image: '/exercises/card-lat-pulldown.jpg',
+		biomechanicsId: 'lat-pulldown'
 	},
 	{
-		id: 'ex-7',
-		name: 'Barbell Back Squat',
-		muscle: 'Legs',
-		target: 'Quadriceps, Glutes & Adductors',
-		setsReps: '5 Sets × 5–8 Reps',
-		equipment: 'Power Cage, Olympic Barbell',
-		cue: 'Break at hips and knees together, hit parallel or below, drive upward through mid-foot.',
-		level: 'Compound'
-	},
-	{
-		id: 'ex-8',
-		name: 'Romanian Deadlift (RDL)',
-		muscle: 'Legs',
-		target: 'Hamstrings & Glute-Ham Tie-in',
-		setsReps: '4 Sets × 8–10 Reps',
-		equipment: 'Heavy Barbells or Dumbbells',
-		cue: 'Push hips backward towards wall, keep shins vertical, stop when hamstrings hit max stretch.',
-		level: 'Heavy Mass'
-	},
-	{
-		id: 'ex-9',
+		id: 'ex-legs-2',
 		name: 'Linear 45° Leg Press',
 		muscle: 'Legs',
 		target: 'Quad Hypertrophy Volume',
 		setsReps: '4 Sets × 12–15 Reps',
 		equipment: 'Plate-Loaded Leg Press',
 		cue: 'Feet shoulder-width on platform, control 3-second descent, do not lock knees at lockout.',
-		level: 'Compound'
-	},
-	{
-		id: 'ex-10',
-		name: 'Seated Dumbbell Overhead Press',
-		muscle: 'Shoulders',
-		target: 'Anterior & Lateral Deltoids',
-		setsReps: '4 Sets × 8–10 Reps',
-		equipment: '75° Incline Bench, Heavy DBs',
-		cue: 'Press slightly forward in the scapular plane, avoid flaring elbows 90° out to protect rotator cuff.',
-		level: 'Heavy Mass'
-	},
-	{
-		id: 'ex-11',
-		name: 'Cable Lean-Away Lateral Raise',
-		muscle: 'Shoulders',
-		target: '3D Lateral Deltoid Caps',
-		setsReps: '4 Sets × 12–15 Reps',
-		equipment: 'Low Cable Pulley',
-		cue: 'Lead with elbows, constant tension across the entire range, control the negative.',
-		level: 'Isolation'
-	},
-	{
-		id: 'ex-12',
-		name: 'Barbell Spider / EZ-Bar Curl',
-		muscle: 'Arms',
-		target: 'Biceps Brachii Peak',
-		setsReps: '4 Sets × 10–12 Reps',
-		equipment: 'EZ-Curl Bar & Preacher Bench',
-		cue: 'Zero torso swing, supinate hands at peak contraction, slow 3-second eccentric stretch.',
-		level: 'Isolation'
-	},
-	{
-		id: 'ex-13',
-		name: 'Incline Skullcrusher / French Press',
-		muscle: 'Arms',
-		target: 'Triceps Long Head Mass',
-		setsReps: '4 Sets × 10–12 Reps',
-		equipment: 'EZ Bar, Incline Bench',
-		cue: 'Angle upper arms back 30° to maintain constant long head tricep tension at full extension.',
-		level: 'Heavy Mass'
-	},
-	{
-		id: 'ex-14',
-		name: 'Hanging Leg & Knee Raises',
-		muscle: 'Core',
-		target: 'Rectus Abdominis & Deep Core',
-		setsReps: '3 Sets × 15–20 Reps',
-		equipment: 'Pull-up Bar / Captains Chair',
-		cue: 'Roll pelvis upward towards sternum rather than merely swinging legs, pause for 1s at top.',
-		level: 'Compound'
+		level: 'Compound',
+		image: '/exercises/card-barbell-squat.jpg',
+		biomechanicsId: 'barbell-squat'
 	}
 ]
 
@@ -363,25 +369,41 @@ export default function GymHubModals() {
 	const [newMemberPlan, setNewMemberPlan] = useState('3 Months Hypertrophy')
 	const [maintenanceLogged, setMaintenanceLogged] = useState(false)
 
-	// Exercises view mode & inspected item
-	const [exerciseSubView, setExerciseSubView] = useState<'studio' | 'list'>('studio')
-	const [inspectedExerciseId, setInspectedExerciseId] = useState<string>('lat-pulldown')
+	// Exercises view mode & inspected item (default to Library grid matching reference app)
+	const [exerciseSubView, setExerciseSubView] = useState<'studio' | 'list'>('list')
+	const [inspectedExerciseId, setInspectedExerciseId] = useState<string>('bicep-curl')
+	const [savedIds, setSavedIds] = useState<string[]>(['ex-bicep-1', 'ex-tricep-1'])
 
 	const showToast = (msg: string) => {
 		setToastText(msg)
 		setTimeout(() => setToastText(null), 3000)
 	}
 
+	const toggleSave = (id: string, e: React.MouseEvent) => {
+		e.stopPropagation()
+		setSavedIds((prev) => {
+			const exists = prev.includes(id)
+			const next = exists ? prev.filter((x) => x !== id) : [...prev, id]
+			showToast(exists ? 'Removed from saved' : 'Saved to favorites 🔖')
+			return next
+		})
+	}
+
 	const filteredExercises = useMemo(() => {
 		return EXERCISES_DATA.filter((ex) => {
-			const matchesMuscle = selectedMuscle === 'All' || ex.muscle === selectedMuscle
+			const matchesMuscle =
+				selectedMuscle === 'All'
+					? true
+					: selectedMuscle === 'Saved 🔖'
+					? savedIds.includes(ex.id)
+					: ex.muscle === selectedMuscle
 			const matchesSearch =
 				ex.name.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
 				ex.target.toLowerCase().includes(exerciseSearch.toLowerCase()) ||
 				ex.equipment.toLowerCase().includes(exerciseSearch.toLowerCase())
 			return matchesMuscle && matchesSearch
 		})
-	}, [selectedMuscle, exerciseSearch])
+	}, [selectedMuscle, exerciseSearch, savedIds])
 
 	if (!activeModal) return null
 
@@ -546,13 +568,13 @@ export default function GymHubModals() {
 
 									{/* Muscle Category Filter Pills */}
 									<div className="mb-5 flex flex-wrap gap-2">
-										{['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'].map((muscle) => (
+										{['All', 'Biceps', 'Triceps', 'Chest', 'Back', 'Legs', 'Shoulders', 'Saved 🔖'].map((muscle) => (
 											<button
 												key={muscle}
 												onClick={() => setSelectedMuscle(muscle)}
 												className={`rounded-full px-3 py-1 text-xs font-semibold tracking-wider transition-all ${
 													selectedMuscle === muscle
-														? 'bg-amber-400 text-black shadow-md'
+														? 'bg-amber-400 text-black shadow-md font-bold'
 														: 'border border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white'
 												}`}
 											>
@@ -561,63 +583,68 @@ export default function GymHubModals() {
 										))}
 									</div>
 
-									{/* Exercises Grid */}
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+									{/* 2-Column Responsive Exercise Library Grid (Matching Phone Reference App) */}
+									<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
 										{filteredExercises.map((ex) => {
-											const matchingBioId =
-												ex.name.toLowerCase().includes('lat') ? 'lat-pulldown' :
-												ex.name.toLowerCase().includes('incline') ? 'incline-press' :
-												ex.name.toLowerCase().includes('squat') ? 'barbell-squat' :
-												ex.name.toLowerCase().includes('overhead') || ex.name.toLowerCase().includes('shoulder') ? 'shoulder-press' :
-												ex.name.toLowerCase().includes('bicep') || ex.name.toLowerCase().includes('curl') ? 'bicep-curl' :
-												ex.name.toLowerCase().includes('tricep') || ex.name.toLowerCase().includes('pushdown') ? 'tricep-pushdown' :
-												'lat-pulldown'
+											const isSaved = savedIds.includes(ex.id)
 
 											return (
 												<div
 													key={ex.id}
-													className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-amber-400/50 hover:bg-white/[0.06] flex flex-col justify-between group cursor-pointer"
+													className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.04] p-2.5 sm:p-3 transition-all hover:border-amber-400/60 hover:bg-white/[0.08] cursor-pointer shadow-lg hover:shadow-amber-400/10"
 													onClick={() => {
-														setInspectedExerciseId(matchingBioId)
+														setInspectedExerciseId(ex.biomechanicsId)
 														setExerciseSubView('studio')
 													}}
 												>
 													<div>
-														<div className="flex items-start gap-3 mb-2.5">
+														{/* Card Top Action Bar: Bookmark & Level Tag */}
+														<div className="flex items-center justify-between mb-2">
+															<button
+																type="button"
+																onClick={(e) => toggleSave(ex.id, e)}
+																className={`flex size-7 items-center justify-center rounded-lg border transition-all ${
+																	isSaved
+																		? 'border-amber-400 bg-amber-400 text-black font-bold shadow-md'
+																		: 'border-white/10 bg-black/40 text-white/40 hover:text-white'
+																}`}
+																title={isSaved ? 'Remove bookmark' : 'Bookmark exercise'}
+															>
+																<svg className="size-3.5 fill-current" viewBox="0 0 24 24">
+																	<path d="M5 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v19.143a.5.5 0 0 1-.777.416L12 18.018l-6.223 4.541A.5.5 0 0 1 5 22.143V3z" />
+																</svg>
+															</button>
+
+															<span className="rounded bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-300">
+																{ex.level}
+															</span>
+														</div>
+
+														{/* Centered Anatomical Muscular Body Illustration */}
+														<div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-white flex items-center justify-center p-2 mb-2.5 shadow-sm">
 															<img
-																src={`/exercises/${matchingBioId}.jpg`}
+																src={ex.image}
 																alt={ex.name}
-																className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-white/10 shrink-0 group-hover:border-amber-400/60 transition-all shadow-md"
+																className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
 															/>
-															<div className="flex-1 min-w-0">
-																<div className="flex items-start justify-between gap-1 mb-1">
-																	<h3 className="font-heading text-base font-bold text-white tracking-wide group-hover:text-amber-300 transition-colors truncate">
-																		{ex.name}
-																	</h3>
-																	<span className="rounded bg-amber-400/10 px-2 py-0.5 text-[9px] font-bold text-amber-400 uppercase tracking-wider shrink-0 border border-amber-400/20">
-																		{ex.level}
-																	</span>
-																</div>
-																<div className="flex items-center gap-2 text-xs mb-1">
-																	<span className="font-semibold text-white/90">{ex.muscle}</span>
-																	<span className="text-white/30">•</span>
-																	<span className="text-amber-300/80 truncate">{ex.target}</span>
-																</div>
-																<span className="text-[10px] text-amber-400/90 flex items-center gap-1 font-semibold">
-																	<span>⚡ Real Athlete & Machine</span>
-																</span>
-															</div>
 														</div>
-														<p className="text-xs text-white/70 leading-relaxed italic bg-black/40 rounded-xl p-2.5 border border-white/5 mb-3">
-															&ldquo;{ex.cue}&rdquo;
-														</p>
+
+														{/* Exercise Name & Muscle Category */}
+														<div className="space-y-0.5 mb-2">
+															<h4 className="font-heading text-xs sm:text-sm font-bold tracking-wide text-white group-hover:text-amber-300 transition-colors line-clamp-2">
+																{ex.name}
+															</h4>
+															<span className="text-[11px] font-semibold text-white/50 block">
+																{ex.muscle}
+															</span>
+														</div>
 													</div>
-													<div className="flex items-center justify-between border-t border-white/10 pt-2.5 text-[11px] text-white/60">
-														<div className="flex items-center gap-1.5 text-white/80 font-medium">
-															<span>🎯 {ex.setsReps}</span>
-														</div>
-														<span className="text-amber-400 font-semibold group-hover:underline flex items-center gap-1">
-															Inspect Form & Setup →
+
+													{/* Card Footer: Sets & Tap Cue */}
+													<div className="border-t border-white/10 pt-2 flex items-center justify-between text-[10px] text-white/60">
+														<span className="font-medium text-white/80">{ex.setsReps}</span>
+														<span className="text-amber-400 font-semibold group-hover:underline">
+															View Form →
 														</span>
 													</div>
 												</div>
