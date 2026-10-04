@@ -256,27 +256,32 @@ export default function MemberTrackerModal() {
 				)}
 			</button>
 
-			{/* Main Modal Overlay - Centered Executive Dashboard Architecture */}
+			{/* Main Modal Overlay - Centered Executive Dashboard Architecture & Mobile Bottom-Sheet */}
 			{isOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-5 overflow-y-auto">
+				<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-5 overflow-y-auto">
 					<div
 						className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
 						onClick={() => setIsOpen(false)}
 					/>
 
-					<div className="relative z-10 flex h-[92vh] max-h-[820px] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/20 bg-neutral-950 shadow-2xl backdrop-blur-2xl my-auto">
+					<div className="relative z-10 flex h-[95dvh] sm:h-[92vh] sm:max-h-[820px] w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/20 bg-neutral-950 shadow-2xl backdrop-blur-2xl my-0 sm:my-auto">
+						{/* Mobile Pull Handle Indicator */}
+						<div className="flex sm:hidden justify-center pt-2.5 pb-1 bg-neutral-950 shrink-0">
+							<div className="h-1 w-10 rounded-full bg-white/25" />
+						</div>
+
 						{/* Header Bar */}
-						<div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 sm:px-6 sm:py-3 bg-neutral-950">
-							<div>
-								<div className="flex flex-wrap items-center gap-2 sm:gap-3">
-									<h2 className="font-heading text-base sm:text-xl font-black tracking-wider text-white uppercase">
+						<div className="flex items-center justify-between border-b border-white/10 px-3.5 py-2.5 sm:px-6 sm:py-3 bg-neutral-950">
+							<div className="min-w-0 pr-2">
+								<div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
+									<h2 className="font-heading text-base sm:text-xl font-black tracking-wider text-white uppercase truncate">
 										LIA IRON CLUB
 									</h2>
-									<span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-400 uppercase">
+									<span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold tracking-wider text-amber-400 uppercase whitespace-nowrap">
 										Membership Command
 									</span>
 									<span
-										className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+										className={`hidden xs:inline-flex items-center gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${
 											isCloudSyncEnabled()
 												? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
 												: 'bg-white/5 text-white/50 border border-white/15'
@@ -290,17 +295,17 @@ export default function MemberTrackerModal() {
 										{isCloudSyncEnabled() ? 'Cloud Sync Active' : 'Local Storage Mode'}
 									</span>
 								</div>
-								<p className="mt-0.5 text-[11px] sm:text-xs text-white/50">
+								<p className="mt-0.5 text-[10.5px] sm:text-xs text-white/50 line-clamp-1 sm:line-clamp-none">
 									Athlete duration management, fee expiry tracking, and 1-click WhatsApp payment alerts.
 								</p>
 							</div>
 
-							<div className="flex items-center gap-2 sm:gap-3">
+							<div className="flex items-center gap-2 sm:gap-3 shrink-0">
 								<button
 									onClick={() => setIsAddingNew(true)}
-									className="flex items-center gap-1.5 rounded-xl border border-amber-400 bg-amber-400 px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-black uppercase tracking-wider transition-all hover:bg-amber-300 shadow-md active:scale-[0.98]"
+									className="flex items-center gap-1 sm:gap-1.5 rounded-xl border border-amber-400 bg-amber-400 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-black uppercase tracking-wider transition-all hover:bg-amber-300 shadow-md active:scale-[0.98] whitespace-nowrap"
 								>
-									<svg className="size-3.5 sm:size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+									<svg className="size-3.5 sm:size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
 										<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
 									</svg>
 									<span>Add Lifter</span>
@@ -308,7 +313,7 @@ export default function MemberTrackerModal() {
 
 								<button
 									onClick={() => setIsOpen(false)}
-									className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/60 transition-all hover:border-white/30 hover:bg-white/10 hover:text-white"
+									className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/60 transition-all hover:border-white/30 hover:bg-white/10 hover:text-white shrink-0"
 								>
 									<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
 										<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -318,7 +323,7 @@ export default function MemberTrackerModal() {
 						</div>
 
 						{/* Compact Cockpit KPI Ribbon */}
-						<div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.02] px-4 sm:px-6 py-1.5 overflow-x-auto">
+						<div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.02] px-3.5 sm:px-6 py-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 							<div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/40 px-2.5 py-1 shrink-0">
 								<span className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Total Enrolled:</span>
 								<span className="text-xs font-bold text-white font-mono">{members.length} Athletes</span>
@@ -406,13 +411,13 @@ export default function MemberTrackerModal() {
 							</div>
 						)}
 
-						{/* Single-Row Unified Filter & Search Toolbar */}
-						<div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 sm:px-6 py-1.5 bg-neutral-950">
+						{/* Responsive Filter & Search Toolbar */}
+						<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 border-b border-white/10 px-3.5 sm:px-6 py-2 sm:py-1.5 bg-neutral-950">
 							{/* Filter Tabs */}
-							<div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-0.5 text-xs">
+							<div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-0.5 text-xs order-2 sm:order-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden shrink-0">
 								<button
 									onClick={() => setFilter('all')}
-									className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+									className={`rounded-lg px-2.5 py-1 font-medium transition-all whitespace-nowrap ${
 										filter === 'all' ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'
 									}`}
 								>
@@ -420,7 +425,7 @@ export default function MemberTrackerModal() {
 								</button>
 								<button
 									onClick={() => setFilter('active')}
-									className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+									className={`rounded-lg px-2.5 py-1 font-medium transition-all whitespace-nowrap ${
 										filter === 'active'
 											? 'bg-emerald-500/25 text-emerald-300'
 											: 'text-white/50 hover:text-white'
@@ -430,7 +435,7 @@ export default function MemberTrackerModal() {
 								</button>
 								<button
 									onClick={() => setFilter('expiring')}
-									className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-medium transition-all ${
+									className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-medium transition-all whitespace-nowrap ${
 										filter === 'expiring'
 											? 'bg-amber-500/30 text-amber-300'
 											: 'text-white/50 hover:text-white'
@@ -440,7 +445,7 @@ export default function MemberTrackerModal() {
 								</button>
 								<button
 									onClick={() => setFilter('expired')}
-									className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+									className={`rounded-lg px-2.5 py-1 font-medium transition-all whitespace-nowrap ${
 										filter === 'expired'
 											? 'bg-rose-500/25 text-rose-300'
 											: 'text-white/50 hover:text-white'
@@ -451,16 +456,16 @@ export default function MemberTrackerModal() {
 							</div>
 
 							{/* Search Input */}
-							<div className="relative w-56 sm:w-64 shrink-0">
+							<div className="relative w-full sm:w-64 order-1 sm:order-2 shrink-0">
 								<input
 									type="text"
 									placeholder="Search lifter, phone, plan..."
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
-									className="w-full rounded-xl border border-white/15 bg-white/5 px-2.5 py-1 pl-7.5 text-xs text-white placeholder-white/35 focus:border-amber-400 focus:outline-none transition-colors"
+									className="w-full rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 sm:py-1 pl-8 text-xs text-white placeholder-white/35 focus:border-amber-400 focus:outline-none transition-colors"
 								/>
 								<svg
-									className="absolute left-2.5 top-1.5 size-3.5 text-white/40"
+									className="absolute left-2.5 top-2 sm:top-1.5 size-3.5 text-white/40"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -522,12 +527,12 @@ export default function MemberTrackerModal() {
 											>
 												{/* Top Member Card Header */}
 												<div>
-													<div className="flex items-start justify-between gap-3">
-														<div className="flex items-center gap-3 min-w-0">
+													<div className="flex items-start justify-between gap-2.5 sm:gap-3">
+														<div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
 															{/* Member Photo */}
 															<div
-																className="relative shrink-0 overflow-hidden rounded-xl border-2 border-white/20 bg-neutral-800 shadow-md"
-																style={{ width: 52, height: 52, minWidth: 52, minHeight: 52 }}
+																className="relative shrink-0 overflow-hidden rounded-xl border-2 border-white/20 bg-neutral-800 shadow-md size-12 sm:size-13"
+																style={{ minWidth: 48, minHeight: 48 }}
 															>
 																{/* eslint-disable-next-line @next/next/no-img-element */}
 																<img
@@ -538,12 +543,12 @@ export default function MemberTrackerModal() {
 															</div>
 
 															{/* Member Details */}
-															<div className="min-w-0">
-																<h4 className="truncate font-heading text-base font-bold text-white uppercase tracking-wide">
+															<div className="min-w-0 flex-1">
+																<h4 className="truncate font-heading text-sm sm:text-base font-bold text-white uppercase tracking-wide">
 																	{member.name}
 																</h4>
-																<div className="text-xs text-white/60 truncate">{member.email}</div>
-																<div className="font-mono text-xs text-emerald-400/90 mt-0.5">
+																<div className="text-[11px] sm:text-xs text-white/60 truncate">{member.email}</div>
+																<div className="font-mono text-xs text-emerald-400/90 mt-0.5 truncate">
 																	{member.phone}
 																</div>
 															</div>
@@ -552,7 +557,7 @@ export default function MemberTrackerModal() {
 														{/* Status Badge */}
 														<div className="shrink-0 text-right">
 															<span
-																className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
+																className={`inline-flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider whitespace-nowrap ${
 																	isExpiring
 																		? 'bg-amber-400/25 text-amber-300 border border-amber-400/40 animate-pulse'
 																		: isExpired
@@ -796,9 +801,9 @@ function EditMemberDialog({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
 			<div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-			<div className="relative w-full max-w-lg rounded-3xl border border-white/20 bg-neutral-950 p-6 shadow-2xl backdrop-blur-2xl">
+			<div className="relative w-full max-w-lg rounded-2xl sm:rounded-3xl border border-white/20 bg-neutral-950 p-4 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] overflow-y-auto my-auto">
 				<div className="flex items-center justify-between border-b border-white/10 pb-4">
 					<div>
 						<h3 className="font-serif text-xl font-bold text-white">Edit Gym Member</h3>
@@ -993,9 +998,9 @@ function AddNewMemberDialog({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
 			<div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-			<div className="relative w-full max-w-lg rounded-3xl border border-white/20 bg-neutral-950 p-6 shadow-2xl backdrop-blur-2xl">
+			<div className="relative w-full max-w-lg rounded-2xl sm:rounded-3xl border border-white/20 bg-neutral-950 p-4 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] overflow-y-auto my-auto">
 				<div className="flex items-center justify-between border-b border-white/10 pb-4">
 					<div>
 						<h3 className="font-serif text-xl font-bold text-white">Register New Member</h3>
@@ -1309,9 +1314,9 @@ function WhatsAppDispatchModal({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 overflow-y-auto">
 			<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
-			<div className="relative w-full max-w-3xl rounded-3xl border border-white/20 bg-neutral-950 p-5 sm:p-7 shadow-2xl backdrop-blur-2xl z-10 my-auto">
+			<div className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl border border-white/20 bg-neutral-950 p-4 sm:p-7 shadow-2xl backdrop-blur-2xl z-10 my-auto max-h-[94vh] overflow-y-auto">
 				{/* Top Bar */}
 				<div className="flex items-center justify-between border-b border-white/10 pb-4">
 					<div className="flex items-center gap-3">
