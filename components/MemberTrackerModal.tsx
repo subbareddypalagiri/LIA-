@@ -5,8 +5,19 @@ import {
 	fetchMembersData,
 	saveMemberData,
 	deleteMemberData,
-	isCloudSyncEnabled
+	isCloudSyncEnabled,
+	fetchOwnerProfileData,
+	type OwnerProfile
 } from '@/lib/supabase'
+import {
+	formatWhatsAppReminder,
+	getWhatsAppUrl,
+	cleanPhoneNumber
+} from '@/lib/whatsapp'
+import {
+	generateUpiQrDataUrl,
+	copyUpiIdToClipboard
+} from '@/lib/upiQr'
 
 export interface GymMember {
 	id: string
@@ -30,6 +41,18 @@ export default function MemberTrackerModal() {
 	const [filter, setFilter] = useState<'all' | 'expiring' | 'active' | 'expired'>('all')
 	const [search, setSearch] = useState('')
 
+	// Owner profile for UPI & QR
+	const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>({
+		gymName: 'LIA Iron Club',
+		ownerName: 'Palagiri Subbareddy',
+		phone: '+91 98765 43210',
+		email: 'subbareddy123sub@gmail.com',
+		upiId: 'liaironclub@okhdfcbank',
+		monthlyTarget: 180000,
+		todayCheckins: 0,
+		qrCodeUrl: ''
+	})
+
 	// Modal States
 	const [editingMember, setEditingMember] = useState<GymMember | null>(null)
 	const [isAddingNew, setIsAddingNew] = useState(false)
@@ -38,14 +61,24 @@ export default function MemberTrackerModal() {
 		daysLeft: number
 		timestamp: string
 	} | null>(null)
+	const [previewWhatsApp, setPreviewWhatsApp] = useState<{
+		member: GymMember
+		daysLeft: number
+		amount: number
+		message: string
+		waUrl: string
+	} | null>(null)
 	const [toastMsg, setToastMsg] = useState<string | null>(null)
 
-	// Load members from Supabase Cloud or localStorage fallback
+	// Load members and owner profile
 	useEffect(() => {
 		fetchMembersData(INITIAL_MEMBERS).then((data) => {
 			setMembers(data)
 		})
-	}, [])
+		fetchOwnerProfileData().then((prof) => {
+			setOwnerProfile(prof)
+		})
+	}, [isOpen])
 
 	const saveMembers = (newMembers: GymMember[]) => {
 		setMembers(newMembers)
@@ -66,6 +99,41 @@ export default function MemberTrackerModal() {
 	const getDaysLeft = (expiryDate: string) => {
 		const diff = new Date(expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
 		return Math.ceil(diff / (1000 * 60 * 60 * 24))
+	}
+
+	const getPlanPrice = (plan: string): number => {
+		if (!plan) return 1500
+		if (plan.includes('12,000') || plan.toLowerCase().includes('1 year') || plan.toLowerCase().includes('annual')) return 12000
+		if (plan.includes('7,000') || plan.toLowerCase().includes('6 month')) return 7000
+		if (plan.includes('6,000') || plan.toLowerCase().includes('personal')) return 6000
+		if (plan.includes('4,000') || plan.toLowerCase().includes('3 month')) return 4000
+		if (plan.includes('1,500') || plan.toLowerCase().includes('1 month')) return 1500
+		return 1500
+	}
+
+	// Open 1-Click WhatsApp reminder dialog
+	const openWhatsAppModal = (member: GymMember) => {
+		const daysLeft = getDaysLeft(member.expiryDate)
+		const amount = getPlanPrice(member.plan)
+		const message = formatWhatsAppReminder({
+			memberName: member.name,
+			planName: member.plan,
+			expiryDate: member.expiryDate,
+			daysLeft,
+			amount,
+			upiId: ownerProfile.upiId,
+			ownerName: ownerProfile.ownerName,
+			ownerPhone: ownerProfile.phone,
+			gymName: ownerProfile.gymName
+		})
+		const waUrl = getWhatsAppUrl(member.phone, message)
+		setPreviewWhatsApp({
+			member,
+			daysLeft,
+			amount,
+			message,
+			waUrl
+		})
 	}
 
 	// Counts
@@ -256,15 +324,37 @@ export default function MemberTrackerModal() {
 										<strong>{expiringCount} Member(s)</strong> expire within 3 days! Automated notifications can be dispatched to their registered mail and {OWNER_EMAIL}.
 									</span>
 								</div>
-								<button
-									onClick={dispatchAllExpiringAlerts}
-									className="flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 transition-all hover:bg-amber-400/30"
-								>
-									<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-									</svg>
-									Send All 3-Day Alerts
-								</button>
+								<div className="flex items-center gap-2">
+									<button
+										onClick={() => {
+											const firstExpiring = members.find((m) => {
+												const days = getDaysLeft(m.expiryDate)
+												return days >= 0 && days <= 3
+											})
+											if (firstExpiring) {
+												openWhatsAppModal(firstExpiring)
+											} else if (members.length > 0) {
+												openWhatsAppModal(members[0])
+											}
+										}}
+										className="flex items-center gap-1.5 rounded-lg border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-200 transition-all hover:bg-emerald-500/30"
+									>
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+										</svg>
+										<span>WhatsApp Alerts</span>
+									</button>
+
+									<button
+										onClick={dispatchAllExpiringAlerts}
+										className="flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 transition-all hover:bg-amber-400/30"
+									>
+										<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+										</svg>
+										<span>Send All Emails</span>
+									</button>
+								</div>
 							</div>
 						)}
 
@@ -498,7 +588,19 @@ export default function MemberTrackerModal() {
 													</div>
 
 													{/* Edit & Notify Buttons */}
-													<div className="flex items-center gap-2">
+													<div className="flex items-center gap-1.5 sm:gap-2">
+														{/* 1-Click WhatsApp Reminder */}
+														<button
+															onClick={() => openWhatsAppModal(member)}
+															title={`Send 1-Click WhatsApp reminder to ${member.phone}`}
+															className="flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition-all shadow-sm"
+														>
+															<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+																<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+															</svg>
+															<span>WhatsApp</span>
+														</button>
+
 														{/* Send 3-day Alert Email */}
 														<button
 															onClick={() => dispatch3DayAlert(member)}
@@ -512,7 +614,7 @@ export default function MemberTrackerModal() {
 															<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
 															</svg>
-															<span>Alert Email</span>
+															<span>Email</span>
 														</button>
 
 														{/* Edit Button */}
@@ -577,6 +679,25 @@ export default function MemberTrackerModal() {
 					data={previewEmail}
 					ownerEmail={OWNER_EMAIL}
 					onClose={() => setPreviewEmail(null)}
+				/>
+			)}
+
+			{/* 1-Click WhatsApp Expiry Reminder & Payment QR Modal */}
+			{previewWhatsApp && (
+				<WhatsAppDispatchModal
+					data={previewWhatsApp}
+					ownerProfile={ownerProfile}
+					onClose={() => setPreviewWhatsApp(null)}
+					onConfirmSend={() => {
+						const now = new Date().toLocaleString()
+						const updated = members.map((m) =>
+							m.id === previewWhatsApp.member.id ? { ...m, lastNotified: now } : m
+						)
+						saveMembers(updated)
+						window.open(previewWhatsApp.waUrl, '_blank')
+						setPreviewWhatsApp(null)
+						showToast(`Dispatched WhatsApp Expiry Alert to ${previewWhatsApp.member.name}!`)
+					}}
 				/>
 			)}
 		</>
@@ -1064,3 +1185,269 @@ function EmailPreviewModal({
 		</div>
 	)
 }
+
+// Dialog: 1-Click WhatsApp Expiry Reminder Dispatch & UPI QR Hub
+function WhatsAppDispatchModal({
+	data,
+	ownerProfile,
+	onClose,
+	onConfirmSend
+}: {
+	data: {
+		member: GymMember
+		daysLeft: number
+		amount: number
+		message: string
+		waUrl: string
+	}
+	ownerProfile: OwnerProfile
+	onClose: () => void
+	onConfirmSend: () => void
+}) {
+	const [generatedQr, setGeneratedQr] = useState<string>('')
+	const [isGeneratingQr, setIsGeneratingQr] = useState(false)
+	const [copiedText, setCopiedText] = useState(false)
+	const [copiedUpi, setCopiedUpi] = useState(false)
+
+	const hasCustomQr = Boolean(ownerProfile.qrCodeUrl && ownerProfile.qrCodeUrl.trim() !== '')
+
+	useEffect(() => {
+		let isMounted = true
+		if (!hasCustomQr) {
+			setIsGeneratingQr(true)
+			generateUpiQrDataUrl(
+				ownerProfile.upiId,
+				ownerProfile.ownerName,
+				data.amount,
+				`LIA Renewal - ${data.member.name}`
+			).then((url) => {
+				if (isMounted) {
+					setGeneratedQr(url)
+					setIsGeneratingQr(false)
+				}
+			})
+		}
+		return () => {
+			isMounted = false
+		}
+	}, [hasCustomQr, ownerProfile.upiId, ownerProfile.ownerName, data.amount, data.member.name])
+
+	const handleCopyText = async () => {
+		try {
+			await navigator.clipboard.writeText(data.message)
+			setCopiedText(true)
+			setTimeout(() => setCopiedText(false), 2000)
+		} catch (e) {
+			console.error(e)
+		}
+	}
+
+	const handleCopyUpi = async () => {
+		const ok = await copyUpiIdToClipboard(ownerProfile.upiId)
+		if (ok) {
+			setCopiedUpi(true)
+			setTimeout(() => setCopiedUpi(false), 2000)
+		}
+	}
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+			<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
+			<div className="relative w-full max-w-3xl rounded-3xl border border-white/20 bg-neutral-950 p-5 sm:p-7 shadow-2xl backdrop-blur-2xl z-10 my-auto">
+				{/* Top Bar */}
+				<div className="flex items-center justify-between border-b border-white/10 pb-4">
+					<div className="flex items-center gap-3">
+						<div className="flex size-10 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+							<svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+								/>
+							</svg>
+						</div>
+						<div>
+							<h3 className="font-serif text-lg sm:text-xl font-bold text-white tracking-wide">
+								WhatsApp Expiry Alert & Instant QR
+							</h3>
+							<p className="text-xs text-white/50">
+								Direct dispatch to <span className="font-semibold text-white/80">{data.member.name}</span> ({data.member.phone})
+							</p>
+						</div>
+					</div>
+					<button
+						onClick={onClose}
+						className="flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 hover:border-white/30 hover:bg-white/10 hover:text-white transition-all"
+					>
+						✕
+					</button>
+				</div>
+
+				{/* Dual Grid: Left = WhatsApp Message Preview, Right = UPI QR Standee */}
+				<div className="mt-5 grid grid-cols-1 md:grid-cols-12 gap-5">
+					{/* Left Column: Formatted WhatsApp Message */}
+					<div className="md:col-span-7 flex flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+						<div>
+							<div className="flex items-center justify-between pb-3 border-b border-white/10">
+								<div className="flex items-center gap-2">
+									<span className="flex size-2 rounded-full bg-emerald-400 animate-pulse" />
+									<span className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
+										Formatted WhatsApp Dispatch
+									</span>
+								</div>
+								<button
+									onClick={handleCopyText}
+									className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white/80 hover:bg-white/10 hover:text-white transition-all"
+								>
+									{copiedText ? (
+										<>
+											<svg className="size-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+												<path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+											</svg>
+											<span className="text-emerald-400">Copied</span>
+										</>
+									) : (
+										<>
+											<svg className="size-3 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+												<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+											</svg>
+											<span>Copy Text</span>
+										</>
+									)}
+								</button>
+							</div>
+
+							{/* WhatsApp Bubble Preview */}
+							<div className="mt-3 rounded-2xl border border-emerald-500/25 bg-[#0b141a] p-4 shadow-inner text-[11.5px] leading-relaxed text-[#e9edef] max-h-64 overflow-y-auto space-y-2 font-sans select-text">
+								<div className="whitespace-pre-wrap">{data.message}</div>
+								<div className="text-right text-[10px] text-white/40">
+									Just now • Delivered
+								</div>
+							</div>
+						</div>
+
+						{/* Athlete Info Card */}
+						<div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-3 text-[11px] space-y-1">
+							<div className="flex justify-between">
+								<span className="text-white/40">Registered Phone:</span>
+								<span className="font-mono font-medium text-white/90">{data.member.phone}</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-white/40">Membership Plan:</span>
+								<span className="font-medium text-white/90">{data.member.plan}</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-white/40">Expiry Status:</span>
+								<span className={`font-semibold ${data.daysLeft <= 0 ? 'text-rose-400' : 'text-amber-400'}`}>
+									{data.daysLeft <= 0 ? 'Expired' : `${data.daysLeft} days remaining (${data.member.expiryDate})`}
+								</span>
+							</div>
+						</div>
+					</div>
+
+					{/* Right Column: QR Code & UPI Details */}
+					<div className="md:col-span-5 flex flex-col items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center">
+						<div className="w-full flex items-center justify-between">
+							<span className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
+								Payment Gateway QR
+							</span>
+							<span
+								className={`rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${
+									hasCustomQr
+										? 'border border-amber-500/30 bg-amber-500/10 text-amber-300'
+										: 'border border-sky-500/30 bg-sky-500/10 text-sky-300'
+								}`}
+							>
+								{hasCustomQr ? 'Merchant Standee' : 'UPI Vector QR'}
+							</span>
+						</div>
+
+						{/* QR Code Container */}
+						<div className="my-3 flex flex-col items-center justify-center">
+							<div className="relative size-44 rounded-2xl border-2 border-white/15 bg-white p-2.5 shadow-2xl flex items-center justify-center overflow-hidden">
+								{hasCustomQr ? (
+									<img
+										src={ownerProfile.qrCodeUrl}
+										alt="Gym Merchant QR Code"
+										className="size-full object-contain"
+									/>
+								) : isGeneratingQr ? (
+									<div className="flex flex-col items-center gap-2 text-neutral-500">
+										<div className="size-6 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent" />
+										<span className="text-[10px]">Generating QR...</span>
+									</div>
+								) : generatedQr ? (
+									<img
+										src={generatedQr}
+										alt="Dynamic UPI QR Code"
+										className="size-full object-contain"
+									/>
+								) : (
+									<div className="text-xs text-neutral-500">QR Generation Failed</div>
+								)}
+							</div>
+
+							<div className="mt-2 text-center">
+								<div className="text-lg font-bold text-white tracking-tight">
+									₹{data.amount.toLocaleString()}
+								</div>
+								<div className="text-[10px] text-white/40">
+									Renewal fee for {data.member.plan.split('(')[0].trim()}
+								</div>
+							</div>
+						</div>
+
+						{/* UPI ID Pill & Copy */}
+						<div className="w-full space-y-2">
+							<div className="flex items-center justify-between rounded-xl border border-white/15 bg-black/60 px-3 py-2 text-left">
+								<div className="truncate">
+									<div className="text-[9px] uppercase tracking-wider text-white/40">Gym UPI VPA</div>
+									<div className="font-mono text-xs font-semibold text-emerald-400 truncate">
+										{ownerProfile.upiId}
+									</div>
+								</div>
+								<button
+									onClick={handleCopyUpi}
+									className="ml-2 flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-medium text-white hover:bg-white/20 transition-all shrink-0"
+								>
+									{copiedUpi ? (
+										<span className="text-emerald-400">Copied</span>
+									) : (
+										<span>Copy</span>
+									)}
+								</button>
+							</div>
+
+							<p className="text-[10px] text-white/40 leading-snug">
+								Member can scan via Google Pay, PhonePe, Paytm, or BHIM directly to {ownerProfile.ownerName}.
+							</p>
+						</div>
+					</div>
+				</div>
+
+				{/* Modal Footer Controls */}
+				<div className="mt-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 border-t border-white/10 pt-4">
+					<button
+						onClick={onClose}
+						className="w-full sm:w-auto rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all"
+					>
+						Cancel
+					</button>
+
+					<div className="flex items-center gap-2.5 w-full sm:w-auto">
+						<button
+							onClick={onConfirmSend}
+							className="group w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-950/50 hover:bg-emerald-500 hover:shadow-emerald-900/60 transition-all active:scale-[0.98]"
+						>
+							<svg className="size-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+							</svg>
+							<span>Open WhatsApp & Dispatch (1-Click)</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+

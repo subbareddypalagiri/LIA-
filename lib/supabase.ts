@@ -24,6 +24,7 @@ export interface OwnerProfile {
 	monthlyTarget: number
 	todayCheckins: number
 	ownerPassword?: string
+	qrCodeUrl?: string
 }
 
 const DEFAULT_OWNER_PROFILE: OwnerProfile = {
@@ -34,7 +35,8 @@ const DEFAULT_OWNER_PROFILE: OwnerProfile = {
 	upiId: 'liaironclub@okhdfcbank',
 	monthlyTarget: 180000,
 	todayCheckins: 0,
-	ownerPassword: 'Subba@LIA2026'
+	ownerPassword: 'Subba@LIA2026',
+	qrCodeUrl: ''
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -168,8 +170,9 @@ export async function fetchOwnerProfileData(): Promise<OwnerProfile> {
 					email: data.email,
 					upiId: data.upi_id,
 					monthlyTarget: data.monthly_target || 180000,
-					todayCheckins: data.today_checkins || 48,
-					ownerPassword: data.owner_password || 'Subba@LIA2026'
+					todayCheckins: data.today_checkins || 0,
+					ownerPassword: data.owner_password || 'Subba@LIA2026',
+					qrCodeUrl: data.qr_code_url || ''
 				}
 				setStorage('lia_owner_profile', profile)
 				return profile
@@ -198,6 +201,7 @@ export async function saveOwnerProfileData(profile: OwnerProfile): Promise<void>
 				monthly_target: profile.monthlyTarget,
 				today_checkins: profile.todayCheckins,
 				owner_password: profile.ownerPassword,
+				qr_code_url: profile.qrCodeUrl || '',
 				updated_at: new Date().toISOString()
 			})
 		} catch (e) {

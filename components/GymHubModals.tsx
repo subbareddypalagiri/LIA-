@@ -2,13 +2,14 @@
 'use no memo'
 /* eslint-disable @next/next/no-img-element */
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useGymModal, type GymModalType } from '@/store/gymHub'
 import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
 import ExerciseVaultView from './ExerciseVaultView'
 import AuthModal from './AuthModal'
 import MemberProfileModal from './MemberProfileModal'
 import { useAuth, updateSessionUser } from '@/store/authStore'
+import { generateUpiQrDataUrl } from '@/lib/upiQr'
 import {
 	fetchOwnerProfileData,
 	saveOwnerProfileData,
@@ -234,6 +235,8 @@ export default function GymHubModals() {
 	const [isEditingProfile, setIsEditingProfile] = useState(false)
 	const [ownerPasswordInput, setOwnerPasswordInput] = useState('')
 	const [cloudSyncActive, setCloudSyncActive] = useState(false)
+	const [autoQrDataUrl, setAutoQrDataUrl] = useState<string>('')
+	const qrFileInputRef = useRef<HTMLInputElement>(null)
 
 	useEffect(() => {
 		setCloudSyncActive(isCloudSyncEnabled())
@@ -245,6 +248,14 @@ export default function GymHubModals() {
 			setMembersList(mems)
 		})
 	}, [activeModal])
+
+	useEffect(() => {
+		if (ownerProfile.upiId) {
+			generateUpiQrDataUrl(ownerProfile.upiId, ownerProfile.gymName).then((url) => {
+				setAutoQrDataUrl(url)
+			})
+		}
+	}, [ownerProfile.upiId, ownerProfile.gymName])
 
 	const getPlanPrice = (plan: string): number => {
 		if (!plan) return 1500
@@ -926,6 +937,100 @@ export default function GymHubModals() {
 											/>
 										</div>
 									</div>
+
+									{/* Gym Payment QR Code Uploader & Live Preview */}
+									<div className="rounded-2xl border border-white/10 bg-black/40 p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
+										<div className="relative size-32 sm:size-36 shrink-0 overflow-hidden rounded-2xl border-2 border-amber-400/40 bg-white p-2 shadow-xl flex items-center justify-center">
+											{ownerProfile.qrCodeUrl ? (
+												<img
+													src={ownerProfile.qrCodeUrl}
+													alt="Owner Custom QR"
+													className="size-full object-contain"
+												/>
+											) : autoQrDataUrl ? (
+												<img
+													src={autoQrDataUrl}
+													alt="Auto UPI Vector QR"
+													className="size-full object-contain"
+												/>
+											) : (
+												<div className="text-center text-[10px] text-black/50">Generating QR...</div>
+											)}
+										</div>
+
+										<div className="flex-1 space-y-2 text-center sm:text-left">
+											<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+												<span className="font-heading text-sm font-bold text-white tracking-wide">
+													Gym Payment QR Code (PhonePe / GPay / Paytm)
+												</span>
+												{ownerProfile.qrCodeUrl ? (
+													<span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-bold text-emerald-300 uppercase">
+														Custom Merchant QR
+													</span>
+												) : (
+													<span className="rounded-full bg-amber-400/20 border border-amber-400/30 px-2 py-0.5 text-[9px] font-bold text-amber-300 uppercase">
+														Auto UPI Vector QR
+													</span>
+												)}
+											</div>
+											<p className="text-[11px] text-white/60 leading-relaxed">
+												Upload your gym&apos;s PhonePe, Google Pay, or bank standee QR image. Athletes scanning to pay fees or receiving WhatsApp reminders will see this official QR code.
+											</p>
+
+											<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+												<button
+													type="button"
+													onClick={() => qrFileInputRef.current?.click()}
+													className="rounded-xl border border-amber-400 bg-amber-400/20 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/30 transition-all flex items-center gap-1.5"
+												>
+													<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+														<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+														<polyline points="17 8 12 3 7 8" />
+														<line x1="12" x2="12" y1="3" y2="15" />
+													</svg>
+													<span>{ownerProfile.qrCodeUrl ? 'Change QR Image' : 'Upload QR Image'}</span>
+												</button>
+												<input
+													ref={qrFileInputRef}
+													type="file"
+													accept="image/*"
+													className="hidden"
+													onChange={(e) => {
+														const file = e.target.files?.[0]
+														if (file) {
+															if (file.size > 5 * 1024 * 1024) {
+																showToast('Image too large. Please select an image under 5MB.')
+																return
+															}
+															const reader = new FileReader()
+															reader.onload = (event) => {
+																if (event.target?.result) {
+																	const dataUrl = event.target.result as string
+																	setOwnerProfile((prev) => ({ ...prev, qrCodeUrl: dataUrl }))
+																	showToast('Payment QR code loaded! Click Save to apply.')
+																}
+															}
+															reader.readAsDataURL(file)
+														}
+													}}
+												/>
+
+												{ownerProfile.qrCodeUrl && (
+													<button
+														type="button"
+														onClick={() => {
+															setOwnerProfile((prev) => ({ ...prev, qrCodeUrl: '' }))
+															showToast('Reset to Auto-Generated UPI QR code.')
+														}}
+														className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
+													>
+														Reset to Auto UPI QR
+													</button>
+												)}
+											</div>
+										</div>
+									</div>
+
 									<div className="flex justify-end gap-2 pt-2 border-t border-white/10">
 										<button
 											type="button"
