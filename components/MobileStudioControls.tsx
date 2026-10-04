@@ -8,6 +8,7 @@ import { FONT_OPTIONS, useFontTheme, setFontTheme, type FontOption } from '@/sto
 import { BG_THEMES, useBgTheme, setBgTheme, type BgTheme } from '@/store/bgTheme'
 import { useLiaColor, setLiaColor } from '@/store/liaColor'
 import { openGymModal } from '@/store/gymHub'
+import { useAuth } from '@/store/authStore'
 
 const PRESET_COLORS = [
 	{ name: 'White', hex: '#ffffff' },
@@ -23,6 +24,7 @@ export default function MobileStudioControls() {
 	const currentFont = useFontTheme()
 	const currentTheme = useBgTheme()
 	const currentColor = useLiaColor()
+	const { user, isOwner, isMember } = useAuth()
 
 	return (
 		<>
@@ -179,25 +181,71 @@ export default function MobileStudioControls() {
 										<div className="text-[9px] text-white/50">Morning / Evening</div>
 									</div>
 								</button>
-								<button
-									type="button"
-									onClick={() => {
-										setIsOpen(false)
-										openGymModal('owner')
-									}}
-									className="col-span-2 flex items-center justify-between rounded-xl border border-amber-400/50 bg-amber-400/20 p-2.5 text-left hover:bg-amber-400/30 transition-colors"
-								>
-									<div className="flex items-center gap-2">
-										<span className="text-lg">👑</span>
-										<div>
-											<div className="text-xs font-bold text-amber-200">Owner Desk</div>
-											<div className="text-[10px] text-white/70">Revenue, pending fees & attendance</div>
+								{isOwner && (
+									<button
+										type="button"
+										onClick={() => {
+											setIsOpen(false)
+											openGymModal('owner')
+										}}
+										className="col-span-2 flex items-center justify-between rounded-xl border border-amber-400/50 bg-amber-400/20 p-2.5 text-left hover:bg-amber-400/30 transition-colors"
+									>
+										<div className="flex items-center gap-2">
+											<span className="text-lg">👑</span>
+											<div>
+												<div className="text-xs font-bold text-amber-200">Owner Desk</div>
+												<div className="text-[10px] text-white/70">Revenue, pending fees & attendance</div>
+											</div>
 										</div>
-									</div>
-									<span className="rounded bg-black/40 px-2 py-0.5 text-[10px] font-bold text-amber-300">
-										Admin →
-									</span>
-								</button>
+										<span className="rounded bg-black/40 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+											Admin →
+										</span>
+									</button>
+								)}
+
+								{isMember && (
+									<button
+										type="button"
+										onClick={() => {
+											setIsOpen(false)
+											openGymModal('my-membership')
+										}}
+										className="col-span-2 flex items-center justify-between rounded-xl border border-emerald-400/50 bg-emerald-400/20 p-2.5 text-left hover:bg-emerald-400/30 transition-colors"
+									>
+										<div className="flex items-center gap-2">
+											<span className="text-lg">🪪</span>
+											<div>
+												<div className="text-xs font-bold text-emerald-200">My Athlete Pass ({user?.name.split(' ')[0]})</div>
+												<div className="text-[10px] text-white/70">Membership card, days left & checkin</div>
+											</div>
+										</div>
+										<span className="rounded bg-black/40 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+											Pass →
+										</span>
+									</button>
+								)}
+
+								{!user && (
+									<button
+										type="button"
+										onClick={() => {
+											setIsOpen(false)
+											openGymModal('auth')
+										}}
+										className="col-span-2 flex items-center justify-between rounded-xl border border-amber-400/50 bg-amber-400/10 p-2.5 text-left hover:bg-amber-400/20 transition-colors"
+									>
+										<div className="flex items-center gap-2">
+											<span className="text-lg">🔐</span>
+											<div>
+												<div className="text-xs font-bold text-amber-300">Member & Owner Login</div>
+												<div className="text-[10px] text-white/70">Access athlete pass or owner admin</div>
+											</div>
+										</div>
+										<span className="rounded bg-black/40 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+											Login →
+										</span>
+									</button>
+								)}
 							</div>
 						</div>
 

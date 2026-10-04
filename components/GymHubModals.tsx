@@ -6,6 +6,9 @@ import { useState, useMemo, useEffect } from 'react'
 import { useGymModal, type GymModalType } from '@/store/gymHub'
 import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
 import ExerciseVaultView from './ExerciseVaultView'
+import AuthModal from './AuthModal'
+import MemberProfileModal from './MemberProfileModal'
+import { useAuth } from '@/store/authStore'
 import {
 	fetchOwnerProfileData,
 	saveOwnerProfileData,
@@ -203,6 +206,7 @@ const EQUIPMENT_DATA: EquipmentItem[] = [
 
 export default function GymHubModals() {
 	const { activeModal, closeModal, openModal } = useGymModal()
+	const { user, isOwner, isMember, logout } = useAuth()
 
 	// Modals internal states
 	const [activeSplitId, setActiveSplitId] = useState('ppl')
@@ -245,6 +249,14 @@ export default function GymHubModals() {
 	}
 
 	if (!activeModal) return null
+
+	if (activeModal === 'auth') {
+		return <AuthModal onSuccess={() => showToast('Authenticated successfully!')} />
+	}
+
+	if (activeModal === 'my-membership') {
+		return <MemberProfileModal showToast={showToast} />
+	}
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
@@ -307,17 +319,52 @@ export default function GymHubModals() {
 						>
 							⏰ Timings
 						</button>
-						<button
-							onClick={() => openModal('owner')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
-								activeModal === 'owner'
-									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
-									: 'border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
-							}`}
-						>
-							<span>👑 Owner Desk</span>
-							<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-						</button>
+						{/* Role-Based Tab: Owner Desk if owner, My Pass if member, or Login if guest */}
+						{isOwner && (
+							<button
+								onClick={() => openModal('owner')}
+								className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
+									activeModal === 'owner'
+										? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
+										: 'border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+								}`}
+							>
+								<span>👑 Owner Desk</span>
+								<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+							</button>
+						)}
+
+						{isMember && (
+							<button
+								onClick={() => openModal('my-membership')}
+								className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+							>
+								<span>🪪 My Pass ({user?.name.split(' ')[0]})</span>
+								<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+							</button>
+						)}
+
+						{!user && (
+							<button
+								onClick={() => openModal('auth')}
+								className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20"
+							>
+								<span>🔐 Login / Pass</span>
+							</button>
+						)}
+
+						{user && (
+							<button
+								onClick={() => {
+									logout()
+									showToast('Signed out successfully')
+								}}
+								className="rounded-xl px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-rose-300 transition-colors shrink-0"
+								title="Sign out"
+							>
+								Sign Out
+							</button>
+						)}
 					</div>
 
 					<button
@@ -601,7 +648,30 @@ export default function GymHubModals() {
 
 					{/* 5. OWNER DESK (OWNER KI USE AYYE OPTIONS) */}
 					{activeModal === 'owner' && (
-						<div>
+						!isOwner ? (
+							<div className="rounded-3xl border border-amber-400/30 bg-neutral-900/90 p-8 text-center max-w-md mx-auto my-12 space-y-4">
+								<div className="size-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-3xl mx-auto">
+									👑
+								</div>
+								<div>
+									<h3 className="font-heading text-xl font-bold uppercase text-white tracking-wide">
+										Owner Access Restricted
+									</h3>
+									<p className="text-xs text-white/60 mt-1.5">
+										Owner Desk contains financial targets, revenue ledger, and member management. Only authenticated gym owners can access this view.
+									</p>
+								</div>
+								<div className="pt-2">
+									<button
+										onClick={() => openModal('auth')}
+										className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 py-3 text-xs font-bold uppercase tracking-wider text-black hover:brightness-110 transition-all shadow-lg shadow-amber-400/20"
+									>
+										Sign In as Owner 👑
+									</button>
+								</div>
+							</div>
+						) : (
+							<div>
 							<div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
 								<div>
 									<div className="flex items-center gap-2 mb-1">
@@ -951,6 +1021,7 @@ export default function GymHubModals() {
 							</div>
 
 						</div>
+						)
 					)}
 
 				</div>

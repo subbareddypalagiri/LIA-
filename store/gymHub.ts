@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 
-export type GymModalType = 'exercises' | 'splits' | 'equipment' | 'timings' | 'owner' | null
+export type GymModalType = 'exercises' | 'splits' | 'equipment' | 'timings' | 'owner' | 'auth' | 'my-membership' | null
 
 const EVENT_NAME = 'lia-gym-modal-change'
 let currentModal: GymModalType = null
