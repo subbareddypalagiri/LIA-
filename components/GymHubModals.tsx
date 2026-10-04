@@ -8,6 +8,8 @@ import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
 import ExerciseVaultView from './ExerciseVaultView'
 import AuthModal from './AuthModal'
 import MemberProfileModal from './MemberProfileModal'
+import AthleteNutritionModal from './AthleteNutritionModal'
+import { exportMembersToCsv } from '@/lib/exportCsv'
 import { useAuth, updateSessionUser } from '@/store/authStore'
 import { generateUpiQrDataUrl } from '@/lib/upiQr'
 import {
@@ -308,6 +310,10 @@ export default function GymHubModals() {
 		return <MemberProfileModal showToast={showToast} />
 	}
 
+	if (activeModal === 'nutrition') {
+		return <AthleteNutritionModal onClose={closeModal} showToast={showToast} />
+	}
+
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
 			{/* Backdrop */}
@@ -369,6 +375,18 @@ export default function GymHubModals() {
 								<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
 							</svg>
 							<span>Equipment</span>
+						</button>
+						<button
+							onClick={() => openModal('nutrition')}
+							className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+						>
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+								<path d="M18 6 6 18" />
+								<path d="m20 10-4-4" />
+								<path d="m4 14 4 4" />
+								<circle cx="12" cy="12" r="3" />
+							</svg>
+							<span>Nutrition</span>
 						</button>
 						<button
 							onClick={() => openModal('timings')}
@@ -783,6 +801,23 @@ export default function GymHubModals() {
 										Gym operational metrics, revenue ledger, daily attendance, and new member onboarding.
 									</p>
 								</div>
+								<div className="flex items-center gap-2 self-start sm:self-center">
+									<button
+										type="button"
+										onClick={() => {
+											exportMembersToCsv(membersList, ownerProfile)
+											showToast('Gym Athlete Roster & Revenue Ledger exported to CSV!')
+										}}
+										className="rounded-xl border border-white/15 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white px-3.5 py-2 text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md active:scale-[0.98]"
+										title="Download Excel/CSV Member Ledger"
+									>
+										<svg className="size-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+											<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+											<polyline points="7 10 12 15 17 10" />
+											<line x1="12" x2="12" y1="15" y2="3" />
+										</svg>
+										<span>Export CSV</span>
+									</button>
 								{/* Quick Entry Logger */}
 								<button
 									onClick={() => {
@@ -801,6 +836,7 @@ export default function GymHubModals() {
 									<span>Quick Check-in</span>
 									<span className="rounded-full bg-black/20 px-1.5 py-0.2 text-[10px]">+{checkInCount}</span>
 								</button>
+								</div>
 							</div>
 
 							{/* Owner Identity & Cloud Sync Banner */}

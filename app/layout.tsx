@@ -2,7 +2,8 @@ import HeaderNav from '@/components/HeaderNav'
 import GymHubModals from '@/components/GymHubModals'
 import MemberTrackerModal from '@/components/MemberTrackerModal'
 import MobileStudioControls from '@/components/MobileStudioControls'
-import type { Metadata } from 'next'
+import PwaInstallPrompt from '@/components/PwaInstallPrompt'
+import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { Oswald, Bebas_Neue, Space_Grotesk, Cinzel } from 'next/font/google'
 import './globals.css'
@@ -42,10 +43,31 @@ const cinzel = Cinzel({
 	variable: '--font-cinzel'
 })
 
+export const viewport: Viewport = {
+	themeColor: '#0a0a0a',
+	width: 'device-width',
+	initialScale: 1,
+	maximumScale: 5
+}
+
 export const metadata: Metadata = {
 	title: {
 		template: '%s | LIA Iron Club',
 		default: 'LIA Iron Club | Elite Physique Sanctum'
+	},
+	description: 'High-performance gym membership, athlete roster, UPI payments, hypertrophy nutrition, and owner desk.',
+	manifest: '/manifest.json',
+	appleWebApp: {
+		capable: true,
+		statusBarStyle: 'black-translucent',
+		title: 'LIA Iron Club'
+	},
+	icons: {
+		icon: [
+			{ url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+			{ url: '/icons/icon.svg', type: 'image/svg+xml' }
+		],
+		apple: '/icons/apple-touch-icon.png'
 	}
 }
 
@@ -80,6 +102,7 @@ export default function RootLayout({
 					</div>
 				</header>
 				<GymHubModals />
+				<PwaInstallPrompt />
 				{children}
 			</body>
 		</html>

@@ -32,6 +32,14 @@ export default function HeaderNav() {
 				Equipment
 			</Nav.Item>
 			<Nav.Item
+				active={activeModal === 'nutrition'}
+				onClick={() => openGymModal('nutrition')}
+				title="Athlete Nutrition & Macro Hypertrophy Calculator"
+				className="text-amber-300/90 hover:text-amber-300"
+			>
+				Nutrition
+			</Nav.Item>
+			<Nav.Item
 				active={activeModal === 'timings'}
 				onClick={() => openGymModal('timings')}
 				title="Check Morning & Evening Batch Timings"

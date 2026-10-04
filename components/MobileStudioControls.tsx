@@ -200,6 +200,29 @@ export default function MobileStudioControls() {
 										<div className="text-[9px] text-white/50">Morning / Evening</div>
 									</div>
 								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsOpen(false)
+										openGymModal('nutrition')
+									}}
+									className="col-span-2 flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-left hover:border-amber-400 hover:bg-amber-500/15 transition-colors"
+								>
+									<div className="flex items-center gap-2.5">
+										<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30">
+											<svg className="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+												<path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3" />
+											</svg>
+										</div>
+										<div>
+											<div className="text-xs font-bold text-amber-300">Macro & Nutrition Engine</div>
+											<div className="text-[10px] text-white/70">Calories, protein targets & hypertrophy diet</div>
+										</div>
+									</div>
+									<span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+										Calc →
+									</span>
+								</button>
 								{isOwner && (
 									<button
 										type="button"

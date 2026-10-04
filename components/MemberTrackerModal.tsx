@@ -18,6 +18,7 @@ import {
 	generateUpiQrDataUrl,
 	copyUpiIdToClipboard
 } from '@/lib/upiQr'
+import { exportMembersToCsv } from '@/lib/exportCsv'
 
 export interface GymMember {
 	id: string
@@ -134,6 +135,29 @@ export default function MemberTrackerModal() {
 			message,
 			waUrl
 		})
+	}
+
+	// 1-Click Direct WhatsApp Reminder Dispatch (wa.me)
+	const dispatchDirectWhatsApp = (member: GymMember) => {
+		const daysLeft = getDaysLeft(member.expiryDate)
+		const amount = getPlanPrice(member.plan)
+		const message = formatWhatsAppReminder({
+			memberName: member.name,
+			planName: member.plan,
+			expiryDate: member.expiryDate,
+			daysLeft,
+			amount,
+			upiId: ownerProfile.upiId,
+			ownerName: ownerProfile.ownerName,
+			ownerPhone: ownerProfile.phone,
+			gymName: ownerProfile.gymName
+		})
+		const waUrl = getWhatsAppUrl(member.phone, message)
+		const now = new Date().toLocaleString()
+		const updated = members.map((m) => (m.id === member.id ? { ...m, lastNotified: now } : m))
+		saveMembers(updated)
+		window.open(waUrl, '_blank')
+		showToast(`Direct WhatsApp reminder launched for ${member.name}! Phone: ${member.phone}`)
 	}
 
 	// Counts
@@ -300,7 +324,23 @@ export default function MemberTrackerModal() {
 								</p>
 							</div>
 
-							<div className="flex items-center gap-2 sm:gap-3 shrink-0">
+							<div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+								<button
+									onClick={() => {
+										exportMembersToCsv(members, ownerProfile)
+										showToast('Member roster & revenue ledger exported to CSV successfully!')
+									}}
+									title="Export Members & Revenue Ledger to CSV/Excel"
+									className="flex items-center gap-1 sm:gap-1.5 rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all shadow-md active:scale-[0.98] whitespace-nowrap"
+								>
+									<svg className="size-3.5 sm:size-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+										<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+										<polyline points="7 10 12 15 17 10" />
+										<line x1="12" x2="12" y1="15" y2="3" />
+									</svg>
+									<span className="hidden xs:inline">Export CSV</span>
+								</button>
+
 								<button
 									onClick={() => setIsAddingNew(true)}
 									className="flex items-center gap-1 sm:gap-1.5 rounded-xl border border-amber-400 bg-amber-400 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-black uppercase tracking-wider transition-all hover:bg-amber-300 shadow-md active:scale-[0.98] whitespace-nowrap"
@@ -378,17 +418,17 @@ export default function MemberTrackerModal() {
 												return days >= 0 && days <= 3
 											})
 											if (firstExpiring) {
-												openWhatsAppModal(firstExpiring)
+												dispatchDirectWhatsApp(firstExpiring)
 											} else if (members.length > 0) {
-												openWhatsAppModal(members[0])
+												dispatchDirectWhatsApp(members[0])
 											}
 										}}
-										className="flex items-center gap-1.5 rounded-lg border border-emerald-400/50 bg-emerald-500/25 px-3 py-1 text-xs font-bold text-emerald-200 transition-all hover:bg-emerald-500/40"
+										className="flex items-center gap-1.5 rounded-lg border border-emerald-400/50 bg-emerald-500/25 px-3 py-1 text-xs font-bold text-emerald-200 transition-all hover:bg-emerald-500/40 shadow-sm"
 									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-											<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
 										</svg>
-										<span>WhatsApp Due Alert</span>
+										<span>1-Click WhatsApp Due Alert</span>
 									</button>
 
 									<button
@@ -656,10 +696,10 @@ export default function MemberTrackerModal() {
 
 													{/* Primary Dispatch & Edit Action Buttons */}
 													<div className="grid grid-cols-12 gap-1.5 sm:gap-2 pt-0.5">
-														{/* 1-Click WhatsApp Button */}
+														{/* Direct 1-Click WhatsApp Reminder Button */}
 														<button
-															onClick={() => openWhatsAppModal(member)}
-															title={`Open WhatsApp reminder for ${member.name}`}
+															onClick={() => dispatchDirectWhatsApp(member)}
+															title={`Direct 1-Click WhatsApp reminder to ${member.name} (${member.phone})`}
 															className="col-span-6 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 sm:py-2 text-xs font-bold text-white shadow-md shadow-emerald-950/50 hover:bg-emerald-500 transition-all active:scale-[0.98]"
 														>
 															<svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -668,16 +708,27 @@ export default function MemberTrackerModal() {
 															<span>WhatsApp</span>
 														</button>
 
-														{/* Email Button */}
+														{/* UPI QR Standee & Preview Button */}
 														<button
-															onClick={() => dispatch3DayAlert(member)}
-															title="Send email reminder"
-															className="col-span-3 flex items-center justify-center gap-1 rounded-xl border border-white/15 bg-white/5 px-2 py-1.5 sm:py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all"
+															onClick={() => openWhatsAppModal(member)}
+															title="View Payment QR Standee & WhatsApp Preview"
+															className="col-span-3 flex items-center justify-center gap-1 rounded-xl border border-amber-400/30 bg-amber-400/10 px-2 py-1.5 sm:py-2 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all"
 														>
-															<svg className="size-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+															<svg className="size-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+																<rect width="5" height="5" x="3" y="3" rx="1" />
+																<rect width="5" height="5" x="16" y="3" rx="1" />
+																<rect width="5" height="5" x="3" y="16" rx="1" />
+																<path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+																<path d="M21 21v.01" />
+																<path d="M12 7v3a2 2 0 0 1-2 2H7" />
+																<path d="M3 12h.01" />
+																<path d="M12 3h.01" />
+																<path d="M12 16v.01" />
+																<path d="M16 12h1" />
+																<path d="M21 12v.01" />
+																<path d="M12 21v-1" />
 															</svg>
-															<span>Email</span>
+															<span>QR Standee</span>
 														</button>
 
 														{/* Edit Button */}

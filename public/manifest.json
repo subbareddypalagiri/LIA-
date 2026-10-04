@@ -1,0 +1,79 @@
+{
+  "name": "LIA Iron Club | Elite Physique Sanctum",
+  "short_name": "LIA Iron Club",
+  "description": "High-performance gym membership, athlete roster, UPI payments, hypertrophy nutrition, and owner desk.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Member Pass & Roster",
+      "short_name": "Members",
+      "description": "Check member expiry and active gym pass",
+      "url": "/?open=members",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Hypertrophy Macro Calculator",
+      "short_name": "Macros",
+      "description": "Calculate daily calories, protein, and nutrition targets",
+      "url": "/?open=nutrition",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Owner Desk & QR Standee",
+      "short_name": "Owner Desk",
+      "description": "Fee reconciliation, QR standee, and member notifications",
+      "url": "/?open=owner",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "fitness",
+    "sports",
+    "lifestyle",
+    "health"
+  ]
+}
