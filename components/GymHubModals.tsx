@@ -12,6 +12,7 @@ import AthleteNutritionModal from './AthleteNutritionModal'
 import { exportMembersToCsv } from '@/lib/exportCsv'
 import { useAuth, updateSessionUser } from '@/store/authStore'
 import { generateUpiQrDataUrl } from '@/lib/upiQr'
+import { BentoGrid, BentoCard } from '@/components/ui/BentoGrid'
 import {
 	fetchOwnerProfileData,
 	saveOwnerProfileData,
@@ -38,6 +39,24 @@ interface SplitProgram {
 	difficulty: string
 	days: SplitDay[]
 }
+
+const PplSplitIcon = ({ className }: { className?: string }) => (
+	<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+		<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 6h16M4 12h16M4 18h16M8 4v4m8-4v4m-8 4v4m8-4v4m-8 4v4m8-4v4" />
+	</svg>
+)
+
+const ArnoldSplitIcon = ({ className }: { className?: string }) => (
+	<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+		<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+	</svg>
+)
+
+const UpperLowerSplitIcon = ({ className }: { className?: string }) => (
+	<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+		<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M7 16V4m0 0L3 8m4-4l4 4m10 4v12m0 0l-4-4m4 4l4-4" />
+	</svg>
+)
 
 const SPLIT_PROGRAMS: SplitProgram[] = [
 	{
@@ -546,31 +565,38 @@ export default function GymHubModals() {
 								</p>
 							</div>
 
-							{/* Split Selector Tabs */}
-							<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-								{SPLIT_PROGRAMS.map((prog) => (
-									<button
-										key={prog.id}
-										onClick={() => setActiveSplitId(prog.id)}
-										className={`relative rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer ${
-											activeSplitId === prog.id
-												? 'border-amber-400/60 bg-gradient-to-b from-amber-500/15 via-amber-500/[0.03] to-neutral-950 shadow-[0_0_24px_rgba(245,158,11,0.18),inset_0_1px_0_rgba(251,191,36,0.35)]'
-												: 'border-white/[0.08] bg-neutral-900/60 hover:border-white/20 hover:bg-neutral-900/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
-										}`}
-									>
-										<div className="flex items-center justify-between mb-2">
-											<span className="rounded-md bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-												{prog.daysPerWeek}
-											</span>
-											<span className="text-[10px] font-medium text-neutral-400">{prog.difficulty}</span>
-										</div>
-										<h3 className="text-base font-bold text-white mb-1.5 tracking-tight">
-											{prog.name}
-										</h3>
-										<p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">{prog.tagline}</p>
-									</button>
-								))}
-							</div>
+							{/* Split Selector Bento Grid */}
+							<BentoGrid className="mb-8 auto-rows-[16rem] md:auto-rows-[17.5rem]">
+								{SPLIT_PROGRAMS.map((prog) => {
+									const isCurrent = activeSplitId === prog.id
+									const ProgIcon =
+										prog.id === 'ppl'
+											? PplSplitIcon
+											: prog.id === 'arnold'
+											? ArnoldSplitIcon
+											: UpperLowerSplitIcon
+
+									return (
+										<BentoCard
+											key={prog.id}
+											name={prog.name}
+											description={prog.tagline}
+											badge={`${prog.daysPerWeek}`}
+											cta={isCurrent ? 'Active Blueprint' : 'Activate Routine'}
+											onClick={() => setActiveSplitId(prog.id)}
+											Icon={ProgIcon}
+											className={
+												isCurrent
+													? 'border-amber-400/90 dark:border-amber-400/80 shadow-[0_0_30px_rgba(245,158,11,0.22)] ring-1 ring-amber-400/50'
+													: ''
+											}
+											background={
+												<div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(245,158,11,0.12),rgba(0,0,0,0))]" />
+											}
+										/>
+									)
+								})}
+							</BentoGrid>
 
 							{/* Active Split Day-by-Day View */}
 							{(() => {
@@ -579,7 +605,12 @@ export default function GymHubModals() {
 									<div className="space-y-4">
 										<div className="flex items-center justify-between border-b border-white/10 pb-3">
 											<div>
-												<h3 className="text-base font-bold text-white tracking-tight">{currentProg.name} Schedule</h3>
+												<h3 className="text-base font-bold text-white tracking-tight font-sans flex items-center gap-2">
+													<span>{currentProg.name} Execution Plan</span>
+													<span className="text-[10px] font-mono font-normal text-amber-400 border border-amber-400/30 px-2 py-0.5 rounded-full bg-amber-400/10">
+														{currentProg.difficulty}
+													</span>
+												</h3>
 												<p className="text-xs text-neutral-400 mt-0.5">{currentProg.tagline}</p>
 											</div>
 											<button
@@ -590,7 +621,7 @@ export default function GymHubModals() {
 													navigator.clipboard?.writeText(routineText)
 													showToast(`Copied ${currentProg.name} Routine to Clipboard!`)
 												}}
-												className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all flex items-center gap-1.5 cursor-pointer"
+												className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
 											>
 												<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -599,27 +630,40 @@ export default function GymHubModals() {
 											</button>
 										</div>
 
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
 											{currentProg.days.map((d, i) => (
 												<div
 													key={i}
-													className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/20 transition-all"
+													className="group relative rounded-2xl border border-white/[0.08] bg-neutral-950/80 p-4.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-amber-500/40 hover:shadow-[0_4px_24px_rgba(245,158,11,0.1)] transition-all duration-300"
 												>
-													<div className="flex items-center justify-between mb-2.5">
-														<span className="text-sm font-bold text-white tracking-tight">
+													<div className="flex items-center justify-between mb-3 border-b border-white/[0.06] pb-2.5">
+														<span className="text-sm font-bold text-white tracking-tight font-sans">
 															{d.day}
 														</span>
-														<span className="rounded-md border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+														<span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300 tracking-wide">
 															{d.focus}
 														</span>
 													</div>
-													<ul className="space-y-1.5 text-xs text-neutral-300 font-normal">
-														{d.exercises.map((ex, eIdx) => (
-															<li key={eIdx} className="flex items-center gap-2">
-																<span className="size-1 rounded-full bg-amber-400 shrink-0" />
-																<span>{ex}</span>
-															</li>
-														))}
+													<ul className="space-y-2 text-xs font-sans">
+														{d.exercises.map((ex, eIdx) => {
+															const match = ex.match(/^(.*?)\s*(\(.*?\))$/)
+															const exName = match ? match[1] : ex
+															const exReps = match ? match[2].replace(/[()]/g, '') : null
+
+															return (
+																<li key={eIdx} className="flex items-center justify-between gap-2 text-neutral-300">
+																	<div className="flex items-center gap-2 min-w-0">
+																		<span className="size-1.5 rounded-full bg-amber-400 shrink-0" />
+																		<span className="truncate">{exName}</span>
+																	</div>
+																	{exReps && (
+																		<span className="shrink-0 font-mono text-[10px] text-amber-300/90 font-medium px-2 py-0.5 rounded bg-white/[0.04] border border-white/[0.08]">
+																			{exReps}
+																		</span>
+																	)}
+																</li>
+															)
+														})}
 													</ul>
 												</div>
 											))}

@@ -3,6 +3,7 @@ import GymHubModals from '@/components/GymHubModals'
 import MemberTrackerModal from '@/components/MemberTrackerModal'
 import MobileStudioControls from '@/components/MobileStudioControls'
 import PwaInstallPrompt from '@/components/PwaInstallPrompt'
+import PwaNavInstallButton from '@/components/PwaNavInstallButton'
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { Oswald, Bebas_Neue, Space_Grotesk, Cinzel, Plus_Jakarta_Sans } from 'next/font/google'
@@ -114,6 +115,7 @@ export default function RootLayout({
 
 						{/* RIGHT ACTION CLUSTER */}
 						<div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+							<PwaNavInstallButton />
 							<MemberTrackerModal />
 							<MobileStudioControls />
 						</div>

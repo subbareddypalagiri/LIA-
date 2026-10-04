@@ -7,6 +7,7 @@ import { BG_THEMES, useBgTheme, setBgTheme, type BgTheme } from '@/store/bgTheme
 import { useLiaColor, setLiaColor } from '@/store/liaColor'
 import { openGymModal } from '@/store/gymHub'
 import { useAuth } from '@/store/authStore'
+import { usePwa, promptInstall } from '@/store/pwaStore'
 
 const PRESET_COLORS = [
 	{ name: 'White', hex: '#ffffff' },
@@ -372,6 +373,33 @@ export default function MobileStudioControls() {
 										/>
 									)
 								})}
+							</div>
+						</div>
+
+						{/* Section 4: Mobile App Install */}
+						<div className="mt-5 pt-4 border-t border-white/10">
+							<div className="flex items-center justify-between rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-3">
+								<div className="flex items-center gap-2.5">
+									<div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
+										<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M12 2v8m0 0 3-3m-3 3-3-3M3 15v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4" />
+										</svg>
+									</div>
+									<div>
+										<p className="text-xs font-bold text-white uppercase tracking-wider">Install LIA App</p>
+										<p className="text-[10px] text-neutral-400">1-Tap home screen access & offline pass</p>
+									</div>
+								</div>
+								<button
+									type="button"
+									onClick={() => {
+										promptInstall()
+										setIsOpen(false)
+									}}
+									className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-1.5 text-xs font-bold text-black shadow-md shadow-amber-500/20 active:scale-95 transition-all"
+								>
+									Install
+								</button>
 							</div>
 						</div>
 					</div>

@@ -14,38 +14,65 @@ export default function HeaderNav() {
 				active={activeModal === 'exercises'}
 				onClick={() => openGymModal('exercises')}
 				title="View Hypertrophy Exercise Library & Biomechanics"
+				className="flex items-center gap-1.5"
 			>
-				Exercises
+				<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<path strokeLinecap="round" strokeLinejoin="round" d="M6 5v14M18 5v14M2 9h4m0 6H2m16-6h4m-4 6h4M6 12h12" />
+				</svg>
+				<span>Exercises</span>
 			</Nav.Item>
+
 			<Nav.Item
 				active={activeModal === 'splits'}
 				onClick={() => openGymModal('splits')}
 				title="Explore PPL, Arnold, and Strength Training Splits"
+				className="flex items-center gap-1.5"
 			>
-				Splits
+				<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<rect width="18" height="18" x="3" y="3" rx="2" />
+					<path strokeLinecap="round" strokeLinejoin="round" d="M3 9h18M9 21V9" />
+				</svg>
+				<span>Splits</span>
 			</Nav.Item>
+
 			<Nav.Item
 				active={activeModal === 'equipment'}
 				onClick={() => openGymModal('equipment')}
 				title="View Solid Steel Dumbbells, Plates & Cable Towers"
+				className="flex items-center gap-1.5"
 			>
-				Equipment
+				<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<circle cx="12" cy="12" r="9" />
+					<circle cx="12" cy="12" r="3" />
+					<path strokeLinecap="round" strokeLinejoin="round" d="M12 3v3m0 12v3M3 12h3m12 0h3" />
+				</svg>
+				<span>Equipment</span>
 			</Nav.Item>
+
 			<Nav.Item
 				active={activeModal === 'nutrition'}
 				onClick={() => openGymModal('nutrition')}
 				title="Athlete Nutrition & Macro Hypertrophy Calculator"
-				className="flex items-center gap-1 text-amber-300/90 hover:text-amber-300"
+				className="flex items-center gap-1.5"
 			>
+				<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<path strokeLinecap="round" strokeLinejoin="round" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+				</svg>
 				<span>Nutrition</span>
-				<span className="rounded bg-amber-400/20 px-1 py-0.2 text-[8px] font-bold text-amber-300">PRO</span>
+				<span className="rounded bg-amber-400/20 px-1 py-0.2 text-[8px] font-mono font-bold text-amber-300">PRO</span>
 			</Nav.Item>
+
 			<Nav.Item
 				active={activeModal === 'timings'}
 				onClick={() => openGymModal('timings')}
 				title="Check Morning & Evening Batch Timings"
+				className="flex items-center gap-1.5"
 			>
-				Timings
+				<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<circle cx="12" cy="12" r="9" />
+					<path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
+				</svg>
+				<span>Timings</span>
 			</Nav.Item>
 
 			{/* Role-Based Nav Item */}
@@ -56,8 +83,8 @@ export default function HeaderNav() {
 					title="Gym Owner Desk: Revenue, Fees, Attendance & Onboarding"
 					className="flex items-center gap-1.5 font-bold text-amber-300 hover:text-amber-200"
 				>
-					<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-						<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+					<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+						<path strokeLinecap="round" strokeLinejoin="round" d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
 					</svg>
 					<span>Owner Desk</span>
 				</Nav.Item>
@@ -70,10 +97,10 @@ export default function HeaderNav() {
 					title="My Athlete Membership Card & Attendance"
 					className="flex items-center gap-1.5 font-bold text-emerald-300 hover:text-emerald-200"
 				>
-					<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+					<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 						<rect width="18" height="18" x="3" y="3" rx="2" />
 						<circle cx="12" cy="10" r="3" />
-						<path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+						<path strokeLinecap="round" strokeLinejoin="round" d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
 					</svg>
 					<span>My Pass ({user?.name.split(' ')[0]})</span>
 				</Nav.Item>
@@ -86,9 +113,9 @@ export default function HeaderNav() {
 					title="Gym Portal Login for Members & Owner"
 					className="flex items-center gap-1.5 font-bold text-amber-400 hover:text-amber-300"
 				>
-					<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+					<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 						<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-						<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+						<path strokeLinecap="round" strokeLinejoin="round" d="M7 11V7a5 5 0 0 1 10 0v4" />
 					</svg>
 					<span>Login</span>
 				</Nav.Item>
