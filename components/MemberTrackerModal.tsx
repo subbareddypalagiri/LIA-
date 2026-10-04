@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import {
 	fetchMembersData,
 	saveMemberData,
@@ -38,7 +39,12 @@ const OWNER_EMAIL = 'subbareddy123sub@gmail.com'
 
 export default function MemberTrackerModal() {
 	const [isOpen, setIsOpen] = useState(false)
+	const [isMounted, setIsMounted] = useState(false)
 	const [members, setMembers] = useState<GymMember[]>([])
+
+	useEffect(() => {
+		setIsMounted(true)
+	}, [])
 	const [filter, setFilter] = useState<'all' | 'expiring' | 'active' | 'expired'>('all')
 	const [search, setSearch] = useState('')
 
@@ -286,9 +292,12 @@ export default function MemberTrackerModal() {
 				)}
 			</button>
 
-			{/* Main Modal Overlay - Centered Executive Dashboard Architecture & Mobile Bottom-Sheet */}
-			{isOpen && (
-				<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-5 overflow-y-auto">
+			{/* Portaled Modal Overlay to root document.body to avoid parent transform clipping */}
+			{isMounted && typeof document !== 'undefined' && createPortal(
+				<>
+					{/* Main Modal Overlay - Centered Executive Dashboard Architecture & Mobile Bottom-Sheet */}
+					{isOpen && (
+				<div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-5 overflow-y-auto">
 					<div
 						className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
 						onClick={() => setIsOpen(false)}
@@ -819,6 +828,9 @@ export default function MemberTrackerModal() {
 						showToast(`Dispatched WhatsApp Expiry Alert to ${previewWhatsApp.member.name}!`)
 					}}
 				/>
+			)}
+				</>,
+				document.body
 			)}
 		</>
 	)
