@@ -148,8 +148,8 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 				</div>
 			</div>
 
-			{/* Muscle Category Filter Pills */}
-			<div className="mb-3.5 flex flex-wrap gap-1.5 sm:gap-2">
+			{/* Muscle Category Filter Pills (Horizontal swipe on mobile, wrap on desktop) */}
+			<div className="mb-3.5 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar sm:flex-wrap pb-1">
 				{MUSCLE_CATEGORIES.map((cat) => {
 					const count = muscleCounts[cat.value] || 0
 					const isActive = selectedMuscle === cat.value
@@ -157,7 +157,7 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 						<button
 							key={cat.value}
 							onClick={() => setSelectedMuscle(cat.value)}
-							className={`rounded-full px-3 py-1.5 text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 ${
+							className={`rounded-full px-3 py-1.5 text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 shrink-0 ${
 								isActive
 									? 'bg-amber-400 text-black shadow-md font-bold'
 									: 'border border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white'
@@ -176,9 +176,9 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 				})}
 			</div>
 
-			{/* Equipment Filter Bar */}
-			<div className="mb-5 flex flex-wrap items-center gap-1.5 text-[11px] border-b border-white/10 pb-3">
-				<span className="text-white/40 mr-1 font-semibold uppercase tracking-wider text-[10px]">
+			{/* Equipment Filter Bar (Horizontal swipe on mobile) */}
+			<div className="mb-5 flex items-center gap-1.5 text-[11px] border-b border-white/10 pb-3 overflow-x-auto no-scrollbar sm:flex-wrap">
+				<span className="text-white/40 mr-1 font-semibold uppercase tracking-wider text-[10px] shrink-0">
 					Equipment:
 				</span>
 				{EQUIPMENT_FILTERS.map((eq) => {
@@ -187,7 +187,7 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 						<button
 							key={eq}
 							onClick={() => setSelectedEquipment(eq)}
-							className={`rounded-lg px-2.5 py-1 capitalize transition-all ${
+							className={`rounded-lg px-2.5 py-1 capitalize transition-all shrink-0 ${
 								isActive
 									? 'bg-white/20 text-amber-300 font-bold border border-amber-400/40'
 									: 'text-white/60 hover:text-white hover:bg-white/5'
