@@ -17,6 +17,7 @@
 		"@react-three/drei": "^9.106.0",
 		"@react-three/fiber": "9.0.0-beta.0",
 		"@react-three/postprocessing": "^2.16.2",
+		"@supabase/supabase-js": "^2.117.2",
 		"framer-motion": "^11.2.10",
 		"framer-motion-3d": "^11.2.10",
 		"next": "15.0.0-rc.0",
@@ -48,7 +49,9 @@
 		"typescript": "5.4.5"
 	},
 	"pnpm": {
-		"onlyBuiltDependencies": ["sharp"],
+		"onlyBuiltDependencies": [
+			"sharp"
+		],
 		"patchedDependencies": {
 			"@react-three/fiber@9.0.0-beta.0": "patches/@react-three__fiber@9.0.0-beta.0.patch",
 			"@react-three/postprocessing@2.16.2": "patches/@react-three__postprocessing@2.16.2.patch",

@@ -2,9 +2,16 @@
 'use no memo'
 /* eslint-disable @next/next/no-img-element */
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useGymModal, type GymModalType } from '@/store/gymHub'
 import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
+import {
+	fetchOwnerProfileData,
+	saveOwnerProfileData,
+	saveMemberData,
+	isCloudSyncEnabled,
+	type OwnerProfile
+} from '@/lib/supabase'
 
 // --- DATA STRUCTURES ---
 
@@ -362,12 +369,32 @@ export default function GymHubModals() {
 	const [activeSplitId, setActiveSplitId] = useState('ppl')
 	const [toastText, setToastText] = useState<string | null>(null)
 
-	// Owner desk mock state
-	const [checkInCount, setCheckInCount] = useState(38)
+	// Owner desk & profile state
+	const [checkInCount, setCheckInCount] = useState(48)
 	const [newMemberName, setNewMemberName] = useState('')
 	const [newMemberPhone, setNewMemberPhone] = useState('')
 	const [newMemberPlan, setNewMemberPlan] = useState('3 Months Hypertrophy')
 	const [maintenanceLogged, setMaintenanceLogged] = useState(false)
+
+	const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>({
+		gymName: 'LIA Iron Club',
+		ownerName: 'Subba Reddy Palagiri',
+		phone: '+91 98765 43210',
+		email: 'owner@liaironclub.com',
+		upiId: 'liaironclub@okhdfcbank',
+		monthlyTarget: 180000,
+		todayCheckins: 48
+	})
+	const [isEditingProfile, setIsEditingProfile] = useState(false)
+	const [cloudSyncActive, setCloudSyncActive] = useState(false)
+
+	useEffect(() => {
+		setCloudSyncActive(isCloudSyncEnabled())
+		fetchOwnerProfileData().then((prof) => {
+			setOwnerProfile(prof)
+			setCheckInCount(prof.todayCheckins)
+		})
+	}, [])
 
 	// Exercises view mode & inspected item (default to Library grid matching reference app)
 	const [exerciseSubView, setExerciseSubView] = useState<'studio' | 'list'>('list')
@@ -889,7 +916,11 @@ export default function GymHubModals() {
 								{/* Quick Entry Logger */}
 								<button
 									onClick={() => {
-										setCheckInCount((c) => c + 1)
+										setCheckInCount((c) => {
+											const next = c + 1
+											saveOwnerProfileData({ ...ownerProfile, todayCheckins: next })
+											return next
+										})
 										showToast(`Logged member entry! Total today: ${checkInCount + 1}`)
 									}}
 									className="rounded-xl border border-amber-400 bg-amber-400 text-black px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-lg hover:bg-amber-300 transition-all flex items-center gap-1.5 self-start sm:self-center"
@@ -898,6 +929,117 @@ export default function GymHubModals() {
 									<span className="rounded-full bg-black/20 px-1.5 py-0.2 text-[10px]">+{checkInCount}</span>
 								</button>
 							</div>
+
+							{/* Owner Identity & Cloud Sync Banner */}
+							<div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+								<div className="flex items-center gap-3.5">
+									<div className="size-12 rounded-2xl border border-amber-400/40 bg-amber-400/10 flex items-center justify-center text-xl font-bold text-amber-300 shrink-0">
+										👑
+									</div>
+									<div>
+										<div className="flex items-center gap-2">
+											<h3 className="font-heading text-lg font-bold text-white">{ownerProfile.ownerName}</h3>
+											<span className="rounded bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 uppercase">
+												Owner / Founder
+											</span>
+										</div>
+										<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/60 mt-0.5">
+											<span>🏢 {ownerProfile.gymName}</span>
+											<span>📞 {ownerProfile.phone}</span>
+											<span className="font-mono text-amber-300/90">UPI: {ownerProfile.upiId}</span>
+										</div>
+									</div>
+								</div>
+
+								<div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+									<span
+										className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+											cloudSyncActive
+												? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+												: 'bg-white/5 text-white/50 border border-white/10'
+										}`}
+										title={
+											cloudSyncActive
+												? 'Connected to Supabase PostgreSQL Database'
+												: 'Running in Local Storage mode. Add NEXT_PUBLIC_SUPABASE_URL in .env to enable multi-device cloud sync.'
+										}
+									>
+										<span className={`size-1.5 rounded-full ${cloudSyncActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+										{cloudSyncActive ? 'Cloud Sync: Connected' : 'Local Storage Mode'}
+									</span>
+
+									<button
+										type="button"
+										onClick={() => setIsEditingProfile(!isEditingProfile)}
+										className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all shrink-0"
+									>
+										{isEditingProfile ? 'Close' : 'Edit Profile ✏️'}
+									</button>
+								</div>
+							</div>
+
+							{/* Owner Profile Editor Drawer (When Open) */}
+							{isEditingProfile && (
+								<div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] p-4.5 space-y-4">
+									<div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+										<h4 className="font-heading text-sm font-bold text-white uppercase tracking-wider">
+											Edit Gym Owner Profile & Payment Settings
+										</h4>
+										<span className="text-[10px] text-amber-400 font-semibold">Instant Local & Cloud Sync</span>
+									</div>
+									<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+										<div>
+											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Owner Name</label>
+											<input
+												type="text"
+												value={ownerProfile.ownerName}
+												onChange={(e) => setOwnerProfile({ ...ownerProfile, ownerName: e.target.value })}
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+											/>
+										</div>
+										<div>
+											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Gym Name</label>
+											<input
+												type="text"
+												value={ownerProfile.gymName}
+												onChange={(e) => setOwnerProfile({ ...ownerProfile, gymName: e.target.value })}
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+											/>
+										</div>
+										<div>
+											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Phone / WhatsApp</label>
+											<input
+												type="tel"
+												value={ownerProfile.phone}
+												onChange={(e) => setOwnerProfile({ ...ownerProfile, phone: e.target.value })}
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+											/>
+										</div>
+										<div>
+											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">UPI ID (For Fees)</label>
+											<input
+												type="text"
+												value={ownerProfile.upiId}
+												onChange={(e) => setOwnerProfile({ ...ownerProfile, upiId: e.target.value })}
+												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
+											/>
+										</div>
+									</div>
+									<div className="flex justify-end gap-2 pt-2">
+										<button
+											type="button"
+											onClick={() => {
+												saveOwnerProfileData(ownerProfile)
+												setIsEditingProfile(false)
+												showToast('✅ Owner profile updated successfully!')
+											}}
+											className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-1.5 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shadow-md"
+										>
+											Save Profile Changes
+										</button>
+									</div>
+								</div>
+							)}
 
 							{/* 4 Financial & Operational KPI Cards */}
 							<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
@@ -952,6 +1094,22 @@ export default function GymHubModals() {
 												showToast('Please enter member name!')
 												return
 											}
+											const newMemberId = 'mem-' + Date.now()
+											const newMem = {
+												id: newMemberId,
+												name: newMemberName,
+												email: `${newMemberName.toLowerCase().replace(/\s+/g, '.')}@gmail.com`,
+												phone: newMemberPhone || '+91 98765 00000',
+												photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+												plan: newMemberPlan,
+												startDate: new Date().toISOString().split('T')[0],
+												expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+											}
+											saveMemberData(newMem)
+											try {
+												const existing: any[] = (JSON.parse(localStorage.getItem('lia_gym_members') || '[]') as any[]) || []
+												localStorage.setItem('lia_gym_members', JSON.stringify([newMem, ...existing]))
+											} catch {}
 											showToast(`Added ${newMemberName} (${newMemberPlan}) successfully!`)
 											setNewMemberName('')
 											setNewMemberPhone('')
