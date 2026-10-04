@@ -1,9 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import FontPicker from './FontPicker'
-import BgThemePicker from './BgThemePicker'
-import ColorPicker from './ColorPicker'
+import DesktopStudioPopover from './DesktopStudioPopover'
 import { FONT_OPTIONS, useFontTheme, setFontTheme, type FontOption } from '@/store/fontTheme'
 import { BG_THEMES, useBgTheme, setBgTheme, type BgTheme } from '@/store/bgTheme'
 import { useLiaColor, setLiaColor } from '@/store/liaColor'
@@ -28,31 +26,9 @@ export default function MobileStudioControls() {
 
 	return (
 		<>
-			{/* DESKTOP VIEW (>= 768px): Exact original horizontal controls untouched */}
-			<div className="hidden md:flex items-center gap-2 sm:gap-2.5">
-				<FontPicker />
-				<BgThemePicker />
-				<ColorPicker />
-				<button className="cursor-not-allowed">
-					<svg
-						width="22"
-						height="22"
-						viewBox="0 0 22 22"
-						fill="none"
-						className="size-[1.375rem]"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<rect width="4" height="4" fill="#D9D9D9" />
-						<rect x="9" width="4" height="4" fill="#D9D9D9" />
-						<rect x="18" width="4" height="4" fill="#D9D9D9" />
-						<rect y="9" width="4" height="4" fill="#D9D9D9" />
-						<rect x="9" y="9" width="4" height="4" fill="#D9D9D9" />
-						<rect x="18" y="9" width="4" height="4" fill="#D9D9D9" />
-						<rect y="18" width="4" height="4" fill="#D9D9D9" />
-						<rect x="9" y="18" width="4" height="4" fill="#D9D9D9" />
-						<rect x="18" y="18" width="4" height="4" fill="#D9D9D9" />
-					</svg>
-				</button>
+			{/* DESKTOP VIEW (>= 768px): Apple-style Glass Studio Bento Popover */}
+			<div className="hidden md:flex items-center">
+				<DesktopStudioPopover />
 			</div>
 
 			{/* MOBILE VIEW (< 768px): Compact Pill Trigger Button */}

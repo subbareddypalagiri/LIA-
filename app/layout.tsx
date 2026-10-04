@@ -86,16 +86,29 @@ export default function RootLayout({
 				style={{ '--header-h': 'calc(var(--header-py) * 2 + 1.375rem)' }}
 			>
 				<Guides />
-				<header className="fixed top-0 z-10 w-full py-[--header-py]">
-					<div className="container flex items-center justify-between gap-4">
-						<div className="flex items-center gap-2.5">
-							<span className="font-heading text-2xl font-black tracking-wider text-white">LIA</span>
-							<span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold tracking-widest text-amber-400 uppercase">
-								IRON CLUB
+				<header className="fixed top-3.5 inset-x-0 z-40 mx-auto w-[95%] max-w-7xl transition-all duration-300">
+					<div className="relative flex items-center justify-between gap-2 sm:gap-4 rounded-2xl lg:rounded-full border border-white/12 bg-neutral-950/80 px-3.5 py-2 sm:px-5 sm:py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-2xl">
+						{/* BRAND ANCHOR */}
+						<div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+							<span className="relative flex size-2 shrink-0">
+								<span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-60"></span>
+								<span className="relative inline-flex size-2 rounded-full bg-amber-400"></span>
 							</span>
+							<a href="/" className="flex items-center gap-2 group cursor-pointer">
+								<span className="font-heading text-xl sm:text-2xl font-black tracking-wider bg-gradient-to-r from-white via-amber-100 to-amber-400 bg-clip-text text-transparent group-hover:to-amber-300 transition-colors">
+									LIA
+								</span>
+								<span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[8px] sm:text-[9px] font-bold tracking-widest text-amber-300 uppercase shadow-sm">
+									IRON CLUB
+								</span>
+							</a>
 						</div>
+
+						{/* CENTER NAVIGATION DOCK */}
 						<HeaderNav />
-						<div className="flex items-center gap-1.5 justify-self-end sm:gap-2.5">
+
+						{/* RIGHT ACTION CLUSTER */}
+						<div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
 							<MemberTrackerModal />
 							<MobileStudioControls />
 						</div>

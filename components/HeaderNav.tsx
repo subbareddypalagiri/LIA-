@@ -35,9 +35,10 @@ export default function HeaderNav() {
 				active={activeModal === 'nutrition'}
 				onClick={() => openGymModal('nutrition')}
 				title="Athlete Nutrition & Macro Hypertrophy Calculator"
-				className="text-amber-300/90 hover:text-amber-300"
+				className="flex items-center gap-1 text-amber-300/90 hover:text-amber-300"
 			>
-				Nutrition
+				<span>Nutrition</span>
+				<span className="rounded bg-amber-400/20 px-1 py-0.2 text-[8px] font-bold text-amber-300">PRO</span>
 			</Nav.Item>
 			<Nav.Item
 				active={activeModal === 'timings'}

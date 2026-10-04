@@ -262,20 +262,26 @@ export default function MemberTrackerModal() {
 			{/* Trigger Button in Top Nav */}
 			<button
 				onClick={() => setIsOpen(true)}
-				className="group relative flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-medium text-white/80 backdrop-blur-md transition-all hover:border-white/40 hover:bg-white/10 hover:text-white"
+				className="group relative flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold tracking-wider text-neutral-200 backdrop-blur-xl transition-all duration-200 hover:border-amber-400/50 hover:bg-white/10 hover:text-white cursor-pointer select-none"
 			>
-				<span className="flex size-2 rounded-full bg-emerald-400">
-					{expiringCount > 0 && (
-						<span className="relative flex size-2">
+				<span className="relative flex size-2 shrink-0">
+					{expiringCount > 0 ? (
+						<>
 							<span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
-							<span className="relative inline-flex size-2 rounded-full bg-amber-500"></span>
-						</span>
+							<span className="relative inline-flex size-2 rounded-full bg-amber-400"></span>
+						</>
+					) : (
+						<span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
 					)}
 				</span>
-				<span className="tracking-wider uppercase">Members Portal</span>
-				{expiringCount > 0 && (
-					<span className="rounded-full bg-amber-500/20 px-1.5 py-0.2 text-[10px] font-semibold text-amber-300">
+				<span className="uppercase">Members</span>
+				{expiringCount > 0 ? (
+					<span className="rounded-full bg-amber-500/25 px-1.5 py-0.2 text-[10px] font-bold text-amber-300">
 						{expiringCount} Due
+					</span>
+				) : (
+					<span className="hidden sm:inline-block rounded-full bg-emerald-500/15 px-1.5 py-0.2 text-[9px] font-medium text-emerald-300">
+						Live
 					</span>
 				)}
 			</button>
