@@ -221,9 +221,9 @@ export default function GymHubModals() {
 
 	const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>({
 		gymName: 'LIA Iron Club',
-		ownerName: 'Subba Reddy Palagiri',
+		ownerName: 'Palagiri Subbareddy',
 		phone: '+91 98765 43210',
-		email: 'owner@liaironclub.com',
+		email: 'subbareddy123sub@gmail.com',
 		upiId: 'liaironclub@okhdfcbank',
 		monthlyTarget: 180000,
 		todayCheckins: 48

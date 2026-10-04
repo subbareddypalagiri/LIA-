@@ -19,39 +19,30 @@ export interface AuthUser {
 	checkinCount?: number
 }
 
-export const DEMO_OWNER: AuthUser = {
+// Official Gym Owner Profile
+export const DEFAULT_OWNER: AuthUser = {
 	id: 'owner_subba_reddy',
-	email: 'owner@liaironclub.com',
-	name: 'Subba Reddy Palagiri',
+	email: 'subbareddy123sub@gmail.com',
+	name: 'Palagiri Subbareddy',
 	role: 'owner',
 	phone: '+91 98765 43210',
 	avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'
 }
 
-export const DEMO_MEMBER: AuthUser = {
-	id: 'member_rahul_v',
-	email: 'rahul.verma@gmail.com',
-	name: 'Rahul Verma',
-	role: 'member',
-	phone: '+91 98480 22334',
-	plan: '6 Months Elite Hypertrophy',
-	startDate: '2026-05-15',
-	expiryDate: '2026-11-15',
-	avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
-	checkinCount: 32
-}
-
 const AUTH_STORAGE_KEY = 'lia_auth_session'
 const AUTH_EVENT = 'lia-auth-change'
 
+// Default secure master password for owner local/offline mode
+const DEFAULT_OWNER_MASTER_PASS = 'Subba@LIA2026'
+
+/**
+ * Strict Owner Email Verification:
+ * Strictly matches Subba Reddy's personal email or the email explicitly configured in owner profile.
+ * No loose wildcard/substring matching to prevent unauthorized privilege escalation.
+ */
 export function isOwnerEmailAddress(email: string): boolean {
 	const normalized = email.trim().toLowerCase()
-	if (
-		normalized === 'owner@liaironclub.com' ||
-		normalized.includes('owner') ||
-		normalized.includes('subbareddy') ||
-		normalized === 'admin@liafitness.com'
-	) {
+	if (normalized === 'subbareddy123sub@gmail.com') {
 		return true
 	}
 	try {
@@ -127,20 +118,28 @@ export function useAuth() {
 
 	const loginWithCredentials = useCallback(
 		async (email: string, pass: string): Promise<{ success: boolean; error?: string; role?: UserRole }> => {
-			const client = getSupabase()
-			const isOwner = isOwnerEmailAddress(email)
+			const cleanEmail = email.trim().toLowerCase()
+			const cleanPass = pass.trim()
 
+			if (!cleanEmail || !cleanPass) {
+				return { success: false, error: 'Email and password are required.' }
+			}
+
+			const client = getSupabase()
+			const isOwner = isOwnerEmailAddress(cleanEmail)
+
+			// 1. Cloud Authentication (Production Supabase)
 			if (client && isCloudSyncEnabled()) {
 				try {
-					const { data, error } = await client.auth.signInWithPassword({ email, password: pass })
+					const { data, error } = await client.auth.signInWithPassword({ email: cleanEmail, password: cleanPass })
 					if (error) return { success: false, error: error.message }
 					if (data.user) {
 						const meta = data.user.user_metadata || {}
 						const role: UserRole = isOwner ? 'owner' : ((meta.role as UserRole) || 'member')
 						const authUser: AuthUser = {
 							id: data.user.id,
-							email: data.user.email || email,
-							name: meta.name || email.split('@')[0],
+							email: data.user.email || cleanEmail,
+							name: meta.name || cleanEmail.split('@')[0],
 							role,
 							phone: meta.phone,
 							plan: meta.plan,
@@ -154,20 +153,36 @@ export function useAuth() {
 				}
 			}
 
-			// Local offline authentication
+			// 2. Local / Offline Mode Authentication
 			if (isOwner) {
-				if (pass === 'owner123' || pass === '2026' || pass.length >= 4) {
-					setStoredUser(DEMO_OWNER)
+				// Verify strictly against Owner Master Password
+				let expectedPass = DEFAULT_OWNER_MASTER_PASS
+				try {
+					const savedOwner = localStorage.getItem('lia_owner_profile')
+					if (savedOwner) {
+						const parsed = JSON.parse(savedOwner) as any
+						if (parsed?.ownerPassword) {
+							expectedPass = parsed.ownerPassword
+						}
+					}
+				} catch {}
+
+				if (cleanPass === expectedPass) {
+					setStoredUser(DEFAULT_OWNER)
 					return { success: true, role: 'owner' }
 				}
-				return { success: false, error: 'Invalid password for Owner account (e.g. 2026 or owner123)' }
+				return { success: false, error: 'Incorrect password for Owner account.' }
 			} else {
-				// Member login
-				const cleanName = email.split('@')[0].replace(/[._]/g, ' ')
+				// Regular Member Login
+				if (cleanPass.length < 6) {
+					return { success: false, error: 'Password must be at least 6 characters.' }
+				}
+
+				const cleanName = cleanEmail.split('@')[0].replace(/[._]/g, ' ')
 				const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1)
 				const authUser: AuthUser = {
 					id: `mem_${Date.now()}`,
-					email,
+					email: cleanEmail,
 					name: formattedName,
 					role: 'member',
 					plan: '3 Months Hypertrophy',
@@ -188,13 +203,24 @@ export function useAuth() {
 			email: string,
 			pass: string
 		): Promise<{ success: boolean; error?: string; role?: UserRole }> => {
+			const cleanEmail = email.trim().toLowerCase()
+			const cleanName = name.trim()
+			const cleanPass = pass.trim()
+
+			if (isOwnerEmailAddress(cleanEmail)) {
+				return { success: false, error: 'This email is reserved for the Gym Owner. Please sign in instead.' }
+			}
+
+			if (cleanPass.length < 6) {
+				return { success: false, error: 'Password must be at least 6 characters.' }
+			}
+
 			const client = getSupabase()
-			const isOwner = isOwnerEmailAddress(email)
-			const role: UserRole = isOwner ? 'owner' : 'member'
+			const role: UserRole = 'member'
 
 			const memberData = {
-				name,
-				email,
+				name: cleanName,
+				email: cleanEmail,
 				role,
 				plan: '3 Months Hypertrophy',
 				startDate: new Date().toISOString().split('T')[0],
@@ -204,8 +230,8 @@ export function useAuth() {
 			if (client && isCloudSyncEnabled()) {
 				try {
 					const { data, error } = await client.auth.signUp({
-						email,
-						password: pass,
+						email: cleanEmail,
+						password: cleanPass,
 						options: {
 							data: memberData
 						}
@@ -214,26 +240,24 @@ export function useAuth() {
 					if (data.user) {
 						const authUser: AuthUser = {
 							id: data.user.id,
-							email,
-							name,
+							email: cleanEmail,
+							name: cleanName,
 							role,
 							plan: memberData.plan,
 							startDate: memberData.startDate,
 							expiryDate: memberData.expiryDate
 						}
 						setStoredUser(authUser)
-						if (role === 'member') {
-							saveMemberData({
-								id: data.user.id,
-								name,
-								email,
-								phone: '',
-								photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
-								plan: memberData.plan,
-								startDate: memberData.startDate,
-								expiryDate: memberData.expiryDate
-							})
-						}
+						saveMemberData({
+							id: data.user.id,
+							name: cleanName,
+							email: cleanEmail,
+							phone: '',
+							photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
+							plan: memberData.plan,
+							startDate: memberData.startDate,
+							expiryDate: memberData.expiryDate
+						})
 						return { success: true, role }
 					}
 				} catch (e: any) {
@@ -242,18 +266,16 @@ export function useAuth() {
 			}
 
 			// Local fallback sign up
-			const authUser: AuthUser = isOwner
-				? DEMO_OWNER
-				: {
-						id: `mem_${Date.now()}`,
-						email,
-						name,
-						role: 'member',
-						plan: memberData.plan,
-						startDate: memberData.startDate,
-						expiryDate: memberData.expiryDate,
-						checkinCount: 1
-				  }
+			const authUser: AuthUser = {
+				id: `mem_${Date.now()}`,
+				email: cleanEmail,
+				name: cleanName,
+				role: 'member',
+				plan: memberData.plan,
+				startDate: memberData.startDate,
+				expiryDate: memberData.expiryDate,
+				checkinCount: 1
+			}
 
 			setStoredUser(authUser)
 			return { success: true, role }

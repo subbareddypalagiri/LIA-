@@ -64,7 +64,7 @@ const INITIAL_MEMBERS: GymMember[] = [
 	}
 ]
 
-const OWNER_EMAIL = 'owner@liaironclub.com'
+const OWNER_EMAIL = 'subbareddy123sub@gmail.com'
 
 export default function MemberTrackerModal() {
 	const [isOpen, setIsOpen] = useState(false)

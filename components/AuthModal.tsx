@@ -96,11 +96,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 				setError(e.message || 'Google authentication failed')
 			}
 		} else {
-			// Instant local fallback for Google sign-in demo
-			await loginWithCredentials('athlete.google@gmail.com', 'google_auth_demo')
-			closeModal()
-			if (onSuccess) onSuccess()
-			openModal('my-membership')
+			setError('Google Sign-In requires Supabase cloud configuration. Please enter your email and password.')
 		}
 	}
 

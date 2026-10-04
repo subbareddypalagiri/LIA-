@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS owner_profile (
     gym_name TEXT NOT NULL DEFAULT 'LIA Iron Club',
     owner_name TEXT NOT NULL DEFAULT 'Subba Reddy Palagiri',
     phone TEXT NOT NULL DEFAULT '+91 98765 43210',
-    email TEXT NOT NULL DEFAULT 'owner@liaironclub.com',
+    email TEXT NOT NULL DEFAULT 'subbareddy123sub@gmail.com',
     upi_id TEXT NOT NULL DEFAULT 'liaironclub@okhdfcbank',
     monthly_target NUMERIC DEFAULT 180000,
     today_checkins INTEGER DEFAULT 48,
@@ -51,9 +51,9 @@ INSERT INTO owner_profile (id, gym_name, owner_name, phone, email, upi_id, month
 VALUES (
     'default_owner',
     'LIA Iron Club',
-    'Subba Reddy Palagiri',
+    'Palagiri Subbareddy',
     '+91 98765 43210',
-    'owner@liaironclub.com',
+    'subbareddy123sub@gmail.com',
     'liaironclub@okhdfcbank',
     180000,
     48
