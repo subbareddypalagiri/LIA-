@@ -5,6 +5,7 @@ import { screens as ftwScreens } from 'fluid-tailwind'
 export const screens = {
 	...ftwScreens,
 	xs: '20rem',
+	sm: '40rem',
 	'guides-4': '36rem',
 	'guides-5': '44rem',
 	md: '44rem',

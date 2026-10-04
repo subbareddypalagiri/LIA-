@@ -142,6 +142,16 @@ export default function MemberTrackerModal() {
 		return days >= 0 && days <= 3
 	}).length
 
+	const activeCount = members.filter((m) => {
+		const days = getDaysLeft(m.expiryDate)
+		return days > 3
+	}).length
+
+	const expiredCount = members.filter((m) => {
+		const days = getDaysLeft(m.expiryDate)
+		return days < 0
+	}).length
+
 	// Dispatch 3-day notification email (to both member and owner!)
 	const dispatch3DayAlert = (member: GymMember) => {
 		const daysLeft = getDaysLeft(member.expiryDate)
@@ -207,10 +217,13 @@ export default function MemberTrackerModal() {
 	// Filtered list
 	const filteredMembers = members.filter((m) => {
 		const days = getDaysLeft(m.expiryDate)
+		const query = search.trim().toLowerCase()
 		const matchesSearch =
-			m.name.toLowerCase().includes(search.toLowerCase()) ||
-			m.email.toLowerCase().includes(search.toLowerCase()) ||
-			m.plan.toLowerCase().includes(search.toLowerCase())
+			!query ||
+			m.name.toLowerCase().includes(query) ||
+			m.email.toLowerCase().includes(query) ||
+			(m.phone && m.phone.toLowerCase().includes(query)) ||
+			m.plan.toLowerCase().includes(query)
 
 		if (!matchesSearch) return false
 
@@ -243,85 +256,113 @@ export default function MemberTrackerModal() {
 				)}
 			</button>
 
-			{/* Main Modal Overlay */}
+			{/* Main Modal Overlay - Centered Executive Dashboard Architecture */}
 			{isOpen && (
-				<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6">
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-5 overflow-y-auto">
 					<div
-						className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+						className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
 						onClick={() => setIsOpen(false)}
 					/>
 
-					<div className="relative flex max-h-[92dvh] sm:max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/20 bg-neutral-950/98 shadow-2xl backdrop-blur-2xl">
-						{/* Mobile pull handle */}
-						<div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-white/20 sm:hidden" />
-
+					<div className="relative z-10 flex h-[92vh] max-h-[820px] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/20 bg-neutral-950 shadow-2xl backdrop-blur-2xl my-auto">
 						{/* Header Bar */}
-						<div className="flex items-center justify-between border-b border-white/10 px-4 py-3.5 sm:px-6 sm:py-5">
+						<div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 sm:px-6 sm:py-3 bg-neutral-950">
 							<div>
-								<div className="flex items-center gap-2 sm:gap-3">
-									<h2 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
+								<div className="flex flex-wrap items-center gap-2 sm:gap-3">
+									<h2 className="font-heading text-base sm:text-xl font-black tracking-wider text-white uppercase">
 										LIA IRON CLUB
 									</h2>
-									<span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-amber-400 uppercase">
-										Gym Owner Portal
+									<span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-400 uppercase">
+										Membership Command
 									</span>
 									<span
-										className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+										className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
 											isCloudSyncEnabled()
-												? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-												: 'bg-white/5 text-white/50 border border-white/10'
+												? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
+												: 'bg-white/5 text-white/50 border border-white/15'
 										}`}
-										title={
-											isCloudSyncEnabled()
-												? 'Data is actively synced to Supabase Cloud Database'
-												: 'Data stored locally in browser. Add Supabase keys to sync across all devices.'
-										}
 									>
 										<span
 											className={`size-1.5 rounded-full ${
 												isCloudSyncEnabled() ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
 											}`}
 										/>
-										{isCloudSyncEnabled() ? 'Cloud Sync: Active' : 'Local Storage Mode'}
+										{isCloudSyncEnabled() ? 'Cloud Sync Active' : 'Local Storage Mode'}
 									</span>
 								</div>
-								<p className="mt-1 text-xs text-white/50">
-									Member photo tracking, duration management, and 3-day automated expiry alerts
+								<p className="mt-0.5 text-[11px] sm:text-xs text-white/50">
+									Athlete duration management, fee expiry tracking, and 1-click WhatsApp payment alerts.
 								</p>
 							</div>
 
-							<div className="flex items-center gap-3">
+							<div className="flex items-center gap-2 sm:gap-3">
 								<button
 									onClick={() => setIsAddingNew(true)}
-									className="flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400 transition-all hover:bg-emerald-500/20"
+									className="flex items-center gap-1.5 rounded-xl border border-amber-400 bg-amber-400 px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-black uppercase tracking-wider transition-all hover:bg-amber-300 shadow-md active:scale-[0.98]"
 								>
-									<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+									<svg className="size-3.5 sm:size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+										<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
 									</svg>
-									<span>New Member</span>
+									<span>Add Lifter</span>
 								</button>
 
 								<button
 									onClick={() => setIsOpen(false)}
-									className="rounded-full border border-white/10 p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+									className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/60 transition-all hover:border-white/30 hover:bg-white/10 hover:text-white"
 								>
-									<svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+									<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+										<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
 									</svg>
 								</button>
 							</div>
 						</div>
 
+						{/* Compact Cockpit KPI Ribbon */}
+						<div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.02] px-4 sm:px-6 py-1.5 overflow-x-auto">
+							<div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/40 px-2.5 py-1 shrink-0">
+								<span className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Total Enrolled:</span>
+								<span className="text-xs font-bold text-white font-mono">{members.length} Athletes</span>
+							</div>
+							<div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 shrink-0">
+								<span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/90">Active Pass:</span>
+								<span className="text-xs font-bold text-emerald-300 font-mono">{activeCount}</span>
+							</div>
+							<div
+								className={`flex items-center gap-2 rounded-xl border px-2.5 py-1 shrink-0 ${
+									expiringCount > 0 ? 'border-amber-400/50 bg-amber-400/15' : 'border-white/10 bg-black/40'
+								}`}
+							>
+								<span className={`text-[10px] font-semibold uppercase tracking-wider ${expiringCount > 0 ? 'text-amber-300' : 'text-white/50'}`}>
+									Due Soon (≤3d):
+								</span>
+								<span className={`text-xs font-bold font-mono ${expiringCount > 0 ? 'text-amber-300' : 'text-white/70'}`}>
+									{expiringCount}
+								</span>
+							</div>
+							<div
+								className={`flex items-center gap-2 rounded-xl border px-2.5 py-1 shrink-0 ${
+									expiredCount > 0 ? 'border-rose-500/40 bg-rose-500/15' : 'border-white/10 bg-black/40'
+								}`}
+							>
+								<span className={`text-[10px] font-semibold uppercase tracking-wider ${expiredCount > 0 ? 'text-rose-300' : 'text-white/50'}`}>
+									Expired:
+								</span>
+								<span className={`text-xs font-bold font-mono ${expiredCount > 0 ? 'text-rose-400' : 'text-white/70'}`}>
+									{expiredCount}
+								</span>
+							</div>
+						</div>
+
 						{/* Alert Banner (if expiring in <= 3 days) */}
 						{expiringCount > 0 && (
-							<div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-500/20 bg-gradient-to-r from-amber-500/15 to-transparent px-6 py-3">
-								<div className="flex items-center gap-2.5 text-xs text-amber-300">
+							<div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-500/30 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent px-5 py-2.5 sm:px-7">
+								<div className="flex items-center gap-2.5 text-xs text-amber-200">
 									<span className="relative flex size-2.5">
 										<span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
 										<span className="relative inline-flex size-2.5 rounded-full bg-amber-500"></span>
 									</span>
 									<span>
-										<strong>{expiringCount} Member(s)</strong> expire within 3 days! Automated notifications can be dispatched to their registered mail and {OWNER_EMAIL}.
+										<strong>{expiringCount} Athlete(s)</strong> have memberships concluding within 3 days. Send instant WhatsApp alerts.
 									</span>
 								</div>
 								<div className="flex items-center gap-2">
@@ -337,17 +378,17 @@ export default function MemberTrackerModal() {
 												openWhatsAppModal(members[0])
 											}
 										}}
-										className="flex items-center gap-1.5 rounded-lg border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-200 transition-all hover:bg-emerald-500/30"
+										className="flex items-center gap-1.5 rounded-lg border border-emerald-400/50 bg-emerald-500/25 px-3 py-1 text-xs font-bold text-emerald-200 transition-all hover:bg-emerald-500/40"
 									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
 											<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
 										</svg>
-										<span>WhatsApp Alerts</span>
+										<span>WhatsApp Due Alert</span>
 									</button>
 
 									<button
 										onClick={dispatchAllExpiringAlerts}
-										className="flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 transition-all hover:bg-amber-400/30"
+										className="flex items-center gap-1.5 rounded-lg border border-amber-400/50 bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 transition-all hover:bg-amber-400/30"
 									>
 										<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -360,71 +401,66 @@ export default function MemberTrackerModal() {
 
 						{/* Toast Notice */}
 						{toastMsg && (
-							<div className="border-b border-emerald-500/30 bg-emerald-500/15 px-6 py-2.5 text-xs text-emerald-300 animate-in fade-in">
+							<div className="border-b border-emerald-500/30 bg-emerald-500/15 px-6 py-2 text-xs text-emerald-300 animate-in fade-in">
 								{toastMsg}
 							</div>
 						)}
 
-						{/* Filter & Search Bar */}
-						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-6 sm:py-3.5">
+						{/* Single-Row Unified Filter & Search Toolbar */}
+						<div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 sm:px-6 py-1.5 bg-neutral-950">
 							{/* Filter Tabs */}
-							<div className="flex flex-wrap items-center gap-1 sm:gap-1.5 rounded-xl border border-white/10 bg-white/5 p-1 text-xs">
+							<div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-0.5 text-xs">
 								<button
 									onClick={() => setFilter('all')}
-									className={`rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
-										filter === 'all' ? 'bg-white/20 font-medium text-white' : 'text-white/50 hover:text-white'
+									className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+										filter === 'all' ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'
 									}`}
 								>
 									All ({members.length})
 								</button>
 								<button
-									onClick={() => setFilter('expiring')}
-									className={`flex items-center gap-1 rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
-										filter === 'expiring'
-											? 'bg-amber-500/30 font-medium text-amber-300'
+									onClick={() => setFilter('active')}
+									className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+										filter === 'active'
+											? 'bg-emerald-500/25 text-emerald-300'
 											: 'text-white/50 hover:text-white'
 									}`}
 								>
-									<span>Expiring</span>
-									{expiringCount > 0 && (
-										<span className="rounded-full bg-amber-500/40 px-1.5 py-0.2 text-[10px] text-amber-200">
-											{expiringCount}
-										</span>
-									)}
+									Active ({activeCount})
 								</button>
 								<button
-									onClick={() => setFilter('active')}
-									className={`rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
-										filter === 'active'
-											? 'bg-emerald-500/20 font-medium text-emerald-300'
+									onClick={() => setFilter('expiring')}
+									className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-medium transition-all ${
+										filter === 'expiring'
+											? 'bg-amber-500/30 text-amber-300'
 											: 'text-white/50 hover:text-white'
 									}`}
 								>
-									Active
+									<span>Due Soon ({expiringCount})</span>
 								</button>
 								<button
 									onClick={() => setFilter('expired')}
-									className={`rounded-lg px-2.5 sm:px-3 py-1 transition-all ${
+									className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
 										filter === 'expired'
-											? 'bg-red-500/20 font-medium text-red-300'
+											? 'bg-rose-500/25 text-rose-300'
 											: 'text-white/50 hover:text-white'
 									}`}
 								>
-									Expired
+									Expired ({expiredCount})
 								</button>
 							</div>
 
 							{/* Search Input */}
-							<div className="relative w-full sm:w-56">
+							<div className="relative w-56 sm:w-64 shrink-0">
 								<input
 									type="text"
-									placeholder="Search member, mail, plan..."
+									placeholder="Search lifter, phone, plan..."
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
-									className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 sm:py-1.5 pl-8 text-sm sm:text-xs text-white placeholder-white/30 focus:border-white/30 focus:outline-none"
+									className="w-full rounded-xl border border-white/15 bg-white/5 px-2.5 py-1 pl-7.5 text-xs text-white placeholder-white/35 focus:border-amber-400 focus:outline-none transition-colors"
 								/>
 								<svg
-									className="absolute left-2.5 top-2.5 sm:top-2 size-3.5 text-white/40"
+									className="absolute left-2.5 top-1.5 size-3.5 text-white/40"
 									fill="none"
 									viewBox="0 0 24 24"
 									stroke="currentColor"
@@ -434,12 +470,12 @@ export default function MemberTrackerModal() {
 							</div>
 						</div>
 
-						{/* Member List Grid */}
-						<div className="flex-1 overflow-y-auto p-4 sm:p-6">
+						{/* Scrollable Member Roster Area */}
+						<div className="flex-1 overflow-y-auto p-3 sm:p-4 bg-black/20">
 							{members.length === 0 ? (
-								<div className="py-16 text-center flex flex-col items-center justify-center max-w-sm mx-auto">
+								<div className="py-20 text-center flex flex-col items-center justify-center max-w-sm mx-auto">
 									<div className="size-16 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-white/40 mb-4">
-										<svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+										<svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
 											<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
 											<circle cx="9" cy="7" r="4" />
 											<line x1="19" x2="19" y1="8" y2="14" />
@@ -448,7 +484,7 @@ export default function MemberTrackerModal() {
 									</div>
 									<h3 className="font-heading text-lg font-bold text-white mb-1">No Members Enrolled Yet</h3>
 									<p className="text-xs text-white/50 mb-5 text-center">
-										Your athlete roster is completely clean. Click below or use the Owner Desk to onboard your first lifter.
+										Your athlete roster is currently clean. Click below to onboard your first lifter.
 									</p>
 									<button
 										onClick={() => setIsAddingNew(true)}
@@ -458,11 +494,16 @@ export default function MemberTrackerModal() {
 									</button>
 								</div>
 							) : filteredMembers.length === 0 ? (
-								<div className="py-16 text-center text-sm text-white/40">
-									No members found matching your filter &quot;{search}&quot;.
+								<div className="py-20 text-center flex flex-col items-center justify-center text-white/40">
+									<div className="size-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+										<svg className="size-6 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+										</svg>
+									</div>
+									<p className="text-sm">No lifters found matching &quot;{search}&quot;.</p>
 								</div>
 							) : (
-								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<div className={filteredMembers.length === 1 ? 'max-w-xl mx-auto w-full' : 'grid grid-cols-1 md:grid-cols-2 gap-4'}>
 									{filteredMembers.map((member) => {
 										const daysLeft = getDaysLeft(member.expiryDate)
 										const isExpiring = daysLeft >= 0 && daysLeft <= 3
@@ -471,147 +512,164 @@ export default function MemberTrackerModal() {
 										return (
 											<div
 												key={member.id}
-												className={`relative flex flex-col justify-between rounded-2xl border p-4.5 transition-all ${
+												className={`relative flex flex-col justify-between rounded-2xl border p-3 sm:p-4 transition-all shadow-xl ${
 													isExpiring
-														? 'border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-neutral-900/90 to-neutral-950'
+														? 'border-amber-500/50 bg-gradient-to-br from-amber-500/15 via-neutral-900 to-neutral-950 ring-1 ring-amber-500/20'
 														: isExpired
-														? 'border-red-500/30 bg-neutral-900/40 opacity-75'
-														: 'border-white/10 bg-neutral-900/60 hover:border-white/20'
+														? 'border-rose-500/40 bg-gradient-to-br from-rose-500/10 via-neutral-900 to-neutral-950'
+														: 'border-white/15 bg-neutral-900/80 hover:border-white/30'
 												}`}
 											>
-												{/* Top Member Card Info */}
-												<div className="flex items-start gap-3.5">
-													{/* Member Photo */}
-													<div className="relative size-14 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-neutral-800 shadow-md">
-														{/* eslint-disable-next-line @next/next/no-img-element */}
-														<img
-															src={member.photoUrl || 'https://via.placeholder.com/150'}
-															alt={member.name}
-															className="size-full object-cover"
-														/>
-														{isExpiring && (
-															<span
-																title="Expiring within 3 days"
-																className="absolute bottom-1 right-1 size-3 rounded-full border border-black bg-amber-400"
-															/>
-														)}
-													</div>
+												{/* Top Member Card Header */}
+												<div>
+													<div className="flex items-start justify-between gap-3">
+														<div className="flex items-center gap-3 min-w-0">
+															{/* Member Photo */}
+															<div
+																className="relative shrink-0 overflow-hidden rounded-xl border-2 border-white/20 bg-neutral-800 shadow-md"
+																style={{ width: 52, height: 52, minWidth: 52, minHeight: 52 }}
+															>
+																{/* eslint-disable-next-line @next/next/no-img-element */}
+																<img
+																	src={member.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
+																	alt={member.name}
+																	className="h-full w-full object-cover"
+																/>
+															</div>
 
-													{/* Member Details */}
-													<div className="min-w-0 flex-1">
-														<div className="flex items-center justify-between gap-2">
-															<h4 className="truncate font-serif text-base font-semibold text-white">
-																{member.name}
-															</h4>
-															{/* Status Badge */}
+															{/* Member Details */}
+															<div className="min-w-0">
+																<h4 className="truncate font-heading text-base font-bold text-white uppercase tracking-wide">
+																	{member.name}
+																</h4>
+																<div className="text-xs text-white/60 truncate">{member.email}</div>
+																<div className="font-mono text-xs text-emerald-400/90 mt-0.5">
+																	{member.phone}
+																</div>
+															</div>
+														</div>
+
+														{/* Status Badge */}
+														<div className="shrink-0 text-right">
 															<span
-																className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase ${
+																className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
 																	isExpiring
-																		? 'bg-amber-400/20 text-amber-300 ring-1 ring-amber-400/30'
+																		? 'bg-amber-400/25 text-amber-300 border border-amber-400/40 animate-pulse'
 																		: isExpired
-																		? 'bg-red-400/20 text-red-300'
-																		: 'bg-emerald-400/20 text-emerald-300'
+																		? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+																		: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
 																}`}
 															>
+																<span
+																	className={`size-1.5 rounded-full ${
+																		isExpiring
+																			? 'bg-amber-400'
+																			: isExpired
+																			? 'bg-rose-400'
+																			: 'bg-emerald-400'
+																	}`}
+																/>
 																{isExpiring
-																	? `${daysLeft} Days Left`
+																	? `${daysLeft}d Due Soon`
 																	: isExpired
-																	? `Expired`
+																	? 'Expired'
 																	: `${daysLeft} Days Left`}
 															</span>
 														</div>
+													</div>
 
-														<div className="mt-0.5 flex flex-col text-[11px] text-white/50">
-															<span className="truncate text-white/70">{member.email}</span>
-															<span>{member.phone}</span>
+													{/* Plan & Duration Bar Box */}
+													<div className="mt-2 rounded-xl border border-white/10 bg-black/40 p-2 sm:p-2.5">
+														<div className="flex items-center justify-between text-xs">
+															<span className="font-bold text-white">{member.plan}</span>
+															<span className="text-white/60">
+																Expires: <strong className="text-amber-300">{member.expiryDate}</strong>
+															</span>
 														</div>
+
+														{/* Visual Duration Timeline Bar */}
+														<div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+															<div
+																className={`h-full rounded-full transition-all ${
+																	isExpiring
+																		? 'bg-amber-400'
+																		: isExpired
+																		? 'bg-rose-500'
+																		: 'bg-emerald-400'
+																}`}
+																style={{
+																	width: `${Math.min(
+																		100,
+																		Math.max(5, isExpired ? 100 : ((90 - daysLeft) / 90) * 100)
+																	)}%`
+																}}
+															/>
+														</div>
+
+														{member.lastNotified && (
+															<div className="mt-1 flex items-center gap-1 text-[9.5px] text-white/50">
+																<svg className="size-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+																	<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+																</svg>
+																<span>Last alert: {member.lastNotified}</span>
+															</div>
+														)}
 													</div>
 												</div>
 
-												{/* Plan & Duration Bar */}
-												<div className="mt-3.5 rounded-xl border border-white/5 bg-white/5 p-2.5">
+												{/* Action Controls Footer */}
+												<div className="mt-2 pt-2 border-t border-white/10 space-y-1.5">
+													{/* Quick Duration Extension Pills */}
 													<div className="flex items-center justify-between text-[11px]">
-														<span className="font-medium text-white/80">{member.plan}</span>
-														<span className="text-white/50">
-															Expires: <strong className="text-white/90">{member.expiryDate}</strong>
+														<span className="text-[9.5px] uppercase font-semibold text-white/40 tracking-wider">
+															Quick Extend:
 														</span>
-													</div>
-
-													{/* Visual Duration Timeline Bar */}
-													<div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-														<div
-															className={`h-full rounded-full transition-all ${
-																isExpiring
-																	? 'bg-amber-400'
-																	: isExpired
-																	? 'bg-red-500'
-																	: 'bg-emerald-400'
-															}`}
-															style={{
-																width: `${Math.min(
-																	100,
-																	Math.max(5, isExpired ? 100 : ((90 - daysLeft) / 90) * 100)
-																)}%`
-															}}
-														/>
-													</div>
-
-													{member.lastNotified && (
-														<div className="mt-1.5 flex items-center gap-1 text-[10px] text-white/40">
-															<svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-															</svg>
-															<span>Last notification sent: {member.lastNotified}</span>
+														<div className="flex items-center gap-1">
+															<button
+																onClick={() => extendDuration(member.id, 30)}
+																className="rounded-lg border border-white/15 bg-white/5 px-2 py-0.5 text-[10.5px] font-medium text-white/80 hover:bg-white/15 hover:text-white transition-all"
+																title="Extend by 30 days"
+															>
+																+30d
+															</button>
+															<button
+																onClick={() => extendDuration(member.id, 90)}
+																className="rounded-lg border border-white/15 bg-white/5 px-2 py-0.5 text-[10.5px] font-medium text-white/80 hover:bg-white/15 hover:text-white transition-all"
+																title="Extend by 90 days"
+															>
+																+90d
+															</button>
+															<button
+																onClick={() => extendDuration(member.id, 180)}
+																className="rounded-lg border border-white/15 bg-white/5 px-2 py-0.5 text-[10.5px] font-medium text-white/80 hover:bg-white/15 hover:text-white transition-all"
+																title="Extend by 180 days"
+															>
+																+180d
+															</button>
 														</div>
-													)}
-												</div>
-
-												{/* Owner Actions */}
-												<div className="mt-3.5 flex items-center justify-between border-t border-white/10 pt-2.5">
-													{/* Quick Duration Extensions */}
-													<div className="flex items-center gap-1">
-														<span className="text-[10px] font-medium text-white/40 uppercase">Extend:</span>
-														<button
-															onClick={() => extendDuration(member.id, 30)}
-															className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white"
-															title="Add 1 Month duration"
-														>
-															+30d
-														</button>
-														<button
-															onClick={() => extendDuration(member.id, 90)}
-															className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white"
-															title="Add 3 Months duration"
-														>
-															+90d
-														</button>
 													</div>
 
-													{/* Edit & Notify Buttons */}
-													<div className="flex items-center gap-1.5 sm:gap-2">
-														{/* 1-Click WhatsApp Reminder */}
+													{/* Primary Dispatch & Edit Action Buttons */}
+													<div className="grid grid-cols-12 gap-1.5 sm:gap-2 pt-0.5">
+														{/* 1-Click WhatsApp Button */}
 														<button
 															onClick={() => openWhatsAppModal(member)}
-															title={`Send 1-Click WhatsApp reminder to ${member.phone}`}
-															className="flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition-all shadow-sm"
+															title={`Open WhatsApp reminder for ${member.name}`}
+															className="col-span-6 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 sm:py-2 text-xs font-bold text-white shadow-md shadow-emerald-950/50 hover:bg-emerald-500 transition-all active:scale-[0.98]"
 														>
-															<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-																<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+															<svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+																<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
 															</svg>
 															<span>WhatsApp</span>
 														</button>
 
-														{/* Send 3-day Alert Email */}
+														{/* Email Button */}
 														<button
 															onClick={() => dispatch3DayAlert(member)}
-															title={`Send 3-Day Alert email to ${member.email} & ${OWNER_EMAIL}`}
-															className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
-																isExpiring
-																	? 'border border-amber-400/40 bg-amber-400/20 text-amber-200 hover:bg-amber-400/30'
-																	: 'border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
-															}`}
+															title="Send email reminder"
+															className="col-span-3 flex items-center justify-center gap-1 rounded-xl border border-white/15 bg-white/5 px-2 py-1.5 sm:py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all"
 														>
-															<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+															<svg className="size-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
 															</svg>
 															<span>Email</span>
@@ -620,10 +678,10 @@ export default function MemberTrackerModal() {
 														{/* Edit Button */}
 														<button
 															onClick={() => setEditingMember(member)}
-															title="Edit member details (Owner)"
-															className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/80 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white"
+															title="Edit lifter"
+															className="col-span-3 flex items-center justify-center gap-1 rounded-xl border border-white/15 bg-white/5 px-2 py-1.5 sm:py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all"
 														>
-															<svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+															<svg className="size-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
 															</svg>
 															<span>Edit</span>
