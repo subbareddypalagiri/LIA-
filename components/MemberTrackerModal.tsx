@@ -20,49 +20,7 @@ export interface GymMember {
 	lastNotified?: string
 }
 
-const INITIAL_MEMBERS: GymMember[] = [
-	{
-		id: 'mem-1',
-		name: 'Vikram Rajput',
-		email: 'vikram.rajput@gmail.com',
-		phone: '+91 98765 43210',
-		photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-		plan: '3 Months Hypertrophy',
-		// Set to expire in exactly 3 days from now for instant demonstration!
-		startDate: new Date(Date.now() - 87 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-		expiryDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-	},
-	{
-		id: 'mem-2',
-		name: 'Ananya Sharma',
-		email: 'ananya.fit@gmail.com',
-		phone: '+91 98112 23344',
-		photoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&auto=format&fit=crop&q=80',
-		plan: 'Annual Elite Athlete',
-		startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-		expiryDate: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-	},
-	{
-		id: 'mem-3',
-		name: 'Karthik Varma',
-		email: 'karthik.iron@gmail.com',
-		phone: '+91 99001 55667',
-		photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
-		plan: '1 Month Kickstart',
-		startDate: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-		expiryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Expiring in 2 days!
-	},
-	{
-		id: 'mem-4',
-		name: 'Rahul Reddy',
-		email: 'rahul.reddy@yahoo.com',
-		phone: '+91 97654 32109',
-		photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80',
-		plan: '6 Months Classic Iron',
-		startDate: new Date(Date.now() - 190 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-		expiryDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Expired
-	}
-]
+const INITIAL_MEMBERS: GymMember[] = []
 
 const OWNER_EMAIL = 'subbareddy123sub@gmail.com'
 
@@ -132,7 +90,7 @@ export default function MemberTrackerModal() {
 			timestamp: now
 		})
 
-		showToast(`📧 3-Day Alert email sent to ${member.email} and CC'd to ${OWNER_EMAIL}!`)
+		showToast(`3-Day Alert email sent to ${member.email} and CC'd to ${OWNER_EMAIL}!`)
 	}
 
 	// Batch dispatch for all expiring in <= 3 days
@@ -143,7 +101,7 @@ export default function MemberTrackerModal() {
 		})
 
 		if (expiringMembers.length === 0) {
-			showToast('✅ No members expiring in the next 3 days!')
+			showToast('No members expiring in the next 3 days.')
 			return
 		}
 
@@ -157,7 +115,7 @@ export default function MemberTrackerModal() {
 		})
 		saveMembers(updated)
 		showToast(
-			`⚡ Batch Alert Sent! Dispatched notifications for ${expiringMembers.length} member(s) to their registered emails + ${OWNER_EMAIL}.`
+			`Batch Alert Sent: Dispatched notifications for ${expiringMembers.length} member(s) to their registered emails and ${OWNER_EMAIL}.`
 		)
 	}
 
@@ -175,7 +133,7 @@ export default function MemberTrackerModal() {
 			return m
 		})
 		saveMembers(updated)
-		showToast(`✅ Membership extended by ${daysToAdd} days!`)
+		showToast(`Membership extended by ${daysToAdd} days.`)
 	}
 
 	// Filtered list
@@ -388,9 +346,30 @@ export default function MemberTrackerModal() {
 
 						{/* Member List Grid */}
 						<div className="flex-1 overflow-y-auto p-4 sm:p-6">
-							{filteredMembers.length === 0 ? (
+							{members.length === 0 ? (
+								<div className="py-16 text-center flex flex-col items-center justify-center max-w-sm mx-auto">
+									<div className="size-16 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-white/40 mb-4">
+										<svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+											<circle cx="9" cy="7" r="4" />
+											<line x1="19" x2="19" y1="8" y2="14" />
+											<line x1="22" x2="16" y1="11" y2="11" />
+										</svg>
+									</div>
+									<h3 className="font-heading text-lg font-bold text-white mb-1">No Members Enrolled Yet</h3>
+									<p className="text-xs text-white/50 mb-5 text-center">
+										Your athlete roster is completely clean. Click below or use the Owner Desk to onboard your first lifter.
+									</p>
+									<button
+										onClick={() => setIsAddingNew(true)}
+										className="rounded-xl border border-amber-400 bg-amber-400 px-5 py-2.5 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shadow-lg flex items-center gap-1.5"
+									>
+										<span>+ Add First Member</span>
+									</button>
+								</div>
+							) : filteredMembers.length === 0 ? (
 								<div className="py-16 text-center text-sm text-white/40">
-									No members found matching your filter.
+									No members found matching your filter &quot;{search}&quot;.
 								</div>
 							) : (
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -445,7 +424,7 @@ export default function MemberTrackerModal() {
 																}`}
 															>
 																{isExpiring
-																	? `⚠️ ${daysLeft} Days Left`
+																	? `${daysLeft} Days Left`
 																	: isExpired
 																	? `Expired`
 																	: `${daysLeft} Days Left`}
@@ -568,13 +547,13 @@ export default function MemberTrackerModal() {
 						const next = members.map((m) => (m.id === updated.id ? updated : m))
 						saveMembers(next)
 						setEditingMember(null)
-						showToast(`✅ Member "${updated.name}" updated successfully!`)
+						showToast(`Member "${updated.name}" updated successfully!`)
 					}}
 					onDelete={(id) => {
 						const next = members.filter((m) => m.id !== id)
 						saveMembers(next)
 						setEditingMember(null)
-						showToast('🗑️ Member removed.')
+						showToast('Member removed from roster.')
 					}}
 				/>
 			)}
@@ -587,7 +566,7 @@ export default function MemberTrackerModal() {
 						const next = [newMem, ...members]
 						saveMembers(next)
 						setIsAddingNew(false)
-						showToast(`🎉 New Member "${newMem.name}" registered!`)
+						showToast(`New Member "${newMem.name}" registered successfully!`)
 					}}
 				/>
 			)}

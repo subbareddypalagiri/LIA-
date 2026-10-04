@@ -33,7 +33,7 @@ const DEFAULT_OWNER_PROFILE: OwnerProfile = {
 	email: 'subbareddy123sub@gmail.com',
 	upiId: 'liaironclub@okhdfcbank',
 	monthlyTarget: 180000,
-	todayCheckins: 48,
+	todayCheckins: 0,
 	ownerPassword: 'Subba@LIA2026'
 }
 
@@ -108,7 +108,13 @@ export async function fetchMembersData(fallbackMembers: GymMember[]): Promise<Gy
 		}
 	}
 
-	return getStorage<GymMember[]>('lia_gym_members', fallbackMembers)
+	const stored = getStorage<GymMember[]>('lia_gym_members', fallbackMembers)
+	const dummyIds = new Set(['mem-1', 'mem-2', 'mem-3', 'mem-4'])
+	const cleaned = stored.filter((m) => !dummyIds.has(m.id))
+	if (cleaned.length !== stored.length) {
+		setStorage('lia_gym_members', cleaned)
+	}
+	return cleaned
 }
 
 export async function saveMemberData(member: GymMember): Promise<void> {

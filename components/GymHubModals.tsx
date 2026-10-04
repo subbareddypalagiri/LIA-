@@ -12,9 +12,11 @@ import { useAuth, updateSessionUser } from '@/store/authStore'
 import {
 	fetchOwnerProfileData,
 	saveOwnerProfileData,
+	fetchMembersData,
 	saveMemberData,
 	isCloudSyncEnabled,
-	type OwnerProfile
+	type OwnerProfile,
+	type GymMember
 } from '@/lib/supabase'
 
 // --- DATA STRUCTURES ---
@@ -213,11 +215,12 @@ export default function GymHubModals() {
 	const [toastText, setToastText] = useState<string | null>(null)
 
 	// Owner desk & profile state
-	const [checkInCount, setCheckInCount] = useState(48)
+	const [checkInCount, setCheckInCount] = useState(0)
 	const [newMemberName, setNewMemberName] = useState('')
 	const [newMemberPhone, setNewMemberPhone] = useState('')
-	const [newMemberPlan, setNewMemberPlan] = useState('3 Months Hypertrophy')
+	const [newMemberPlan, setNewMemberPlan] = useState('3 Months Hypertrophy (₹4,000)')
 	const [maintenanceLogged, setMaintenanceLogged] = useState(false)
+	const [membersList, setMembersList] = useState<GymMember[]>([])
 
 	const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>({
 		gymName: 'LIA Iron Club',
@@ -226,7 +229,7 @@ export default function GymHubModals() {
 		email: 'subbareddy123sub@gmail.com',
 		upiId: 'liaironclub@okhdfcbank',
 		monthlyTarget: 180000,
-		todayCheckins: 48
+		todayCheckins: 0
 	})
 	const [isEditingProfile, setIsEditingProfile] = useState(false)
 	const [ownerPasswordInput, setOwnerPasswordInput] = useState('')
@@ -236,9 +239,44 @@ export default function GymHubModals() {
 		setCloudSyncActive(isCloudSyncEnabled())
 		fetchOwnerProfileData().then((prof) => {
 			setOwnerProfile(prof)
-			setCheckInCount(prof.todayCheckins)
+			setCheckInCount(prof.todayCheckins || 0)
 		})
-	}, [])
+		fetchMembersData([]).then((mems) => {
+			setMembersList(mems)
+		})
+	}, [activeModal])
+
+	const getPlanPrice = (plan: string): number => {
+		if (!plan) return 1500
+		if (plan.includes('12,000') || plan.toLowerCase().includes('1 year') || plan.toLowerCase().includes('annual')) return 12000
+		if (plan.includes('7,000') || plan.toLowerCase().includes('6 month')) return 7000
+		if (plan.includes('6,000') || plan.toLowerCase().includes('personal')) return 6000
+		if (plan.includes('4,000') || plan.toLowerCase().includes('3 month')) return 4000
+		if (plan.includes('1,500') || plan.toLowerCase().includes('1 month')) return 1500
+		return 1500
+	}
+
+	const activeMembersCount = useMemo(() => {
+		return membersList.filter((m) => {
+			const diff = new Date(m.expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
+			return Math.ceil(diff / (1000 * 60 * 60 * 24)) >= 0
+		}).length
+	}, [membersList])
+
+	const expiredMembers = useMemo(() => {
+		return membersList.filter((m) => {
+			const diff = new Date(m.expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
+			return Math.ceil(diff / (1000 * 60 * 60 * 24)) < 0
+		})
+	}, [membersList])
+
+	const monthRevenue = useMemo(() => {
+		return membersList.reduce((acc, m) => acc + getPlanPrice(m.plan), 0)
+	}, [membersList])
+
+	const pendingDues = useMemo(() => {
+		return expiredMembers.reduce((acc, m) => acc + getPlanPrice(m.plan), 0)
+	}, [expiredMembers])
 
 	// Exercises view mode & inspected item (default to Vault list)
 	const [exerciseSubView, setExerciseSubView] = useState<'studio' | 'list'>('list')
@@ -692,8 +730,10 @@ export default function GymHubModals() {
 					{activeModal === 'owner' && (
 						!isOwner ? (
 							<div className="rounded-3xl border border-amber-400/30 bg-neutral-900/90 p-8 text-center max-w-md mx-auto my-12 space-y-4">
-								<div className="size-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-3xl mx-auto">
-									👑
+								<div className="size-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-300 mx-auto">
+									<svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+										<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+									</svg>
 								</div>
 								<div>
 									<h3 className="font-heading text-xl font-bold uppercase text-white tracking-wide">
@@ -706,9 +746,13 @@ export default function GymHubModals() {
 								<div className="pt-2">
 									<button
 										onClick={() => openModal('auth')}
-										className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 py-3 text-xs font-bold uppercase tracking-wider text-black hover:brightness-110 transition-all shadow-lg shadow-amber-400/20"
+										className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 py-3 text-xs font-bold uppercase tracking-wider text-black hover:brightness-110 transition-all shadow-lg shadow-amber-400/20 flex items-center justify-center gap-2"
 									>
-										Sign In as Owner 👑
+										<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+											<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+											<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+										</svg>
+										<span>Sign In as Owner</span>
 									</button>
 								</div>
 							</div>
@@ -924,24 +968,34 @@ export default function GymHubModals() {
 									<div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-1">
 										Active Members
 									</div>
-									<div className="font-heading text-2xl font-black text-white">142</div>
-									<div className="text-[10px] text-emerald-400 mt-1">↑ 12 enrolled this month</div>
+									<div className="font-heading text-2xl font-black text-white">{activeMembersCount}</div>
+									<div className="text-[10px] text-emerald-400 mt-1">
+										{activeMembersCount === 0 ? 'No active lifters enrolled' : `${activeMembersCount} lifters on floor`}
+									</div>
 								</div>
 
 								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
 									<div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-1">
 										Month Revenue
 									</div>
-									<div className="font-heading text-2xl font-black text-amber-300">₹1,48,500</div>
-									<div className="text-[10px] text-white/40 mt-1">Target: ₹1,80,000</div>
+									<div className="font-heading text-2xl font-black text-amber-300">
+										₹{monthRevenue.toLocaleString('en-IN')}
+									</div>
+									<div className="text-[10px] text-white/40 mt-1">
+										Target: ₹{ownerProfile.monthlyTarget.toLocaleString('en-IN')}
+									</div>
 								</div>
 
 								<div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4">
 									<div className="text-[10px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
 										Pending Dues
 									</div>
-									<div className="font-heading text-2xl font-black text-rose-400">₹18,500</div>
-									<div className="text-[10px] text-rose-300/80 mt-1">4 lifters pending fee</div>
+									<div className="font-heading text-2xl font-black text-rose-400">
+										₹{pendingDues.toLocaleString('en-IN')}
+									</div>
+									<div className="text-[10px] text-rose-300/80 mt-1">
+										{expiredMembers.length === 0 ? 'All memberships cleared' : `${expiredMembers.length} lifter(s) pending renewal`}
+									</div>
 								</div>
 
 								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -949,7 +1003,9 @@ export default function GymHubModals() {
 										Today&apos;s Check-ins
 									</div>
 									<div className="font-heading text-2xl font-black text-white">{checkInCount}</div>
-									<div className="text-[10px] text-emerald-400 mt-1">Peak evening batch active</div>
+									<div className="text-[10px] text-emerald-400 mt-1">
+										{checkInCount === 0 ? 'Floor gate open • Ready for entries' : `${checkInCount} check-in(s) today`}
+									</div>
 								</div>
 							</div>
 
@@ -987,6 +1043,7 @@ export default function GymHubModals() {
 												const existing: any[] = (JSON.parse(localStorage.getItem('lia_gym_members') || '[]') as any[]) || []
 												localStorage.setItem('lia_gym_members', JSON.stringify([newMem, ...existing]))
 											} catch {}
+											setMembersList((prev) => [newMem, ...prev])
 											showToast(`Added ${newMemberName} (${newMemberPlan}) successfully!`)
 											setNewMemberName('')
 											setNewMemberPhone('')
@@ -1103,7 +1160,11 @@ export default function GymHubModals() {
 							{/* Callout to Full Subscriptions Modal */}
 							<div className="rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
 								<div className="flex items-center gap-2.5">
-									<span className="text-xl">📲</span>
+									<div className="size-8 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-300 shrink-0">
+										<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+										</svg>
+									</div>
 									<div>
 										<div className="font-bold text-white">Need to send WhatsApp Fee Expiry Alerts?</div>
 										<div className="text-white/60">

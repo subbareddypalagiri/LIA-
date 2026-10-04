@@ -14,7 +14,7 @@ export default function MemberProfileModal({ showToast }: MemberProfileModalProp
 	const { closeModal, openModal } = useGymModal()
 	const { user, logout } = useAuth()
 	const [checkedInToday, setCheckedInToday] = useState(false)
-	const [checkinCount, setCheckinCount] = useState(user?.checkinCount || 32)
+	const [checkinCount, setCheckinCount] = useState(user?.checkinCount || 0)
 
 	if (!user) return null
 
@@ -23,7 +23,7 @@ export default function MemberProfileModal({ showToast }: MemberProfileModalProp
 		setCheckedInToday(true)
 		setCheckinCount((prev) => prev + 1)
 		if (showToast) {
-			showToast('Check-in logged successfully! Have a brutal workout! 🔥')
+			showToast('Check-in logged successfully! Have a great workout.')
 		}
 	}
 
