@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { BG_THEMES, useBgTheme, setBgTheme, type BgTheme } from '@/store/bgTheme'
-import { useLiaColor, setLiaColor } from '@/store/liaColor'
+import { useLiaColor } from '@/store/liaColor'
 import { useMotionVector3 } from '@/utils/motion'
 
 // Dynamically import 3D Scene with SSR disabled
@@ -16,10 +16,10 @@ export default function BackgroundPreviewPage() {
 	const [viewMode, setViewMode] = useState<'3d' | 'ambient'>('3d')
 	const [copiedNotice, setCopiedNotice] = useState<string | null>(null)
 
-	// Motion vectors for clean centered camera in 3D mode
+	// Motion vectors for clean centered camera in 3D mode (matching hero state exactly)
 	const cameraPosition = useMotionVector3([0, 0, 20])
 	const cameraLookAt = useMotionVector3([-0.15, 0, 0])
-	const floatIntensity = useMotionVector3([0.8, 0, 0])
+	const floatIntensity = useMotionVector3([1, 0, 0])
 
 	const showCopied = (msg: string) => {
 		setCopiedNotice(msg)
@@ -44,7 +44,7 @@ export default function BackgroundPreviewPage() {
   </div>
 </div>`
 		navigator.clipboard.writeText(code)
-		showCopied('Copied Tailwind / CSS Code to Clipboard!')
+		showCopied('Copied Tailwind / CSS Code!')
 	}
 
 	const copyReactComponent = () => {
@@ -65,7 +65,7 @@ export function LuxuryAmbientBackground({ children }: { children?: React.ReactNo
       <div 
         className="pointer-events-none absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 70% 70% at 50% 35%, ${activeColor}20 0%, transparent 70%)'
+          background: 'radial-gradient(ellipse 70% 70% at 50% 38%, ${activeColor}20 0%, transparent 70%)'
         }}
       />
 
@@ -82,6 +82,53 @@ export function LuxuryAmbientBackground({ children }: { children?: React.ReactNo
 `
 		navigator.clipboard.writeText(code)
 		showCopied('Copied Standalone React Component Code!')
+	}
+
+	const copyThreeJsSceneCode = () => {
+		const code = `// npm install three @react-three/fiber @react-three/drei @react-three/postprocessing postprocessing
+import { Canvas, useThree, extend } from '@react-three/fiber'
+import { Text, useGLTF } from '@react-three/drei'
+import { Bloom, EffectComposer, Vignette, Noise } from '@react-three/postprocessing'
+import { Suspense, useRef } from 'react'
+
+export default function Luxury3DBackground({ title = "LIA" }: { title?: string }) {
+  return (
+    <div className="fixed inset-0 size-full bg-black">
+      <Canvas camera={{ position: [0, 0, 20], fov: 8 }}>
+        <pointLight position={[0, 0, -2]} intensity={2.5} color="#ffffff" />
+        <ambientLight intensity={0.6} />
+
+        <Suspense fallback={null}>
+          {/* Glowing 3D Typography */}
+          <group position={[0, 0.2, -2.5]}>
+            <Text fontSize={2.5} letterSpacing={0.12} anchorX="center" anchorY="middle" color="#ffffff">
+              {title}
+              <meshStandardMaterial emissive="#ffffff" emissiveIntensity={3.5} toneMapped={false} />
+            </Text>
+          </group>
+
+          {/* Centered 3D Model */}
+          <Model position={[0, -0.2, 0]} scale={1.2} />
+        </Suspense>
+
+        {/* Postprocessing Bloom & Film Aesthetics */}
+        <EffectComposer multisampling={0} enableNormalPass={false}>
+          <Bloom mipmapBlur intensity={1.2} luminanceThreshold={0.7} />
+          <Vignette eskil={false} offset={0.1} darkness={0.8} />
+          <Noise opacity={0.03} />
+        </EffectComposer>
+      </Canvas>
+    </div>
+  )
+}
+
+function Model(props: any) {
+  const { scene } = useGLTF('/bodybuilder.glb')
+  return <primitive object={scene} {...props} />
+}
+`
+		navigator.clipboard.writeText(code)
+		showCopied('Copied Three.js 3D Scene Code!')
 	}
 
 	return (
@@ -117,6 +164,16 @@ export function LuxuryAmbientBackground({ children }: { children?: React.ReactNo
 				</div>
 			)}
 
+			{/* Vertical Architectural Grid Lines (matching Image 2) */}
+			<div className="pointer-events-none fixed inset-0 z-10 size-full">
+				<div className="grid-guides container relative grid h-full max-guides-4:~px-6/8">
+					<div className="border-r border-white/10 max-guides-4:border-l"></div>
+					<div className="border-r border-white/10"></div>
+					<div className="border-r border-white/10 max-guides-4:hidden"></div>
+					<div className="border-r border-white/10 max-guides-5:hidden"></div>
+				</div>
+			</div>
+
 			{/* TOP LEFT: Quick Back & Status Badge */}
 			<div className="fixed top-5 left-5 z-20 flex items-center gap-3">
 				<Link
@@ -126,19 +183,19 @@ export function LuxuryAmbientBackground({ children }: { children?: React.ReactNo
 					<svg className="size-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 						<path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m7 7l-7-7 7-7" />
 					</svg>
-					<span>Back to App</span>
+					<span>Back to Main Site</span>
 				</Link>
 
 				<div className="hidden sm:flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-300 backdrop-blur-xl">
 					<span className="size-2 rounded-full bg-amber-400 animate-pulse" />
-					<span>Only Background Mode</span>
+					<span>Pure Background Mode</span>
 				</div>
 			</div>
 
 			{/* TOAST NOTIFICATION */}
 			{copiedNotice && (
 				<div className="fixed top-5 right-5 z-30 flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-neutral-950/95 px-4 py-2.5 text-xs font-bold text-emerald-300 shadow-2xl backdrop-blur-2xl animate-in fade-in slide-in-from-top-2 duration-200">
-					<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+					<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
 						<path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
 					</svg>
 					<span>{copiedNotice}</span>
@@ -158,7 +215,7 @@ export function LuxuryAmbientBackground({ children }: { children?: React.ReactNo
 								: 'text-neutral-300 hover:text-white'
 						}`}
 					>
-						3D Cinematic
+						3D Scene View
 					</button>
 					<button
 						type="button"
@@ -169,7 +226,7 @@ export function LuxuryAmbientBackground({ children }: { children?: React.ReactNo
 								: 'text-neutral-300 hover:text-white'
 						}`}
 					>
-						Pure Ambient Gradient
+						Ambient Gradient View
 					</button>
 				</div>
 
@@ -204,27 +261,27 @@ export function LuxuryAmbientBackground({ children }: { children?: React.ReactNo
 					<button
 						type="button"
 						onClick={copyTailwindCode}
-						title="Copy Tailwind CSS snippet for any project"
-						className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:border-white/30 hover:bg-white/10 hover:text-white transition-all active:scale-95 shadow-sm"
+						title="Copy CSS snippet for any project"
+						className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs font-semibold text-neutral-200 hover:border-white/30 hover:bg-white/10 hover:text-white transition-all active:scale-95 shadow-sm"
 					>
 						<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 							<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
 							<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
 						</svg>
-						<span>Copy HTML/CSS</span>
+						<span>CSS / Tailwind</span>
 					</button>
 
 					<button
 						type="button"
-						onClick={copyReactComponent}
-						title="Copy standalone React component for Next.js or Vite"
+						onClick={copyThreeJsSceneCode}
+						title="Copy exact 3D Scene Three.js component code"
 						className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-bold text-black hover:from-amber-300 hover:to-amber-400 transition-all active:scale-95 shadow-md shadow-amber-400/20"
 					>
 						<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
 							<polyline points="16 18 22 12 16 6" />
 							<polyline points="8 6 2 12 8 18" />
 						</svg>
-						<span>Copy React Component</span>
+						<span>Copy 3D Code</span>
 					</button>
 				</div>
 			</div>
