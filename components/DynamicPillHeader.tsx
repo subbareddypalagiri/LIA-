@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useGymModal, openGymModal } from '@/store/gymHub'
 import { useAuth } from '@/store/authStore'
 import DesktopStudioPopover from '@/components/DesktopStudioPopover'
@@ -10,6 +11,7 @@ import MemberTrackerModal from '@/components/MemberTrackerModal'
 import PwaNavInstallButton from '@/components/PwaNavInstallButton'
 
 export default function DynamicPillHeader() {
+	const pathname = usePathname()
 	const [isVisible, setIsVisible] = useState(true)
 	const [isHovered, setIsHovered] = useState(false)
 	const [lastScrollY, setLastScrollY] = useState(0)
@@ -37,6 +39,10 @@ export default function DynamicPillHeader() {
 		window.addEventListener('scroll', handleScroll, { passive: true })
 		return () => window.removeEventListener('scroll', handleScroll)
 	}, [lastScrollY])
+
+	if (pathname?.startsWith('/background-preview')) {
+		return null
+	}
 
 	return (
 		<header
