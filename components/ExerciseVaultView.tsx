@@ -36,6 +36,17 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 	const [selectedExerciseDetail, setSelectedExerciseDetail] = useState<RepExercise | null>(null)
 	const [detailPhase, setDetailPhase] = useState<'start' | 'peak'>('start')
 	const [savedIds, setSavedIds] = useState<string[]>([])
+	const [cardPhases, setCardPhases] = useState<Record<string, 'start' | 'peak'>>({})
+
+	const toggleCardPhase = (id: string, e?: React.SyntheticEvent) => {
+		if (e) {
+			e.stopPropagation()
+		}
+		setCardPhases((prev) => ({
+			...prev,
+			[id]: prev[id] === 'peak' ? 'start' : 'peak'
+		}))
+	}
 
 	// Load saved exercises from localStorage
 	useEffect(() => {
@@ -54,7 +65,7 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 				localStorage.setItem('lia_saved_exercises', JSON.stringify(next))
 			} catch {}
 			if (showToast) {
-				showToast(exists ? 'Removed from saved' : 'Saved to favorites 🔖')
+				showToast(exists ? 'Removed from saved' : 'Saved to favorites')
 			}
 			return next
 		})
@@ -136,7 +147,10 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 						placeholder="Search 600+ exercises, muscles, equipment..."
 						className="w-full rounded-xl border border-white/15 bg-white/5 pl-9 pr-8 py-2.5 text-xs text-white placeholder-white/40 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition-all"
 					/>
-					<span className="absolute left-3 top-3 text-xs text-white/40">🔍</span>
+					<svg className="absolute left-3 top-3 size-3.5 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+						<circle cx="11" cy="11" r="8" />
+						<path d="m21 21-4.3-4.3" />
+					</svg>
 					{exerciseSearch && (
 						<button
 							onClick={() => setExerciseSearch('')}
@@ -211,15 +225,16 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 			</div>
 
 			{/* 2-to-4 Columns Responsive Grid */}
-			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
 				{displayedExercises.map((ex) => {
 					const isSaved = savedIds.includes(ex.id)
 					const studioId = getBiomechanicsStudioId(ex.name)
+					const isPeak = cardPhases[ex.id] === 'peak'
 
 					return (
 							<div
 								key={ex.id}
-								className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-2.5 sm:p-3 transition-all duration-200 hover:border-amber-400/50 hover:bg-neutral-900/90 cursor-pointer shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:shadow-amber-400/10"
+								className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-2 sm:p-3 transition-all duration-200 hover:border-amber-400/50 hover:bg-neutral-900/90 cursor-pointer shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:shadow-amber-400/10"
 								onClick={() => {
 									setSelectedExerciseDetail(ex)
 									setDetailPhase('start')
@@ -256,28 +271,65 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 										</span>
 									</div>
 
-									{/* Centered RepDB 2D Illustration with Hover Dual-Phase */}
-									<div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-white flex items-center justify-center p-2 mb-2.5 shadow-sm">
+									{/* Centered RepDB 2D Illustration with Hover Dual-Phase & Mobile Finger Touch Support */}
+									<div
+										className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-white flex items-center justify-center p-2 mb-2 sm:mb-2.5 shadow-sm touch-manipulation select-none"
+										onTouchStart={() => {
+											if (ex.peakImage) {
+												setCardPhases((prev) => ({ ...prev, [ex.id]: 'peak' }))
+											}
+										}}
+										onTouchEnd={() => {
+											if (ex.peakImage) {
+												setCardPhases((prev) => ({ ...prev, [ex.id]: 'start' }))
+											}
+										}}
+										onTouchCancel={() => {
+											if (ex.peakImage) {
+												setCardPhases((prev) => ({ ...prev, [ex.id]: 'start' }))
+											}
+										}}
+									>
 										{/* Default Start Position */}
 										<img
 											src={ex.startImage || ex.peakImage}
 											alt={ex.name}
 											loading="lazy"
-											className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105 group-hover:opacity-0"
+											className={`h-full w-full object-contain transition-all duration-300 group-hover:scale-105 ${
+												isPeak ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 group-hover:opacity-0'
+											}`}
 										/>
-										{/* Hover Peak Contraction Position */}
+										{/* Hover / Touch Peak Contraction Position */}
 										{ex.peakImage && (
 											<img
 												src={ex.peakImage}
 												alt={`${ex.name} peak contraction`}
 												loading="lazy"
-												className="absolute inset-0 h-full w-full object-contain p-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:scale-105"
+												className={`absolute inset-0 h-full w-full object-contain p-2 transition-all duration-300 group-hover:scale-105 ${
+													isPeak ? 'opacity-100 scale-105' : 'opacity-0 group-hover:opacity-100'
+												}`}
 											/>
 										)}
-										{/* Phase Indicator Badge */}
-										<div className="absolute bottom-1 right-1 rounded bg-black/60 px-1 py-0.5 text-[8px] font-medium text-white/70 backdrop-blur-sm pointer-events-none">
-											Start ⇄ Peak
-										</div>
+										{/* Interactive Touch/Click Phase Toggle Badge */}
+										{ex.peakImage && (
+											<button
+												type="button"
+												onClick={(e) => toggleCardPhase(ex.id, e)}
+												className={`absolute bottom-1 right-1 rounded-md px-1.5 py-0.5 text-[8.5px] font-bold tracking-wider transition-all duration-200 z-10 active:scale-90 flex items-center gap-1 shadow-sm cursor-pointer select-none ${
+													isPeak
+														? 'bg-amber-400 text-black border border-amber-500 font-extrabold shadow-amber-400/30'
+														: 'bg-black/80 text-white/90 border border-white/20 backdrop-blur-md hover:bg-black hover:text-white'
+												}`}
+												title="Tap to switch Start / Peak contraction phase"
+											>
+												<span
+													className={`size-1.5 rounded-full ${
+														isPeak ? 'bg-black' : 'bg-amber-400 animate-pulse'
+													}`}
+												/>
+												<span>{isPeak ? 'Peak' : 'Start'} ⇄</span>
+											</button>
+										)}
 									</div>
 
 									{/* Exercise Name & Primary Muscle */}
@@ -285,25 +337,34 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 										<h4 className="text-xs sm:text-sm font-bold tracking-tight text-white group-hover:text-amber-300 transition-colors line-clamp-2">
 											{ex.name}
 										</h4>
-									<div className="flex flex-wrap items-center gap-1">
-										<span className="rounded bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 capitalize">
-											{ex.primaryMuscles[0] || ex.bodyPart}
-										</span>
-										<span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] text-white/60 capitalize">
-											{ex.equipment}
-										</span>
+										<div className="flex flex-wrap items-center gap-1">
+											<span className="rounded bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 capitalize">
+												{ex.primaryMuscles[0] || ex.bodyPart}
+											</span>
+											<span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] text-white/60 capitalize">
+												{ex.equipment}
+											</span>
+										</div>
 									</div>
 								</div>
-							</div>
 
-							{/* Card Footer */}
-							<div className="border-t border-white/10 pt-2 flex items-center justify-between text-[10px] text-white/60">
-								<span className="capitalize">{ex.category}</span>
-								<span className="text-amber-400 font-semibold group-hover:underline flex items-center gap-0.5">
-									{studioId ? '3D Studio 🎚️' : 'Details →'}
-								</span>
+								{/* Card Footer */}
+								<div className="border-t border-white/10 pt-2 flex items-center justify-between text-[10px] text-white/60">
+									<span className="capitalize">{ex.category}</span>
+									<span className="text-amber-400 font-semibold group-hover:underline flex items-center gap-0.5">
+										{studioId ? (
+											<span className="flex items-center gap-1">
+												<span>3D Studio</span>
+												<svg className="size-3 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+													<path d="M5 12h14m-7-7 7 7-7 7" />
+												</svg>
+											</span>
+										) : (
+											<span>Details →</span>
+										)}
+									</span>
+								</div>
 							</div>
-						</div>
 					)
 				})}
 			</div>
@@ -470,8 +531,11 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 						{/* Coach Pro Tips */}
 						{selectedExerciseDetail.tips.length > 0 && (
 							<div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4">
-								<div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
-									<span>💡 Coach&apos;s Form Cues & Safety Tips</span>
+								<div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+									<svg className="size-3.5 text-amber-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+										<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z" />
+									</svg>
+									<span>Coach&apos;s Form Cues & Safety Tips</span>
 								</div>
 								<ul className="space-y-1.5 text-xs text-amber-100/90 list-disc list-inside">
 									{selectedExerciseDetail.tips.map((tip, idx) => (
@@ -490,9 +554,14 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 										setSelectedExerciseDetail(null)
 										if (onOpenStudio) onOpenStudio(studioId)
 									}}
-									className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-black shadow-lg shadow-amber-400/20 hover:brightness-110 transition-all flex items-center gap-1.5"
+									className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-black shadow-lg shadow-amber-400/20 hover:brightness-110 transition-all flex items-center gap-2"
 								>
-									<span>🎚️ Explore in 3D Biomechanics Studio</span>
+									<svg className="size-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+										<polygon points="12 2 2 7 12 12 22 7 12 2" />
+										<polyline points="2 17 12 22 22 17" />
+										<polyline points="2 12 12 17 22 12" />
+									</svg>
+									<span>Explore in 3D Biomechanics Studio</span>
 									<span>→</span>
 								</button>
 							) : (

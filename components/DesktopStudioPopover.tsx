@@ -16,7 +16,17 @@ const PRESET_COLORS = [
 	{ name: 'Purple', hex: '#b537f2' }
 ]
 
-export default function DesktopStudioPopover() {
+export interface DesktopStudioPopoverProps {
+	className?: string
+	align?: 'left' | 'right' | 'center'
+	renderTrigger?: (toggle: () => void, isOpen: boolean) => React.ReactNode
+}
+
+export default function DesktopStudioPopover({
+	className,
+	align = 'right',
+	renderTrigger
+}: DesktopStudioPopoverProps = {}) {
 	const [isOpen, setIsOpen] = useState(false)
 	const currentFont = useFontTheme()
 	const currentTheme = useBgTheme()
@@ -34,44 +44,52 @@ export default function DesktopStudioPopover() {
 	}, [])
 
 	return (
-		<div ref={popoverRef} className="relative">
+		<div ref={popoverRef} className={`relative ${className || ''}`}>
 			{/* Trigger Button */}
-			<button
-				type="button"
-				onClick={() => setIsOpen(!isOpen)}
-				aria-expanded={isOpen}
-				className={`group relative flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium tracking-wider uppercase backdrop-blur-xl transition-all duration-200 cursor-pointer ${
-					isOpen
-						? 'border-amber-400/60 bg-amber-500/15 text-white shadow-[0_0_15px_rgba(245,158,11,0.25)]'
-						: 'border-white/10 bg-white/5 text-neutral-300 hover:border-white/25 hover:bg-white/10 hover:text-white'
-				}`}
-				title="Open 3D Studio Customizer (Lighting, Fonts, Ambience)"
-			>
-				{/* Glowing Color Dot */}
-				<span
-					className="size-2 rounded-full transition-transform group-hover:scale-125"
-					style={{
-						backgroundColor: activeColor,
-						boxShadow: `0 0 10px ${activeColor}`
-					}}
-				/>
-				<span className="font-semibold">Studio</span>
-				<span className="hidden xl:inline text-[10px] text-neutral-400 font-normal">
-					{currentFont.name.split(' ')[0]}
-				</span>
-				<svg
-					className={`size-3 text-neutral-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-amber-400' : 'group-hover:text-white'}`}
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
+			{renderTrigger ? (
+				renderTrigger(() => setIsOpen(!isOpen), isOpen)
+			) : (
+				<button
+					type="button"
+					onClick={() => setIsOpen(!isOpen)}
+					aria-expanded={isOpen}
+					className={`group relative flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium tracking-wider uppercase backdrop-blur-xl transition-all duration-200 cursor-pointer ${
+						isOpen
+							? 'border-amber-400/60 bg-amber-500/15 text-white shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+							: 'border-white/10 bg-white/5 text-neutral-300 hover:border-white/25 hover:bg-white/10 hover:text-white'
+					}`}
+					title="Open 3D Studio Customizer (Lighting, Fonts, Ambience)"
 				>
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
+					{/* Glowing Color Dot */}
+					<span
+						className="size-2 rounded-full transition-transform group-hover:scale-125"
+						style={{
+							backgroundColor: activeColor,
+							boxShadow: `0 0 10px ${activeColor}`
+						}}
+					/>
+					<span className="font-semibold">Studio</span>
+					<span className="hidden xl:inline text-[10px] text-neutral-400 font-normal">
+						{currentFont.name.split(' ')[0]}
+					</span>
+					<svg
+						className={`size-3 text-neutral-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-amber-400' : 'group-hover:text-white'}`}
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+					</svg>
+				</button>
+			)}
 
 			{/* Bento Glass Popover */}
 			{isOpen && (
-				<div className="absolute right-0 top-full z-50 mt-3 w-84 overflow-hidden rounded-2xl border border-white/15 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-3xl animate-in fade-in slide-in-from-top-3 duration-200">
+				<div
+					className={`absolute top-full z-50 mt-3 w-84 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-white/15 bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-3xl animate-in fade-in slide-in-from-top-3 duration-200 ${
+						align === 'left' ? 'left-0' : align === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-0'
+					}`}
+				>
 					{/* Header */}
 					<div className="flex items-center justify-between pb-3 border-b border-white/10">
 						<div className="flex items-center gap-2">

@@ -37,7 +37,15 @@ const INITIAL_MEMBERS: GymMember[] = []
 
 const OWNER_EMAIL = 'subbareddy123sub@gmail.com'
 
-export default function MemberTrackerModal() {
+export interface MemberTrackerModalProps {
+	className?: string
+	renderTrigger?: (open: () => void, expiringCount: number) => React.ReactNode
+}
+
+export default function MemberTrackerModal({
+	className,
+	renderTrigger
+}: MemberTrackerModalProps = {}) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [isMounted, setIsMounted] = useState(false)
 	const [members, setMembers] = useState<GymMember[]>([])
@@ -266,31 +274,38 @@ export default function MemberTrackerModal() {
 	return (
 		<>
 			{/* Trigger Button in Top Nav */}
-			<button
-				onClick={() => setIsOpen(true)}
-				className="group relative flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold tracking-wider text-neutral-200 backdrop-blur-xl transition-all duration-200 hover:border-amber-400/50 hover:bg-white/10 hover:text-white cursor-pointer select-none"
-			>
-				<span className="relative flex size-2 shrink-0">
+			{renderTrigger ? (
+				renderTrigger(() => setIsOpen(true), expiringCount)
+			) : (
+				<button
+					type="button"
+					onClick={() => setIsOpen(true)}
+					className={`group relative flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold tracking-wider text-neutral-200 backdrop-blur-xl transition-all duration-200 hover:border-amber-400/50 hover:bg-white/10 hover:text-white cursor-pointer select-none ${
+						className || ''
+					}`}
+				>
+					<span className="relative flex size-2 shrink-0">
+						{expiringCount > 0 ? (
+							<>
+								<span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+								<span className="relative inline-flex size-2 rounded-full bg-amber-400"></span>
+							</>
+						) : (
+							<span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+						)}
+					</span>
+					<span className="uppercase">Members</span>
 					{expiringCount > 0 ? (
-						<>
-							<span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
-							<span className="relative inline-flex size-2 rounded-full bg-amber-400"></span>
-						</>
+						<span className="rounded-full bg-amber-500/25 px-1.5 py-0.2 text-[10px] font-bold text-amber-300">
+							{expiringCount} Due
+						</span>
 					) : (
-						<span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+						<span className="hidden sm:inline-block rounded-full bg-emerald-500/15 px-1.5 py-0.2 text-[9px] font-medium text-emerald-300">
+							Live
+						</span>
 					)}
-				</span>
-				<span className="uppercase">Members</span>
-				{expiringCount > 0 ? (
-					<span className="rounded-full bg-amber-500/25 px-1.5 py-0.2 text-[10px] font-bold text-amber-300">
-						{expiringCount} Due
-					</span>
-				) : (
-					<span className="hidden sm:inline-block rounded-full bg-emerald-500/15 px-1.5 py-0.2 text-[9px] font-medium text-emerald-300">
-						Live
-					</span>
-				)}
-			</button>
+				</button>
+			)}
 
 			{/* Portaled Modal Overlay to root document.body to avoid parent transform clipping */}
 			{isMounted && typeof document !== 'undefined' && createPortal(

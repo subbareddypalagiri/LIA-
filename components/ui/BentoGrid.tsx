@@ -82,7 +82,7 @@ const BentoCard = ({
       </div>
     )}
 
-    <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-2 p-6 transition-all duration-300 group-hover:-translate-y-8">
+    <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-2 p-6 pb-16 md:pb-6 transition-all duration-300 md:group-hover:-translate-y-8">
       {Icon && (
         <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-white/5 border border-white/10 text-amber-400 group-hover:border-amber-500/30 group-hover:bg-amber-500/10 transition-all duration-300 ease-in-out group-hover:scale-75 origin-left">
           <Icon className="h-6 w-6 stroke-[1.75]" />
@@ -98,7 +98,8 @@ const BentoCard = ({
 
     <div
       className={cn(
-        "pointer-events-none absolute bottom-0 flex w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 z-20",
+        "pointer-events-none absolute bottom-0 flex w-full transform-gpu flex-row items-center p-4 z-20 transition-all duration-300",
+        "opacity-100 translate-y-0 md:opacity-0 md:translate-y-10 md:group-hover:translate-y-0 md:group-hover:opacity-100",
       )}
     >
       {href ? (
