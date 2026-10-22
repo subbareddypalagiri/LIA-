@@ -235,29 +235,16 @@ export default function DynamicPillHeader() {
 								</button>
 							</div>
 						) : (
-							<div className="flex items-center gap-1.5">
-								<button
-									type="button"
-									onClick={() => openGymModal('auth')}
-									className="rounded-full bg-white text-black font-bold text-xs px-3.5 sm:px-4 py-1.5 sm:py-2 shadow-md hover:bg-neutral-200 transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0 font-sans"
-								>
-									<span>Member Pass</span>
-									<svg className="size-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-										<path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6l6 6-6 6" />
-									</svg>
-								</button>
-								<button
-									type="button"
-									onClick={() => openGymModal('owner')}
-									className="rounded-full border border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 font-bold text-xs px-2.5 py-1.5 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
-									title="Owner Authority Portal"
-								>
-									<svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-										<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-									</svg>
-									<span>Owner</span>
-								</button>
-							</div>
+							<button
+								type="button"
+								onClick={() => openGymModal('auth')}
+								className="rounded-full bg-white text-black font-bold text-xs px-3.5 sm:px-4 py-1.5 sm:py-2 shadow-md hover:bg-neutral-200 transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0 font-sans"
+							>
+								<span>Member Pass</span>
+								<svg className="size-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+									<path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6l6 6-6 6" />
+								</svg>
+							</button>
 						)}
 
 						<MemberTrackerModal />
@@ -282,7 +269,7 @@ export default function DynamicPillHeader() {
 								className="rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold text-xs px-3 py-1.5 shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0"
 							>
 								<span className="size-1.5 rounded-full bg-black animate-pulse" />
-								<span>Owner Desk</span>
+								<span>Owner</span>
 							</button>
 						) : (
 							<button
@@ -380,122 +367,90 @@ export default function DynamicPillHeader() {
 
 						{/* Athlete & Owner Status Card */}
 						{isOwner ? (
-							<div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.05] p-3.5 flex flex-col gap-2.5">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2.5">
-										<span className="relative flex size-2.5">
-											<span className="inline-flex size-full rounded-full bg-amber-400 animate-ping" />
-											<span className="relative inline-flex size-2.5 rounded-full bg-amber-400" />
-										</span>
-										<div>
-											<div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-												<span>{user?.name || 'Palagiri Subbareddy'}</span>
-												<span className="rounded bg-amber-400/20 border border-amber-400/30 px-1.5 py-0.2 text-[9px] font-bold text-amber-300 uppercase">
-													Owner
-												</span>
-											</div>
-											<div className="text-[10px] text-white/50">Club Admin & Revenue Authority</div>
-										</div>
-									</div>
-
-									<span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-semibold text-emerald-300">
-										Active
+							<div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.05] p-3 flex items-center justify-between">
+								<div className="flex items-center gap-2.5">
+									<span className="relative flex size-2.5">
+										<span className="inline-flex size-full rounded-full bg-amber-400 animate-ping" />
+										<span className="relative inline-flex size-2.5 rounded-full bg-amber-400" />
 									</span>
+									<div>
+										<div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+											<span>{user?.name || 'Palagiri Subbareddy'}</span>
+											<span className="rounded bg-amber-400/20 border border-amber-400/30 px-1.5 py-0.2 text-[9px] font-bold text-amber-300 uppercase">
+												Owner
+											</span>
+										</div>
+										<div className="text-[10px] text-white/50">Club Admin Authority</div>
+									</div>
 								</div>
 
-								<div className="flex items-center gap-2 pt-1 border-t border-white/10">
+								<div className="flex items-center gap-1.5">
 									<button
 										onClick={() => handleNavAction('owner')}
-										className="flex-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-black py-2 text-xs font-bold uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-400/20"
+										className="rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 text-black px-2.5 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-sm"
 									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-											<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-										</svg>
-										<span>Owner Desk</span>
+										Owner Desk
 									</button>
 									<button
 										onClick={handleLogout}
-										className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-3.5 py-2 text-xs font-semibold active:scale-[0.98] transition-all flex items-center gap-1.5"
+										className="rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2 py-1 text-[11px] font-semibold active:scale-95 transition-all"
 										title="Sign out of Owner Account"
 									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-											<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-										</svg>
-										<span>Logout</span>
+										Logout
 									</button>
 								</div>
 							</div>
 						) : isMember ? (
-							<div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3.5 flex flex-col gap-2.5">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2.5">
-										<span className="relative flex size-2.5">
-											<span className="inline-flex size-full rounded-full bg-emerald-400 animate-ping" />
-											<span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
-										</span>
-										<div>
-											<div className="text-xs font-bold text-white flex items-center gap-1.5">
-												<span>{user?.name}</span>
-												<span className="rounded bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-bold text-emerald-300 uppercase">
-													Athlete
-												</span>
-											</div>
-											<div className="text-[10px] text-white/50">{user?.plan} Membership Active</div>
+							<div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3 flex items-center justify-between">
+								<div className="flex items-center gap-2.5">
+									<span className="relative flex size-2.5">
+										<span className="inline-flex size-full rounded-full bg-emerald-400 animate-ping" />
+										<span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
+									</span>
+									<div>
+										<div className="text-xs font-bold text-white flex items-center gap-1.5">
+											<span>{user?.name}</span>
+											<span className="rounded bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-bold text-emerald-300 uppercase">
+												Athlete
+											</span>
 										</div>
+										<div className="text-[10px] text-white/50">{user?.plan} Membership Active</div>
 									</div>
 								</div>
 
-								<div className="flex items-center gap-2 pt-1 border-t border-white/10">
+								<div className="flex items-center gap-1.5">
 									<button
 										onClick={() => handleNavAction('my-membership')}
-										className="flex-1 rounded-xl bg-white text-black py-2 text-xs font-bold uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+										className="rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-1 text-[11px] font-bold text-emerald-300 active:scale-95 transition-all"
 									>
-										<span>View Digital Pass</span>
+										View Pass
 									</button>
 									<button
 										onClick={handleLogout}
-										className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-3.5 py-2 text-xs font-semibold active:scale-[0.98] transition-all flex items-center gap-1.5"
+										className="rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2 py-1 text-[11px] font-semibold active:scale-95 transition-all"
 										title="Sign out of Athlete Account"
 									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-											<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-										</svg>
-										<span>Logout</span>
+										Logout
 									</button>
 								</div>
 							</div>
 						) : (
-							<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 flex flex-col gap-2.5">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2.5">
-										<span className="size-2.5 rounded-full bg-white/40" />
-										<div>
-											<div className="text-xs font-bold text-white">Guest Lifter</div>
-											<div className="text-[10px] text-white/50">Digital Pass & Owner Command Ready</div>
-										</div>
+							/* GUEST LIFTER CARD (Clean & identical to reference screenshot) */
+							<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 flex items-center justify-between">
+								<div className="flex items-center gap-2.5">
+									<span className="size-2 rounded-full bg-white/40" />
+									<div>
+										<div className="text-xs font-bold text-white">Guest Lifter</div>
+										<div className="text-[10px] text-white/50">Digital Pass Ready</div>
 									</div>
 								</div>
 
-								<div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/10">
-									<button
-										onClick={() => handleNavAction('auth')}
-										className="rounded-xl bg-white text-black py-2 text-xs font-bold uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-1 shadow-sm"
-									>
-										<span>Athlete Sign In</span>
-									</button>
-									<button
-										onClick={() => {
-											setIsMobileMenuOpen(false)
-											openGymModal('owner')
-										}}
-										className="rounded-xl border border-amber-400/50 bg-amber-400/15 hover:bg-amber-400/25 text-amber-300 py-2 text-xs font-bold uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm"
-									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-											<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-										</svg>
-										<span>Owner Desk ✦</span>
-									</button>
-								</div>
+								<button
+									onClick={() => handleNavAction('auth')}
+									className="rounded-lg bg-white text-black px-3 py-1.5 text-xs font-bold active:scale-95 transition-all shadow-sm"
+								>
+									Sign In
+								</button>
 							</div>
 						)}
 
@@ -641,43 +596,33 @@ export default function DynamicPillHeader() {
 								</svg>
 							</button>
 
-							{/* 6. Club Owner Desk */}
-							<button
-								onClick={() => handleNavAction('owner')}
-								className={`w-full flex items-center justify-between rounded-2xl border p-3 text-left transition-all active:scale-[0.98] ${
-									isOwner
-										? 'border-amber-400/60 bg-amber-400/10 hover:bg-amber-400/15'
-										: 'border-white/10 bg-white/[0.04] hover:border-amber-400/40 hover:bg-neutral-900'
-								}`}
-							>
-								<div className="flex items-center gap-3">
-									<div className={`flex size-9 items-center justify-center rounded-xl border ${
-										isOwner
-											? 'bg-amber-400 text-black border-amber-300 font-bold'
-											: 'bg-amber-400/15 border-amber-400/30 text-amber-300'
-									}`}>
-										<svg className="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-											<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-										</svg>
-									</div>
-									<div>
-										<div className="text-xs font-bold text-white flex items-center gap-1.5">
-											<span>Club Owner Desk</span>
-											<span className={`rounded px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider ${
-												isOwner
-													? 'bg-amber-400 text-black'
-													: 'bg-amber-400/20 border border-amber-400/30 text-amber-300'
-											}`}>
-												{isOwner ? 'Active Admin' : 'Owner Portal'}
-											</span>
+							{/* 6. Club Owner Desk (Visible when Owner is Authenticated) */}
+							{isOwner && (
+								<button
+									onClick={() => handleNavAction('owner')}
+									className="w-full flex items-center justify-between rounded-2xl border border-amber-400/60 bg-amber-400/10 hover:bg-amber-400/15 p-3 text-left transition-all active:scale-[0.98]"
+								>
+									<div className="flex items-center gap-3">
+										<div className="flex size-9 items-center justify-center rounded-xl border bg-amber-400 text-black border-amber-300 font-bold">
+											<svg className="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+												<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+											</svg>
 										</div>
-										<p className="text-[11px] text-white/50">Revenue ledger, attendance & athlete billing</p>
+										<div>
+											<div className="text-xs font-bold text-white flex items-center gap-1.5">
+												<span>Club Owner Desk</span>
+												<span className="rounded bg-amber-400 text-black px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider">
+													Active Admin
+												</span>
+											</div>
+											<p className="text-[11px] text-white/50">Revenue ledger, attendance & athlete billing</p>
+										</div>
 									</div>
-								</div>
-								<svg className="size-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-									<path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-								</svg>
-							</button>
+									<svg className="size-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+										<path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+									</svg>
+								</button>
+							)}
 						</div>
 
 						{/* Secondary Utilities: Studio, Members Tracker, PWA */}
