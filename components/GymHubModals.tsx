@@ -1147,13 +1147,7 @@ export default function GymHubModals() {
 											type="button"
 											onClick={() => {
 												const updatedProfile = { ...ownerProfile }
-												if (ownerPasswordInput.trim()) {
-													if (ownerPasswordInput.trim().length < 6) {
-														showToast('Password must be at least 6 characters.')
-														return
-													}
-													updatedProfile.ownerPassword = ownerPasswordInput.trim()
-												}
+												// Master credentials secured via server session
 												saveOwnerProfileData(updatedProfile)
 												setOwnerProfile(updatedProfile)
 												if (user) {

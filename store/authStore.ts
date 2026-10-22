@@ -17,6 +17,7 @@ export interface AuthUser {
 	expiryDate?: string
 	avatar?: string
 	checkinCount?: number
+	sessionToken?: string
 }
 
 // Official Gym Owner Profile
@@ -31,9 +32,6 @@ export const DEFAULT_OWNER: AuthUser = {
 
 const AUTH_STORAGE_KEY = 'lia_auth_session'
 const AUTH_EVENT = 'lia-auth-change'
-
-// Default secure master password for owner local/offline mode
-const DEFAULT_OWNER_MASTER_PASS = 'Subba@LIA2026'
 
 /**
  * Strict Owner Email Verification:
@@ -93,6 +91,26 @@ export function useAuth() {
 		}
 		window.addEventListener(AUTH_EVENT, handleAuth)
 		return () => window.removeEventListener(AUTH_EVENT, handleAuth)
+	}, [])
+
+	// Anti-Privilege Escalation & Session Integrity Verification
+	useEffect(() => {
+		const currentUser = getStoredUser()
+		if (currentUser?.role === 'owner') {
+			fetch('/api/auth/owner-session', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'verify-session', token: currentUser.sessionToken })
+			})
+				.then((res) => res.json() as Promise<any>)
+				.then((data: any) => {
+					if (!data.success || !data.valid) {
+						console.warn('[Security] Unauthorized or forged owner session detected. Access revoked.')
+						setStoredUser(null)
+					}
+				})
+				.catch(() => {})
+		}
 	}, [])
 
 	// Cloud session sync on mount
@@ -157,25 +175,28 @@ export function useAuth() {
 				}
 			}
 
-			// 2. Local / Offline Mode Authentication
+			// 2. Server-Side Verified Owner Authentication (Zero Client-Side Passwords)
 			if (isOwner) {
-				// Verify strictly against Owner Master Password
-				let expectedPass = DEFAULT_OWNER_MASTER_PASS
 				try {
-					const savedOwner = localStorage.getItem('lia_owner_profile')
-					if (savedOwner) {
-						const parsed = JSON.parse(savedOwner) as any
-						if (parsed?.ownerPassword) {
-							expectedPass = parsed.ownerPassword
-						}
+					const res = await fetch('/api/auth/owner-session', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ action: 'verify-login', email: cleanEmail, password: cleanPass })
+					})
+					const data = (await res.json()) as any
+					if (!data.success) {
+						return { success: false, error: data.error || 'Incorrect password for Owner account.' }
 					}
-				} catch {}
-
-				if (cleanPass === expectedPass) {
-					setStoredUser(DEFAULT_OWNER)
+					const verifiedOwner: AuthUser = {
+						...DEFAULT_OWNER,
+						email: cleanEmail,
+						sessionToken: data.token
+					}
+					setStoredUser(verifiedOwner)
 					return { success: true, role: 'owner' }
+				} catch {
+					return { success: false, error: 'Authentication verification service unavailable.' }
 				}
-				return { success: false, error: 'Incorrect password for Owner account.' }
 			} else {
 				// Regular Member Login
 				if (cleanPass.length < 6) {
@@ -301,12 +322,26 @@ export function useAuth() {
 			const isOwner = isOwnerEmailAddress(cleanEmail)
 
 			if (isOwner) {
-				// Owner signed in with Google
+				// Owner signed in with Google -> Request cryptographically signed token
+				let sessionToken: string | undefined
+				try {
+					const res = await fetch('/api/auth/owner-session', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ action: 'sign-google-owner', email: cleanEmail })
+					})
+					const data = (await res.json()) as any
+					if (data.success && data.token) {
+						sessionToken = data.token
+					}
+				} catch {}
+
 				const ownerUser: AuthUser = {
 					...DEFAULT_OWNER,
 					email: cleanEmail,
 					name: profile.name || DEFAULT_OWNER.name,
-					avatar: profile.avatar || DEFAULT_OWNER.avatar
+					avatar: profile.avatar || DEFAULT_OWNER.avatar,
+					sessionToken
 				}
 				setStoredUser(ownerUser)
 				return { success: true, role: 'owner' }

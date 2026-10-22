@@ -188,17 +188,17 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 	}
 
 	return (
-		<div className="fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 overflow-y-auto bg-black/85 backdrop-blur-md">
+		<div className="fixed inset-0 z-[60] flex flex-col items-center justify-start sm:justify-center p-4 py-8 sm:py-6 overflow-y-auto bg-black/85 backdrop-blur-md min-h-[100dvh] pb-[max(2rem,env(safe-area-inset-bottom))]">
 			{/* Backdrop click to close */}
 			<div className="fixed inset-0" onClick={closeModal} />
 
 			{/* Centered Glass Card */}
-			<div className="relative z-10 w-full max-w-sm rounded-3xl bg-neutral-950/95 backdrop-blur-2xl border border-white/15 shadow-2xl p-7 sm:p-8 flex flex-col items-center text-white animate-in fade-in zoom-in-95 duration-200">
+			<div className="relative z-10 my-auto shrink-0 w-full max-w-sm rounded-3xl bg-neutral-950/95 backdrop-blur-2xl border border-white/15 shadow-2xl p-6 sm:p-8 flex flex-col items-center text-white animate-in fade-in zoom-in-95 duration-200">
 				{/* Dismiss Button */}
 				<button
 					type="button"
 					onClick={closeModal}
-					className="absolute top-4 right-4 text-white/40 hover:text-white transition p-1.5 rounded-full"
+					className="absolute top-2.5 right-2.5 text-white/60 hover:text-white transition p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full active:scale-95"
 					aria-label="Close"
 				>
 					<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,7 +217,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 				<h2 className="text-2xl font-bold text-white mb-1 text-center tracking-tight font-heading uppercase">
 					LIA Iron Club
 				</h2>
-				<p className="text-xs text-white/50 mb-6 text-center">
+				<p className="text-xs text-neutral-300 mb-6 text-center">
 					{isSignUp ? 'Create your athlete account' : 'Enter your email & password to continue'}
 				</p>
 
@@ -229,7 +229,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 								placeholder="Full Name"
 								type="text"
 								value={name}
-								className="w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/40 text-xs focus:outline-none focus:ring-1 focus:ring-amber-400 border border-white/10 transition"
+								className="w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/50 text-xs focus:outline-none focus:ring-1 focus:ring-amber-400 border border-white/10 transition"
 								onChange={(e) => setName(e.target.value)}
 							/>
 						)}
@@ -238,7 +238,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 							placeholder="Email Address"
 							type="email"
 							value={email}
-							className="w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/40 text-xs focus:outline-none focus:ring-1 focus:ring-amber-400 border border-white/10 transition"
+							className="w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/50 text-xs focus:outline-none focus:ring-1 focus:ring-amber-400 border border-white/10 transition"
 							onChange={(e) => setEmail(e.target.value)}
 						/>
 
@@ -246,7 +246,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 							placeholder="Password"
 							type="password"
 							value={password}
-							className="w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/40 text-xs focus:outline-none focus:ring-1 focus:ring-amber-400 border border-white/10 transition"
+							className="w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/50 text-xs focus:outline-none focus:ring-1 focus:ring-amber-400 border border-white/10 transition"
 							onChange={(e) => setPassword(e.target.value)}
 							onKeyDown={(e) => {
 								if (e.key === 'Enter') handleSubmit()
@@ -316,7 +316,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 
 			{/* User count and athlete avatar cluster */}
 			<div className="relative z-10 mt-6 sm:mt-8 flex flex-col items-center text-center">
-				<p className="text-white/40 text-xs mb-2">
+				<p className="text-neutral-300 text-xs mb-2">
 					Join <span className="font-semibold text-white">hundreds</span> of athletes training with LIA.
 				</p>
 				<div className="flex -space-x-2">

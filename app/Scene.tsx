@@ -20,6 +20,7 @@ import { useControls } from 'leva'
 import useMergedProgress from '@/hooks/useMergedProgress'
 import { useLiaColor } from '@/store/liaColor'
 import { useBgTheme } from '@/store/bgTheme'
+import { useGymModal } from '@/store/gymHub'
 
 extend({
 	Mesh,
@@ -40,11 +41,13 @@ export default function Scene({
 	// const { control } = useControls({ control: false })
 	const liaColor = useLiaColor()
 	const bgTheme = useBgTheme()
+	const { activeModal } = useGymModal()
 	const rimColor = liaColor === bgTheme.suggestedLiaColor ? (bgTheme.rimColor ?? liaColor) : liaColor
 
 	return (
 		<Canvas
 			{...props}
+			frameloop={activeModal ? 'demand' : 'always'}
 			dpr={[1, typeof window !== 'undefined' && window.innerWidth < 768 ? 1.5 : 2]}
 			camera={{ position: [20, 0, -5], fov: 8 }}
 		>

@@ -23,7 +23,6 @@ export interface OwnerProfile {
 	upiId: string
 	monthlyTarget: number
 	todayCheckins: number
-	ownerPassword?: string
 	qrCodeUrl?: string
 }
 
@@ -35,7 +34,6 @@ const DEFAULT_OWNER_PROFILE: OwnerProfile = {
 	upiId: 'liaironclub@okhdfcbank',
 	monthlyTarget: 180000,
 	todayCheckins: 0,
-	ownerPassword: 'Subba@LIA2026',
 	qrCodeUrl: ''
 }
 
@@ -171,7 +169,6 @@ export async function fetchOwnerProfileData(): Promise<OwnerProfile> {
 					upiId: data.upi_id,
 					monthlyTarget: data.monthly_target || 180000,
 					todayCheckins: data.today_checkins || 0,
-					ownerPassword: data.owner_password || 'Subba@LIA2026',
 					qrCodeUrl: data.qr_code_url || ''
 				}
 				setStorage('lia_owner_profile', profile)
@@ -186,7 +183,19 @@ export async function fetchOwnerProfileData(): Promise<OwnerProfile> {
 }
 
 export async function saveOwnerProfileData(profile: OwnerProfile): Promise<void> {
-	setStorage('lia_owner_profile', profile)
+	// Sanitize profile before storing locally (never store sensitive passwords in localStorage)
+	const sanitizedProfile: OwnerProfile = {
+		id: profile.id,
+		gymName: profile.gymName,
+		ownerName: profile.ownerName,
+		phone: profile.phone,
+		email: profile.email,
+		upiId: profile.upiId,
+		monthlyTarget: profile.monthlyTarget,
+		todayCheckins: profile.todayCheckins,
+		qrCodeUrl: profile.qrCodeUrl || ''
+	}
+	setStorage('lia_owner_profile', sanitizedProfile)
 
 	const client = getSupabase()
 	if (client && isCloudSyncEnabled()) {
@@ -200,7 +209,6 @@ export async function saveOwnerProfileData(profile: OwnerProfile): Promise<void>
 				upi_id: profile.upiId,
 				monthly_target: profile.monthlyTarget,
 				today_checkins: profile.todayCheckins,
-				owner_password: profile.ownerPassword,
 				qr_code_url: profile.qrCodeUrl || '',
 				updated_at: new Date().toISOString()
 			})

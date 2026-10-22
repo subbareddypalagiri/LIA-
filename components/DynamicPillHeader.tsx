@@ -350,7 +350,7 @@ export default function DynamicPillHeader() {
 									<h3 className="font-heading text-sm font-black tracking-wider uppercase text-white">
 										LIA Iron Club
 									</h3>
-									<p className="text-[10px] text-white/50 tracking-wide uppercase">
+									<p className="text-[11px] text-neutral-300 tracking-wide uppercase">
 										Hyper-Performance Movement System
 									</p>
 								</div>
@@ -387,13 +387,13 @@ export default function DynamicPillHeader() {
 								<div className="flex items-center gap-1.5">
 									<button
 										onClick={() => handleNavAction('owner')}
-										className="rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 text-black px-2.5 py-1 text-[11px] font-bold active:scale-95 transition-all shadow-sm"
+										className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-black px-3.5 py-2 text-xs font-bold active:scale-95 transition-all shadow-sm min-h-[38px] flex items-center justify-center"
 									>
 										Owner Desk
 									</button>
 									<button
 										onClick={handleLogout}
-										className="rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2 py-1 text-[11px] font-semibold active:scale-95 transition-all"
+										className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-3 py-2 text-xs font-semibold active:scale-95 transition-all min-h-[38px] flex items-center justify-center"
 										title="Sign out of Owner Account"
 									>
 										Logout
@@ -421,13 +421,13 @@ export default function DynamicPillHeader() {
 								<div className="flex items-center gap-1.5">
 									<button
 										onClick={() => handleNavAction('my-membership')}
-										className="rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-1 text-[11px] font-bold text-emerald-300 active:scale-95 transition-all"
+										className="rounded-xl bg-emerald-500/20 border border-emerald-500/40 px-3.5 py-2 text-xs font-bold text-emerald-300 active:scale-95 transition-all min-h-[38px] flex items-center justify-center"
 									>
 										View Pass
 									</button>
 									<button
 										onClick={handleLogout}
-										className="rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2 py-1 text-[11px] font-semibold active:scale-95 transition-all"
+										className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-3 py-2 text-xs font-semibold active:scale-95 transition-all min-h-[38px] flex items-center justify-center"
 										title="Sign out of Athlete Account"
 									>
 										Logout
@@ -447,7 +447,7 @@ export default function DynamicPillHeader() {
 
 								<button
 									onClick={() => handleNavAction('auth')}
-									className="rounded-lg bg-white text-black px-3 py-1.5 text-xs font-bold active:scale-95 transition-all shadow-sm"
+									className="rounded-xl bg-white text-black px-4 py-2 text-xs font-bold active:scale-95 transition-all shadow-sm min-h-[38px] flex items-center justify-center"
 								>
 									Sign In
 								</button>
