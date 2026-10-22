@@ -287,6 +287,66 @@ export function useAuth() {
 		[]
 	)
 
+	const loginWithGoogle = useCallback(
+		async (profile: {
+			email: string
+			name?: string
+			avatar?: string
+		}): Promise<{ success: boolean; error?: string; role?: UserRole }> => {
+			const cleanEmail = profile.email.trim().toLowerCase()
+			if (!cleanEmail) {
+				return { success: false, error: 'Valid Google email is required.' }
+			}
+
+			const isOwner = isOwnerEmailAddress(cleanEmail)
+
+			if (isOwner) {
+				// Owner signed in with Google
+				const ownerUser: AuthUser = {
+					...DEFAULT_OWNER,
+					email: cleanEmail,
+					name: profile.name || DEFAULT_OWNER.name,
+					avatar: profile.avatar || DEFAULT_OWNER.avatar
+				}
+				setStoredUser(ownerUser)
+				return { success: true, role: 'owner' }
+			}
+
+			// Regular Member/Athlete signed in with Google
+			const memberName = profile.name?.trim() || cleanEmail.split('@')[0]
+			const authUser: AuthUser = {
+				id: `google_${Date.now()}`,
+				email: cleanEmail,
+				name: memberName,
+				avatar: profile.avatar,
+				role: 'member',
+				plan: '3 Months Hypertrophy',
+				startDate: new Date().toISOString().split('T')[0],
+				expiryDate: new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0],
+				checkinCount: 1
+			}
+
+			setStoredUser(authUser)
+
+			// Persist to member directory
+			try {
+				saveMemberData({
+					id: authUser.id,
+					name: authUser.name,
+					email: authUser.email,
+					phone: '',
+					photoUrl: authUser.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
+					plan: authUser.plan || '3 Months Hypertrophy',
+					startDate: authUser.startDate || new Date().toISOString().split('T')[0],
+					expiryDate: authUser.expiryDate || new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0]
+				})
+			} catch {}
+
+			return { success: true, role: 'member' }
+		},
+		[]
+	)
+
 	const logout = useCallback(async () => {
 		const client = getSupabase()
 		if (client && isCloudSyncEnabled()) {
@@ -304,6 +364,7 @@ export function useAuth() {
 		isAuthenticated: Boolean(user),
 		loginWithCredentials,
 		signUp,
+		loginWithGoogle,
 		logout
 	}
 }
