@@ -880,6 +880,22 @@ export default function GymHubModals() {
 									<span>Quick Check-in</span>
 									<span className="rounded-full bg-black/20 px-1.5 py-0.2 text-[10px]">+{checkInCount}</span>
 								</button>
+								{/* Owner Sign Out Button */}
+								<button
+									type="button"
+									onClick={() => {
+										logout()
+										showToast('Signed out of Owner Desk')
+										closeModal()
+									}}
+									className="rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md active:scale-[0.98]"
+									title="Sign out of Owner Account"
+								>
+									<svg className="size-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+										<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+									</svg>
+									<span>Sign Out</span>
+								</button>
 								</div>
 							</div>
 
@@ -933,6 +949,21 @@ export default function GymHubModals() {
 											<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
 										</svg>
 										<span>{isEditingProfile ? 'Close' : 'Edit Credentials'}</span>
+									</button>
+									<button
+										type="button"
+										onClick={() => {
+											logout()
+											showToast('Signed out of Owner Desk')
+											closeModal()
+										}}
+										className="rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5"
+										title="Sign out of Owner Account"
+									>
+										<svg className="size-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+											<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+										</svg>
+										<span>Sign Out</span>
 									</button>
 								</div>
 							</div>
