@@ -11,6 +11,7 @@ import MemberProfileModal from './MemberProfileModal'
 import AthleteNutritionModal, { AthleteNutritionView } from './AthleteNutritionModal'
 import MemberTrackerModal, { MemberTrackerView } from './MemberTrackerModal'
 import { exportMembersToCsv } from '@/lib/exportCsv'
+import { formatWhatsAppReminder, getWhatsAppUrl, cleanPhoneNumber } from '@/lib/whatsapp'
 import { useAuth, updateSessionUser } from '@/store/authStore'
 import { generateUpiQrDataUrl } from '@/lib/upiQr'
 import { BentoGrid, BentoCard } from '@/components/ui/BentoGrid'
@@ -265,6 +266,7 @@ export default function GymHubModals() {
 	}
 	const [maintenanceLogged, setMaintenanceLogged] = useState(false)
 	const [membersList, setMembersList] = useState<GymMember[]>([])
+	const [viewingKpiModal, setViewingKpiModal] = useState<'active' | 'revenue' | 'dues' | null>(null)
 
 	const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>({
 		gymName: 'LIA Iron Club',
@@ -331,6 +333,21 @@ export default function GymHubModals() {
 	const pendingDues = useMemo(() => {
 		return expiredMembers.reduce((acc, m) => acc + getPlanPrice(m.plan), 0)
 	}, [expiredMembers])
+
+	const activeMembersList = useMemo(() => {
+		return membersList.filter((m: GymMember) => {
+			const diff = new Date(m.expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
+			return Math.ceil(diff / (1000 * 60 * 60 * 24)) >= 0
+		})
+	}, [membersList])
+
+	const dueAndExpiringMembers = useMemo(() => {
+		return membersList.filter((m: GymMember) => {
+			const diff = new Date(m.expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
+			const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
+			return days <= 3
+		})
+	}, [membersList])
 
 	// Exercises view mode & inspected item (default to Vault list)
 	const [exerciseSubView, setExerciseSubView] = useState<'studio' | 'list'>('list')
@@ -876,557 +893,684 @@ export default function GymHubModals() {
 								</div>
 							</div>
 						) : (
-							<div>
-							<div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-								<div>
-									<div className="flex items-center gap-2 mb-1">
-										<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
-											LIA Iron Club — LIA Command
-										</h2>
-										<span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-											Admin Verified
-										</span>
-									</div>
-									<p className="text-xs text-white/60">
-										Executive operational suite: daily turnstile check-ins, revenue target ledger, and athlete induction.
-									</p>
-								</div>
-								<div className="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-									<button
-										type="button"
-										onClick={() => {
-											exportMembersToCsv(membersList, ownerProfile)
-											showToast('Gym Athlete Roster & Revenue Ledger exported to CSV!')
-										}}
-										className="rounded-xl border border-white/15 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white px-2 sm:px-3.5 py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1 sm:gap-1.5 shadow-md active:scale-[0.98]"
-										title="Download Excel/CSV Member Ledger"
-									>
-										<svg className="size-3.5 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-											<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-											<polyline points="7 10 12 15 17 10" />
-											<line x1="12" x2="12" y1="15" y2="3" />
-										</svg>
-										<span>Export</span>
-									</button>
-								{/* Quick Entry Logger */}
-								<button
-									onClick={() => {
-										setCheckInCount((c) => {
-											const next = c + 1
-											saveOwnerProfileData({ ...ownerProfile, todayCheckins: next })
-											return next
-										})
-										showToast(`Logged member entry! Total today: ${checkInCount + 1}`)
-									}}
-									className="rounded-xl border border-amber-400 bg-amber-400 text-black px-2 sm:px-4 py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-lg hover:bg-amber-300 transition-all flex items-center justify-center gap-1 sm:gap-1.5 active:scale-[0.98]"
-								>
-									<svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-										<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-									</svg>
-									<span>Check-in</span>
-									<span className="rounded-full bg-black/20 px-1 py-0.2 text-[9px] sm:text-[10px]">+{checkInCount}</span>
-								</button>
-								{/* Owner Sign Out Button */}
-								<button
-									type="button"
-									onClick={() => {
-										logout()
-										showToast('Signed out of LIA Command')
-										closeModal()
-									}}
-									className="rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 px-2 sm:px-3.5 py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 sm:gap-1.5 shadow-md active:scale-[0.98]"
-									title="Sign out of Owner Account"
-								>
-									<svg className="size-3.5 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-										<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-									</svg>
-									<span>Sign Out</span>
-								</button>
-								</div>
-							</div>
-
-							{/* Owner Identity & Cloud Sync Banner */}
-							<div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-								<div className="flex items-center gap-3.5">
-									<div className="size-12 rounded-2xl border border-amber-400/40 bg-amber-400/10 flex items-center justify-center text-amber-300 shrink-0">
-										<svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-											<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-										</svg>
-									</div>
+							<div className="font-sans space-y-5">
+								{/* 1. Sleek Mobile-First Header */}
+								<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border-b border-white/10 pb-4">
 									<div>
-										<div className="flex items-center gap-2">
-											<h3 className="font-heading text-lg font-bold text-white">{ownerProfile.ownerName}</h3>
-											<span className="rounded bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 uppercase">
-												Owner / Founder
+										<div className="flex items-center gap-2 mb-1">
+											<h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+												LIA Executive Command
+											</h2>
+											<span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300">
+												<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+												Admin Verified
 											</span>
 										</div>
-										<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/60 mt-0.5">
-											<span>{ownerProfile.gymName}</span>
-											<span>• {ownerProfile.email}</span>
-											<span>• {ownerProfile.phone}</span>
-											<span className="font-mono text-amber-300/90">• UPI: {ownerProfile.upiId}</span>
-										</div>
-									</div>
-								</div>
-
-								<div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
-									<span
-										className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
-											cloudSyncActive
-												? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-												: 'bg-white/5 text-white/50 border border-white/10'
-										}`}
-										title={
-											cloudSyncActive
-												? 'Connected to Supabase PostgreSQL Database'
-												: 'Running in Local Storage mode. Add NEXT_PUBLIC_SUPABASE_URL in .env to enable multi-device cloud sync.'
-										}
-									>
-										<span className={`size-1.5 rounded-full ${cloudSyncActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-										{cloudSyncActive ? 'Cloud Sync' : 'Local Storage'}
-									</span>
-
-									<button
-										type="button"
-										onClick={() => setIsEditingProfile(!isEditingProfile)}
-										className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all shrink-0 flex items-center gap-1.5 active:scale-95"
-									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-											<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-										</svg>
-										<span>{isEditingProfile ? 'Close' : 'Edit Credentials'}</span>
-									</button>
-								</div>
-							</div>
-
-							{/* Owner Profile Editor Drawer (When Open) */}
-							{isEditingProfile && (
-								<div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] p-5 space-y-4">
-									<div className="flex items-center justify-between border-b border-white/10 pb-3">
-										<div>
-											<h4 className="font-heading text-sm font-bold text-white uppercase tracking-wider">
-												Edit Owner Profile & Security Credentials
-											</h4>
-											<p className="text-[11px] text-white/50">Change your login email, master password, UPI ID and gym targets.</p>
-										</div>
-										<span className="text-[10px] text-amber-400 font-semibold bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-lg">
-											Instant Local & Cloud Sync
-										</span>
-									</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Owner Name</label>
-											<input
-												type="text"
-												value={ownerProfile.ownerName}
-												onChange={(e) => setOwnerProfile({ ...ownerProfile, ownerName: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Gym Name</label>
-											<input
-												type="text"
-												value={ownerProfile.gymName}
-												onChange={(e) => setOwnerProfile({ ...ownerProfile, gymName: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-amber-300 block mb-1">Owner Login Email</label>
-											<input
-												type="email"
-												value={ownerProfile.email}
-												onChange={(e) => setOwnerProfile({ ...ownerProfile, email: e.target.value.trim().toLowerCase() })}
-												className="w-full rounded-xl border border-amber-400/40 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-amber-300 block mb-1">Change Master Password</label>
-											<input
-												type="text"
-												placeholder="Leave blank to keep current password"
-												value={ownerPasswordInput}
-												onChange={(e) => setOwnerPasswordInput(e.target.value)}
-												className="w-full rounded-xl border border-amber-400/40 bg-neutral-900 px-3.5 py-2 text-white placeholder-white/30 focus:border-amber-400 focus:outline-none font-mono"
-											/>
-										</div>
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Phone / WhatsApp</label>
-											<input
-												type="tel"
-												value={ownerProfile.phone}
-												onChange={(e) => setOwnerProfile({ ...ownerProfile, phone: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">UPI ID (For Fees)</label>
-											<input
-												type="text"
-												value={ownerProfile.upiId}
-												onChange={(e) => setOwnerProfile({ ...ownerProfile, upiId: e.target.value })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">Monthly Target (₹)</label>
-											<input
-												type="number"
-												value={ownerProfile.monthlyTarget}
-												onChange={(e) => setOwnerProfile({ ...ownerProfile, monthlyTarget: Number(e.target.value) })}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
+										<p className="text-xs text-neutral-400">
+											Turnstile operations, financial ledger & athlete management suite.
+										</p>
 									</div>
 
-									{/* Gym Payment QR Code Uploader & Live Preview */}
-									<div className="rounded-2xl border border-white/10 bg-black/40 p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
-										<div className="relative size-32 sm:size-36 shrink-0 overflow-hidden rounded-2xl border-2 border-amber-400/40 bg-white p-2 shadow-xl flex items-center justify-center">
-											{ownerProfile.qrCodeUrl ? (
-												<img
-													src={ownerProfile.qrCodeUrl}
-													alt="Owner Custom QR"
-													className="size-full object-contain"
-												/>
-											) : autoQrDataUrl ? (
-												<img
-													src={autoQrDataUrl}
-													alt="Auto UPI Vector QR"
-													className="size-full object-contain"
-												/>
-											) : (
-												<div className="text-center text-[10px] text-black/50">Generating QR...</div>
-											)}
-										</div>
+									{/* Action Pills: Single-line, never breaks text on mobile! */}
+									<div className="grid grid-cols-3 sm:flex items-center gap-2 w-full sm:w-auto">
+										<button
+											onClick={() => {
+												setCheckInCount((c) => {
+													const next = c + 1
+													saveOwnerProfileData({ ...ownerProfile, todayCheckins: next })
+													return next
+												})
+												showToast(`Turnstile entry logged! Total today: ${checkInCount + 1}`)
+											}}
+											className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black px-2.5 sm:px-4 py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 whitespace-nowrap cursor-pointer"
+										>
+											<span>⚡ Check-in</span>
+											<span className="rounded-full bg-black/25 px-1.5 py-0.2 text-[10px] font-mono">+{checkInCount}</span>
+										</button>
 
-										<div className="flex-1 space-y-2 text-center sm:text-left">
-											<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-												<span className="font-heading text-sm font-bold text-white tracking-wide">
-													Gym Payment QR Code (PhonePe / GPay / Paytm)
-												</span>
-												{ownerProfile.qrCodeUrl ? (
-													<span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-bold text-emerald-300 uppercase">
-														Custom Merchant QR
-													</span>
-												) : (
-													<span className="rounded-full bg-amber-400/20 border border-amber-400/30 px-2 py-0.5 text-[9px] font-bold text-amber-300 uppercase">
-														Auto UPI Vector QR
-													</span>
-												)}
-											</div>
-											<p className="text-[11px] text-white/60 leading-relaxed">
-												Upload your gym&apos;s PhonePe, Google Pay, or bank standee QR image. Athletes scanning to pay fees or receiving WhatsApp reminders will see this official QR code.
-											</p>
-
-											<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-												<button
-													type="button"
-													onClick={() => qrFileInputRef.current?.click()}
-													className="rounded-xl border border-amber-400 bg-amber-400/20 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/30 transition-all flex items-center gap-1.5"
-												>
-													<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-														<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-														<polyline points="17 8 12 3 7 8" />
-														<line x1="12" x2="12" y1="3" y2="15" />
-													</svg>
-													<span>{ownerProfile.qrCodeUrl ? 'Change QR Image' : 'Upload QR Image'}</span>
-												</button>
-												<input
-													ref={qrFileInputRef}
-													type="file"
-													accept="image/*"
-													className="hidden"
-													onChange={(e) => {
-														const file = e.target.files?.[0]
-														if (file) {
-															if (file.size > 5 * 1024 * 1024) {
-																showToast('Image too large. Please select an image under 5MB.')
-																return
-															}
-															const reader = new FileReader()
-															reader.onload = (event) => {
-																if (event.target?.result) {
-																	const dataUrl = event.target.result as string
-																	setOwnerProfile((prev) => ({ ...prev, qrCodeUrl: dataUrl }))
-																	showToast('Payment QR code loaded! Click Save to apply.')
-																}
-															}
-															reader.readAsDataURL(file)
-														}
-													}}
-												/>
-
-												{ownerProfile.qrCodeUrl && (
-													<button
-														type="button"
-														onClick={() => {
-															setOwnerProfile((prev) => ({ ...prev, qrCodeUrl: '' }))
-															showToast('Reset to Auto-Generated UPI QR code.')
-														}}
-														className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
-													>
-														Reset to Auto UPI QR
-													</button>
-												)}
-											</div>
-										</div>
-									</div>
-
-									<div className="flex justify-end gap-2 pt-2 border-t border-white/10">
 										<button
 											type="button"
 											onClick={() => {
-												const updatedProfile = { ...ownerProfile }
-												// Master credentials secured via server session
-												saveOwnerProfileData(updatedProfile)
-												setOwnerProfile(updatedProfile)
-												if (user) {
-													updateSessionUser({
-														...user,
-														email: updatedProfile.email,
-														name: updatedProfile.ownerName
-													})
-												}
-												setOwnerPasswordInput('')
-												setIsEditingProfile(false)
-												showToast('Owner credentials & profile saved successfully!')
+												exportMembersToCsv(membersList, ownerProfile)
+												showToast('Roster & Revenue Ledger exported to CSV!')
 											}}
-											className="rounded-xl border border-amber-400 bg-amber-400 px-5 py-2 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shadow-md flex items-center gap-1.5"
+											className="rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white/90 px-2.5 sm:px-3.5 py-2.5 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 active:scale-95 whitespace-nowrap shadow-sm cursor-pointer"
 										>
-											<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-												<polyline points="20 6 9 17 4 12" />
+											<svg className="size-3.5 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+												<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+												<polyline points="7 10 12 15 17 10" />
+												<line x1="12" x2="12" y1="15" y2="3" />
 											</svg>
-											<span>Save Profile & Credentials</span>
+											<span>Export</span>
 										</button>
-									</div>
-								</div>
-							)}
-
-							{/* 4 Financial & Operational KPI Cards */}
-							<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-									<div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-1">
-										Active Members
-									</div>
-									<div className="font-heading text-2xl font-black text-white">{activeMembersCount}</div>
-									<div className="text-[10px] text-emerald-400 mt-1">
-										{activeMembersCount === 0 ? 'No active lifters enrolled' : `${activeMembersCount} lifters on floor`}
-									</div>
-								</div>
-
-								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-									<div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-1">
-										Month Revenue
-									</div>
-									<div className="font-heading text-2xl font-black text-amber-300">
-										₹{monthRevenue.toLocaleString('en-IN')}
-									</div>
-									<div className="text-[10px] text-white/40 mt-1">
-										Target: ₹{ownerProfile.monthlyTarget.toLocaleString('en-IN')}
-									</div>
-								</div>
-
-								<div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4">
-									<div className="text-[10px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
-										Pending Dues
-									</div>
-									<div className="font-heading text-2xl font-black text-rose-400">
-										₹{pendingDues.toLocaleString('en-IN')}
-									</div>
-									<div className="text-[10px] text-rose-300/80 mt-1">
-										{expiredMembers.length === 0 ? 'All memberships cleared' : `${expiredMembers.length} lifter(s) pending renewal`}
-									</div>
-								</div>
-
-								<div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-									<div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-1">
-										Today&apos;s Check-ins
-									</div>
-									<div className="font-heading text-2xl font-black text-white">{checkInCount}</div>
-									<div className="text-[10px] text-emerald-400 mt-1">
-										{checkInCount === 0 ? 'Floor gate open • Ready for entries' : `${checkInCount} check-in(s) today`}
-									</div>
-								</div>
-							</div>
-
-							{/* 2-Column: Quick Add Member & Equipment Maintenance */}
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-								
-								{/* Quick Admission Form */}
-								<div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-									<div className="flex items-center justify-between mb-3">
-										<h3 className="font-heading text-base font-bold text-white tracking-wide">
-											New Member Admission
-										</h3>
-										<span className="text-[10px] text-amber-400 font-bold uppercase">Instant Setup</span>
-									</div>
-									<form
-										onSubmit={(e) => {
-											e.preventDefault()
-											if (!newMemberName.trim()) {
-												showToast('Please enter member name!')
-												return
-											}
-											const newMemberId = 'mem-' + Date.now()
-											const newMem = {
-												id: newMemberId,
-												name: newMemberName,
-												email: `${newMemberName.toLowerCase().replace(/\s+/g, '.')}@gmail.com`,
-												phone: newMemberPhone || '+91 98765 00000',
-												photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-												plan: newMemberPlan,
-												startDate: new Date().toISOString().split('T')[0],
-												expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-											}
-											saveMemberData(newMem)
-											try {
-												const existing: any[] = (JSON.parse(localStorage.getItem('lia_gym_members') || '[]') as any[]) || []
-												localStorage.setItem('lia_gym_members', JSON.stringify([newMem, ...existing]))
-											} catch {}
-											setMembersList((prev) => [newMem, ...prev])
-											showToast(`Added ${newMemberName} (${newMemberPlan}) successfully!`)
-											setNewMemberName('')
-											setNewMemberPhone('')
-										}}
-										className="space-y-3"
-									>
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">
-												Member Full Name
-											</label>
-											<input
-												type="text"
-												value={newMemberName}
-												onChange={(e) => setNewMemberName(e.target.value)}
-												placeholder="e.g. Rajesh Kumar"
-												className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/40 focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
-
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">
-												Phone Number (WhatsApp)
-											</label>
-											<input
-												type="tel"
-												value={newMemberPhone}
-												onChange={(e) => setNewMemberPhone(e.target.value)}
-												placeholder="+91 98765 43210"
-												className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/40 focus:border-amber-400 focus:outline-none"
-											/>
-										</div>
-
-										<div>
-											<label className="text-[10px] uppercase font-semibold text-white/60 block mb-1">
-												Select Membership Plan
-											</label>
-											<select
-												value={newMemberPlan}
-												onChange={(e) => setNewMemberPlan(e.target.value)}
-												className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"
-											>
-												<option value="1 Month Kickstart (₹1,500)">1 Month Kickstart (₹1,500)</option>
-												<option value="3 Months Hypertrophy (₹4,000)">3 Months Hypertrophy (₹4,000)</option>
-												<option value="6 Months Classic Iron (₹7,000)">6 Months Classic Iron (₹7,000)</option>
-												<option value="1 Year Elite Athlete (₹12,000)">1 Year Elite Athlete (₹12,000)</option>
-												<option value="Personal Training 1-on-1 (₹6,000/mo)">Personal Training (₹6,000/mo)</option>
-											</select>
-										</div>
 
 										<button
-											type="submit"
-											className="w-full rounded-xl border border-amber-400 bg-amber-400/20 py-2.5 text-xs font-bold text-amber-300 hover:bg-amber-400/30 transition-all flex items-center justify-center gap-1.5"
+											type="button"
+											onClick={() => {
+												logout()
+												showToast('Signed out of LIA Command')
+												closeModal()
+											}}
+											className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-2.5 sm:px-3.5 py-2.5 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 active:scale-95 whitespace-nowrap shadow-sm cursor-pointer"
 										>
-											<span>⚡ Authorize & Issue Digital Pass</span>
+											<svg className="size-3.5 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+												<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+											</svg>
+											<span>Sign Out</span>
 										</button>
-									</form>
+									</div>
 								</div>
 
-								{/* Equipment Maintenance & Audit Log */}
-								<div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col justify-between">
-									<div>
-										<div className="flex items-center justify-between mb-3">
-											<h3 className="font-heading text-base font-bold text-white tracking-wide">
-												Floor Maintenance Status
-											</h3>
-											<span className="text-[10px] text-emerald-400 font-bold uppercase">All Clean</span>
+								{/* 2. Founder & Financial Profile Card (No messy floating bullets) */}
+								<div className="rounded-2xl border border-amber-400/25 bg-gradient-to-br from-white/[0.04] via-black/40 to-transparent p-4 sm:p-5 shadow-xl space-y-3.5">
+									<div className="flex items-center justify-between gap-3">
+										<div className="flex items-center gap-3 min-w-0">
+											<div className="size-11 sm:size-12 rounded-2xl border border-amber-400/40 bg-amber-400/10 flex items-center justify-center text-amber-300 shrink-0 text-xl shadow-inner">
+												👑
+											</div>
+											<div className="min-w-0">
+												<div className="flex items-center gap-2">
+													<h3 className="font-bold text-sm sm:text-base text-white truncate">{ownerProfile.ownerName}</h3>
+													<span className="rounded-full bg-amber-400/15 border border-amber-400/30 px-2 py-0.5 text-[9px] font-bold text-amber-300 uppercase shrink-0">
+														Founder
+													</span>
+												</div>
+												<div className="text-xs text-neutral-400 truncate mt-0.5">{ownerProfile.gymName} • Master Operational Command</div>
+											</div>
 										</div>
-										<div className="space-y-2.5 text-xs">
-											<div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
-												<div>
-													<div className="font-semibold text-white">Cable Jungle Pulley Wires</div>
-													<div className="text-[10px] text-white/50">Next inspection in 18 days</div>
-												</div>
-												<span className="rounded bg-emerald-500/10 text-emerald-400 px-2 py-0.5 text-[10px] font-bold">
-													Good
-												</span>
-											</div>
 
-											<div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
-												<div>
-													<div className="font-semibold text-white">Adjustable Benches & Pins</div>
-													<div className="text-[10px] text-white/50">Tightened yesterday</div>
-												</div>
-												<span className="rounded bg-emerald-500/10 text-emerald-400 px-2 py-0.5 text-[10px] font-bold">
-													Certified
-												</span>
-											</div>
-
-											<div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
-												<div>
-													<div className="font-semibold text-white">HVAC & Floor Air Circulation</div>
-													<div className="text-[10px] text-white/50">Filters cleaned on 1st</div>
-												</div>
-												<span className="rounded bg-emerald-500/10 text-emerald-400 px-2 py-0.5 text-[10px] font-bold">
-													Active
-												</span>
-											</div>
+										<div className="flex items-center gap-2 shrink-0">
+											<span
+												className={`hidden sm:inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+													cloudSyncActive
+														? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+														: 'bg-white/5 text-white/50 border border-white/10'
+												}`}
+											>
+												<span className={`size-1.5 rounded-full ${cloudSyncActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+												{cloudSyncActive ? 'Cloud Active' : 'Local Storage'}
+											</span>
+											<button
+												type="button"
+												onClick={() => setIsEditingProfile(!isEditingProfile)}
+												className="rounded-xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 px-3 py-1.5 text-xs font-semibold text-amber-300 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+											>
+												<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+													<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+												</svg>
+												<span>{isEditingProfile ? 'Close' : 'Edit Credentials'}</span>
+											</button>
 										</div>
 									</div>
 
-									<button
-										onClick={() => {
-											setMaintenanceLogged(true)
-											showToast('Routine maintenance checklist marked as complete!')
-										}}
-										disabled={maintenanceLogged}
-										className="mt-4 w-full rounded-xl border border-white/10 bg-white/5 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 transition-all"
+									{/* Clean Info Capsules (No ugly floating bullets) */}
+									<div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+										<div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/50 px-3 py-2">
+											<span className="text-[10px] uppercase font-semibold text-neutral-400">Email</span>
+											<span className="font-medium text-white truncate max-w-[190px]">{ownerProfile.email}</span>
+										</div>
+										<div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/50 px-3 py-2">
+											<span className="text-[10px] uppercase font-semibold text-neutral-400">Phone</span>
+											<span className="font-medium text-white font-mono">{ownerProfile.phone}</span>
+										</div>
+										<button
+											onClick={() => {
+												navigator.clipboard?.writeText(ownerProfile.upiId)
+												showToast(`Copied UPI ID "${ownerProfile.upiId}" to clipboard!`)
+											}}
+											className="flex items-center justify-between rounded-xl border border-amber-400/30 bg-black/50 hover:bg-white/5 px-3 py-2 transition-all group text-left cursor-pointer"
+											title="Click to copy UPI ID"
+										>
+											<span className="text-[10px] uppercase font-semibold text-amber-300/80">UPI Fee ID</span>
+											<span className="font-mono text-amber-300 font-semibold flex items-center gap-1 truncate">
+												<span>{ownerProfile.upiId}</span>
+												<svg className="size-3 text-amber-400/70 group-hover:text-amber-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+													<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+													<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+												</svg>
+											</span>
+										</button>
+									</div>
+								</div>
+
+								{/* 3. Owner Profile Editor Drawer (When Open) */}
+								{isEditingProfile && (
+									<div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] p-4 sm:p-5 space-y-4">
+										<div className="flex items-center justify-between border-b border-white/10 pb-3">
+											<div>
+												<h4 className="text-sm font-bold text-white uppercase tracking-wider">
+													Edit Owner Profile & Credentials
+												</h4>
+												<p className="text-[11px] text-neutral-400">Change your login email, master password, UPI ID and gym targets.</p>
+											</div>
+											<span className="text-[10px] text-amber-400 font-semibold bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-lg">
+												Instant Cloud Sync
+											</span>
+										</div>
+										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+											<div>
+												<label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">Owner Name</label>
+												<input
+													type="text"
+													value={ownerProfile.ownerName}
+													onChange={(e) => setOwnerProfile({ ...ownerProfile, ownerName: e.target.value })}
+													className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+												/>
+											</div>
+											<div>
+												<label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">Gym Name</label>
+												<input
+													type="text"
+													value={ownerProfile.gymName}
+													onChange={(e) => setOwnerProfile({ ...ownerProfile, gymName: e.target.value })}
+													className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+												/>
+											</div>
+											<div>
+												<label className="text-[10px] uppercase font-semibold text-amber-300 block mb-1">Owner Login Email</label>
+												<input
+													type="email"
+													value={ownerProfile.email}
+													onChange={(e) => setOwnerProfile({ ...ownerProfile, email: e.target.value.trim().toLowerCase() })}
+													className="w-full rounded-xl border border-amber-400/40 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+												/>
+											</div>
+											<div>
+												<label className="text-[10px] uppercase font-semibold text-amber-300 block mb-1">Change Master Password</label>
+												<input
+													type="text"
+													placeholder="Leave blank to keep current"
+													value={ownerPasswordInput}
+													onChange={(e) => setOwnerPasswordInput(e.target.value)}
+													className="w-full rounded-xl border border-amber-400/40 bg-neutral-900 px-3.5 py-2 text-white placeholder-white/30 focus:border-amber-400 focus:outline-none font-mono"
+												/>
+											</div>
+											<div>
+												<label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">Phone / WhatsApp</label>
+												<input
+													type="tel"
+													value={ownerProfile.phone}
+													onChange={(e) => setOwnerProfile({ ...ownerProfile, phone: e.target.value })}
+													className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+												/>
+											</div>
+											<div>
+												<label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">UPI ID (For Fees)</label>
+												<input
+													type="text"
+													value={ownerProfile.upiId}
+													onChange={(e) => setOwnerProfile({ ...ownerProfile, upiId: e.target.value })}
+													className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+												/>
+											</div>
+											<div>
+												<label className="text-[10px] uppercase font-semibold text-neutral-400 block mb-1">Monthly Target (₹)</label>
+												<input
+													type="number"
+													value={ownerProfile.monthlyTarget}
+													onChange={(e) => setOwnerProfile({ ...ownerProfile, monthlyTarget: Number(e.target.value) })}
+													className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-white focus:border-amber-400 focus:outline-none"
+												/>
+											</div>
+										</div>
+
+										{/* Payment QR Code Uploader */}
+										<div className="rounded-2xl border border-white/10 bg-black/40 p-4 flex flex-col sm:flex-row items-center gap-4">
+											<div className="relative size-32 shrink-0 overflow-hidden rounded-2xl border-2 border-amber-400/40 bg-white p-2 shadow-xl flex items-center justify-center">
+												{ownerProfile.qrCodeUrl ? (
+													<img src={ownerProfile.qrCodeUrl} alt="Owner Custom QR" className="size-full object-contain" />
+												) : autoQrDataUrl ? (
+													<img src={autoQrDataUrl} alt="Auto UPI Vector QR" className="size-full object-contain" />
+												) : (
+													<div className="text-center text-[10px] text-black/50">Generating QR...</div>
+												)}
+											</div>
+											<div className="flex-1 space-y-2 text-center sm:text-left">
+												<div className="font-bold text-white text-xs">Gym Payment QR Code (PhonePe / GPay / Paytm)</div>
+												<p className="text-[11px] text-neutral-400">
+													Upload your gym&apos;s official standee QR image. Athletes scanning to pay fees or receiving WhatsApp reminders will see this official QR code.
+												</p>
+												<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+													<button
+														type="button"
+														onClick={() => qrFileInputRef.current?.click()}
+														className="rounded-xl border border-amber-400 bg-amber-400/20 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/30 transition-all cursor-pointer"
+													>
+														{ownerProfile.qrCodeUrl ? 'Change QR Image' : 'Upload Standee QR'}
+													</button>
+													{ownerProfile.qrCodeUrl && (
+														<button
+															type="button"
+															onClick={() => {
+																setOwnerProfile((prev) => ({ ...prev, qrCodeUrl: '' }))
+																showToast('Reset to Auto-Generated UPI QR code.')
+															}}
+															className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white transition-all cursor-pointer"
+														>
+															Reset to Auto UPI QR
+														</button>
+													)}
+												</div>
+											</div>
+										</div>
+
+										<div className="flex justify-end gap-2 pt-2 border-t border-white/10">
+											<button
+												type="button"
+												onClick={() => {
+													const updatedProfile = { ...ownerProfile }
+													saveOwnerProfileData(updatedProfile)
+													setOwnerProfile(updatedProfile)
+													if (user) {
+														updateSessionUser({
+															...user,
+															email: updatedProfile.email,
+															name: updatedProfile.ownerName
+														})
+													}
+													setOwnerPasswordInput('')
+													setIsEditingProfile(false)
+													showToast('Owner credentials & profile saved successfully!')
+												}}
+												className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-5 py-2 text-xs font-bold text-black uppercase tracking-wider hover:brightness-105 transition-all shadow-md cursor-pointer"
+											>
+												Save Profile & Credentials
+											</button>
+										</div>
+									</div>
+								)}
+
+								{/* 4. Interactive Equal-Height KPI Grid with Click Handlers */}
+								<div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+									{/* Active Athletes Card */}
+									<div
+										onClick={() => setViewingKpiModal('active')}
+										className="rounded-2xl border border-white/10 bg-white/[0.03] hover:border-emerald-500/50 hover:bg-emerald-500/[0.05] p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98] shadow-sm group"
+										title="Click to view Active Athletes List"
 									>
-										{maintenanceLogged ? '✓ Maintenance Verified Today' : 'Mark Daily Floor Inspection Done'}
-									</button>
-								</div>
-							</div>
-
-							{/* Callout to Full Subscriptions Modal */}
-							<div className="rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-								<div className="flex items-center gap-2.5">
-									<div className="size-8 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-300 shrink-0">
-										<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-											<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-										</svg>
+										<div>
+											<div className="flex items-center justify-between text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-1">
+												<span>Active Members</span>
+												<span className="text-[10px] text-emerald-400 group-hover:translate-x-0.5 transition-transform">→</span>
+											</div>
+											<div className="text-2xl font-black text-white font-mono">{activeMembersCount}</div>
+										</div>
+										<div className="text-[10px] text-emerald-400 mt-2 flex items-center gap-1 font-medium">
+											<span className="size-1.5 rounded-full bg-emerald-400" />
+											<span>Tap to view roster</span>
+										</div>
 									</div>
-									<div>
-										<div className="font-bold text-white">Need to send WhatsApp Fee Expiry Alerts?</div>
-										<div className="text-white/60">
-											Use the Members Portal to send automatic 3-day WhatsApp payment reminders.
+
+									{/* Month Revenue Card */}
+									<div
+										onClick={() => setViewingKpiModal('revenue')}
+										className="rounded-2xl border border-amber-400/30 bg-white/[0.03] hover:border-amber-400 hover:bg-amber-400/[0.05] p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98] shadow-sm group"
+										title="Click to view Revenue Target & Financial Ledger"
+									>
+										<div>
+											<div className="flex items-center justify-between text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-1">
+												<span>Month Revenue</span>
+												<span className="text-[10px] text-amber-300 group-hover:translate-x-0.5 transition-transform">→</span>
+											</div>
+											<div className="text-2xl font-black text-amber-300 font-mono">
+												₹{monthRevenue.toLocaleString('en-IN')}
+											</div>
+										</div>
+										<div className="text-[10px] text-neutral-400 mt-2 truncate font-medium">
+											Target: ₹{ownerProfile.monthlyTarget.toLocaleString('en-IN')} • Ledger
+										</div>
+									</div>
+
+									{/* Pending Dues Card */}
+									<div
+										onClick={() => setViewingKpiModal('dues')}
+										className="rounded-2xl border border-rose-500/30 bg-rose-500/10 hover:border-rose-400 hover:bg-rose-500/15 p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98] shadow-sm group"
+										title="Click to view Pending Dues & Send WhatsApp Alerts"
+									>
+										<div>
+											<div className="flex items-center justify-between text-[10px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
+												<span>Pending Dues</span>
+												<span className="text-[10px] text-rose-300 group-hover:translate-x-0.5 transition-transform">→</span>
+											</div>
+											<div className="text-2xl font-black text-rose-400 font-mono">
+												₹{pendingDues.toLocaleString('en-IN')}
+											</div>
+										</div>
+										<div className="text-[10px] text-rose-300/80 mt-2 truncate font-medium">
+											{expiredMembers.length === 0 ? 'All dues cleared' : `${expiredMembers.length} due • Send WhatsApp`}
+										</div>
+									</div>
+
+									{/* Today's Check-ins Card */}
+									<div
+										onClick={() => {
+											setCheckInCount((c) => {
+												const next = c + 1
+												saveOwnerProfileData({ ...ownerProfile, todayCheckins: next })
+												return next
+											})
+											showToast(`Turnstile entry logged! Total today: ${checkInCount + 1}`)
+										}}
+										className="rounded-2xl border border-white/10 bg-white/[0.03] hover:border-amber-400/50 hover:bg-amber-400/[0.05] p-3.5 sm:p-4 flex flex-col justify-between cursor-pointer transition-all active:scale-[0.98] shadow-sm group"
+										title="Click to log +1 check-in"
+									>
+										<div>
+											<div className="flex items-center justify-between text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-1">
+												<span>Today&apos;s Check-ins</span>
+												<span className="text-[10px] text-amber-400 group-hover:translate-x-0.5 transition-transform">+1</span>
+											</div>
+											<div className="text-2xl font-black text-white font-mono">{checkInCount}</div>
+										</div>
+										<div className="text-[10px] text-emerald-400 mt-2 font-medium">
+											{checkInCount === 0 ? 'Gate open • Tap to log' : `${checkInCount} check-in(s) • Tap to +1`}
 										</div>
 									</div>
 								</div>
-								<button
-									onClick={() => openModal('members')}
-									className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-2 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shrink-0 cursor-pointer shadow-md"
-								>
-									Open Members Portal →
-								</button>
-							</div>
 
-							{/* Direct Embedded Athlete Roster inside LIA Command */}
-							<div className="mt-8 border-t border-white/10 pt-6">
-								<MemberTrackerView showToast={showToast} />
-							</div>
+								{/* 5. Compact Floor Maintenance Log */}
+								<div className="rounded-2xl border border-white/10 bg-black/40 p-4 space-y-3">
+									<div className="flex items-center justify-between">
+										<h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+											<span>Floor Maintenance Status</span>
+											<span className="size-1.5 rounded-full bg-emerald-400" />
+										</h3>
+										<button
+											onClick={() => {
+												setMaintenanceLogged(true)
+												showToast('Daily equipment checklist verified!')
+											}}
+											disabled={maintenanceLogged}
+											className="rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 px-2.5 py-1 text-[10.5px] font-semibold text-white/80 transition-all cursor-pointer disabled:opacity-50"
+										>
+											{maintenanceLogged ? '✓ Verified Today' : 'Mark Inspected'}
+										</button>
+									</div>
+									<div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+										<div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5">
+											<span className="text-neutral-300">Cable Jungle & Pulleys</span>
+											<span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">Good</span>
+										</div>
+										<div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5">
+											<span className="text-neutral-300">Benches & Heavy Pins</span>
+											<span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">Certified</span>
+										</div>
+										<div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5">
+											<span className="text-neutral-300">HVAC Air Circulation</span>
+											<span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">Active</span>
+										</div>
+									</div>
+								</div>
 
-						</div>
+								{/* 6. Embedded Full Athlete Management Suite */}
+								<div className="pt-2">
+									<MemberTrackerView showToast={showToast} />
+								</div>
+
+								{/* 7. MODAL: Active Athletes Details */}
+								{viewingKpiModal === 'active' && (
+									<div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 font-sans">
+										<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={() => setViewingKpiModal(null)} />
+										<div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl border border-emerald-500/30 bg-neutral-950 p-5 sm:p-6 shadow-2xl flex flex-col text-white">
+											<div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
+												<div>
+													<h3 className="text-lg font-bold text-white flex items-center gap-2">
+														<span>Active Athletes on Floor</span>
+														<span className="rounded-full bg-emerald-500/20 text-emerald-300 text-xs px-2 py-0.5 font-bold font-mono">
+															{activeMembersList.length} Active
+														</span>
+													</h3>
+													<p className="text-xs text-neutral-400">Lifters with valid, paid gym memberships authorized for entry.</p>
+												</div>
+												<button onClick={() => setViewingKpiModal(null)} className="size-8 rounded-xl border border-white/10 bg-white/5 text-neutral-400 hover:text-white flex items-center justify-center cursor-pointer">
+													✕
+												</button>
+											</div>
+
+											<div className="flex-1 overflow-y-auto py-4 space-y-2.5">
+												{activeMembersList.length === 0 ? (
+													<div className="text-center py-12 text-neutral-400 text-xs">
+														No active lifters enrolled yet. Click &quot;+ Add Athlete&quot; to onboard your first member.
+													</div>
+												) : (
+													activeMembersList.map((m) => {
+														const diff = new Date(m.expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
+														const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24))
+														return (
+															<div key={m.id} className="flex items-center justify-between gap-3 p-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-emerald-500/30 transition-all">
+																<div className="flex items-center gap-3 min-w-0">
+																	<div className="size-10 rounded-xl overflow-hidden border border-white/15 bg-neutral-800 shrink-0">
+																		<img src={m.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'} alt={m.name} className="size-full object-cover" />
+																	</div>
+																	<div className="min-w-0">
+																		<div className="font-bold text-sm text-white truncate">{m.name}</div>
+																		<div className="text-xs text-neutral-400 truncate">{m.plan}</div>
+																		<div className="text-[11px] text-emerald-400 font-mono mt-0.5">{m.phone}</div>
+																	</div>
+																</div>
+																<div className="text-right shrink-0">
+																	<span className="inline-block rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 font-mono">
+																		{daysLeft}d left
+																	</span>
+																	<div className="text-[10px] text-neutral-500 mt-1">Exp: {m.expiryDate}</div>
+																</div>
+															</div>
+														)
+													})
+												)}
+											</div>
+
+											<div className="border-t border-white/10 pt-3 flex justify-between items-center shrink-0">
+												<span className="text-xs text-neutral-400">Total Active: {activeMembersList.length}</span>
+												<button
+													onClick={() => setViewingKpiModal(null)}
+													className="rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer"
+												>
+													Close Roster
+												</button>
+											</div>
+										</div>
+									</div>
+								)}
+
+								{/* 8. MODAL: Monthly Revenue Ledger */}
+								{viewingKpiModal === 'revenue' && (
+									<div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 font-sans">
+										<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={() => setViewingKpiModal(null)} />
+										<div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl border border-amber-400/30 bg-neutral-950 p-5 sm:p-6 shadow-2xl flex flex-col text-white">
+											<div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
+												<div>
+													<h3 className="text-lg font-bold text-white flex items-center gap-2">
+														<span>Monthly Revenue & Financial Ledger</span>
+														<span className="rounded-full bg-amber-400/20 text-amber-300 text-xs px-2 py-0.5 font-bold font-mono">
+															₹{monthRevenue.toLocaleString('en-IN')}
+														</span>
+													</h3>
+													<p className="text-xs text-neutral-400">Real-time collections, plan breakdown and targets.</p>
+												</div>
+												<button onClick={() => setViewingKpiModal(null)} className="size-8 rounded-xl border border-white/10 bg-white/5 text-neutral-400 hover:text-white flex items-center justify-center cursor-pointer">
+													✕
+												</button>
+											</div>
+
+											<div className="flex-1 overflow-y-auto py-4 space-y-4">
+												{/* Big Target Bar */}
+												<div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] p-4 space-y-2">
+													<div className="flex items-center justify-between text-xs">
+														<span className="text-neutral-400">Target Progress</span>
+														<span className="font-bold text-amber-300 font-mono">
+															₹{monthRevenue.toLocaleString('en-IN')} / ₹{ownerProfile.monthlyTarget.toLocaleString('en-IN')} ({Math.min(100, Math.round((monthRevenue / (ownerProfile.monthlyTarget || 1)) * 100))}%)
+														</span>
+													</div>
+													<div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+														<div
+															className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all"
+															style={{ width: `${Math.min(100, Math.max(5, (monthRevenue / (ownerProfile.monthlyTarget || 1)) * 100))}%` }}
+														/>
+													</div>
+												</div>
+
+												{/* Plan Breakdown Chips */}
+												<div>
+													<div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">Revenue by Plan Duration</div>
+													<div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+														{[
+															{ name: '1 Month', price: 1500 },
+															{ name: '3 Months', price: 4000 },
+															{ name: '6 Months', price: 7000 },
+															{ name: '1 Year', price: 12000 },
+															{ name: 'Personal Training', price: 6000 }
+														].map((tier) => {
+															const count = membersList.filter((m) => m.plan.includes(tier.name)).length
+															const rev = count * tier.price
+															return (
+																<div key={tier.name} className="p-3 rounded-xl border border-white/10 bg-white/[0.03]">
+																	<div className="text-[11px] text-neutral-300 font-medium truncate">{tier.name}</div>
+																	<div className="text-base font-bold text-white mt-1 font-mono">₹{rev.toLocaleString('en-IN')}</div>
+																	<div className="text-[10px] text-neutral-500">{count} enrolled (₹{tier.price.toLocaleString('en-IN')}/ea)</div>
+																</div>
+															)
+														})}
+													</div>
+												</div>
+
+												{/* Athlete Contribution List */}
+												<div>
+													<div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">Member Contributions ({membersList.length})</div>
+													<div className="space-y-1.5 max-h-48 overflow-y-auto">
+														{membersList.length === 0 ? (
+															<div className="text-center py-6 text-neutral-500 text-xs">No ledger entries recorded yet.</div>
+														) : (
+															membersList.map((m) => (
+																<div key={m.id} className="flex items-center justify-between p-2.5 rounded-xl border border-white/5 bg-black/40 text-xs">
+																	<div>
+																		<div className="font-semibold text-white">{m.name}</div>
+																		<div className="text-[10px] text-neutral-400">{m.plan}</div>
+																	</div>
+																	<div className="font-mono font-bold text-amber-300">
+																		+₹{getPlanPrice(m.plan).toLocaleString('en-IN')}
+																	</div>
+																</div>
+															))
+														)}
+													</div>
+												</div>
+											</div>
+
+											<div className="border-t border-white/10 pt-3 flex justify-between items-center shrink-0">
+												<button
+													onClick={() => {
+														exportMembersToCsv(membersList, ownerProfile)
+														showToast('Revenue Ledger exported to CSV!')
+													}}
+													className="rounded-xl border border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 px-3.5 py-2 text-xs font-bold text-amber-300 transition-all flex items-center gap-1.5 cursor-pointer"
+												>
+													<span>Export CSV Ledger</span>
+												</button>
+												<button
+													onClick={() => setViewingKpiModal(null)}
+													className="rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer"
+												>
+													Close Ledger
+												</button>
+											</div>
+										</div>
+									</div>
+								)}
+
+								{/* 9. MODAL: Pending Dues & Recovery Radar */}
+								{viewingKpiModal === 'dues' && (
+									<div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 font-sans">
+										<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={() => setViewingKpiModal(null)} />
+										<div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl border border-rose-500/30 bg-neutral-950 p-5 sm:p-6 shadow-2xl flex flex-col text-white">
+											<div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
+												<div>
+													<h3 className="text-lg font-bold text-white flex items-center gap-2">
+														<span>Pending Dues & Recovery Radar</span>
+														<span className="rounded-full bg-rose-500/20 text-rose-300 text-xs px-2 py-0.5 font-bold font-mono">
+															₹{pendingDues.toLocaleString('en-IN')} Due
+														</span>
+													</h3>
+													<p className="text-xs text-neutral-400">Members with expired passes or concluding in ≤3 days.</p>
+												</div>
+												<button onClick={() => setViewingKpiModal(null)} className="size-8 rounded-xl border border-white/10 bg-white/5 text-neutral-400 hover:text-white flex items-center justify-center cursor-pointer">
+													✕
+												</button>
+											</div>
+
+											<div className="flex-1 overflow-y-auto py-4 space-y-2.5">
+												{dueAndExpiringMembers.length === 0 ? (
+													<div className="text-center py-12 text-emerald-400 text-xs">
+														🎉 All athlete passes are currently valid! Zero pending fee dues.
+													</div>
+												) : (
+													dueAndExpiringMembers.map((m) => {
+														const diff = new Date(m.expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
+														const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24))
+														const isExpired = daysLeft < 0
+														const feeAmount = getPlanPrice(m.plan)
+
+														return (
+															<div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl border border-rose-500/20 bg-rose-500/[0.04]">
+																<div className="flex items-center gap-3 min-w-0">
+																	<div className="size-10 rounded-xl overflow-hidden border border-rose-500/30 bg-neutral-800 shrink-0">
+																		<img src={m.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'} alt={m.name} className="size-full object-cover" />
+																	</div>
+																	<div className="min-w-0">
+																		<div className="font-bold text-sm text-white truncate">{m.name}</div>
+																		<div className="text-xs text-neutral-400">{m.plan} • <span className="text-rose-400 font-mono font-bold">₹{feeAmount.toLocaleString('en-IN')} Due</span></div>
+																		<div className="text-[11px] text-neutral-500 font-mono">{m.phone}</div>
+																	</div>
+																</div>
+
+																<div className="flex items-center gap-2 justify-end">
+																	<span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold font-mono ${isExpired ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-400/20 text-amber-300'}`}>
+																		{isExpired ? 'Expired' : `${daysLeft}d left`}
+																	</span>
+																	{/* 1-Click WhatsApp Alert button */}
+																	<button
+																		onClick={() => {
+																			const message = formatWhatsAppReminder({
+																				memberName: m.name,
+																				planName: m.plan,
+																				expiryDate: m.expiryDate,
+																				daysLeft,
+																				amount: feeAmount,
+																				upiId: ownerProfile.upiId,
+																				ownerName: ownerProfile.ownerName,
+																				ownerPhone: ownerProfile.phone,
+																				gymName: ownerProfile.gymName
+																			})
+																			const waUrl = getWhatsAppUrl(m.phone, message)
+																			window.open(waUrl, '_blank')
+																			showToast(`WhatsApp due alert dispatched to ${m.name}!`)
+																		}}
+																		className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-semibold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+																	>
+																		<svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+																			<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+																		</svg>
+																		<span>WhatsApp</span>
+																	</button>
+																</div>
+															</div>
+														)
+													})
+												)}
+											</div>
+
+											<div className="border-t border-white/10 pt-3 flex justify-between items-center shrink-0">
+												<span className="text-xs text-neutral-400">Total Dues: ₹{pendingDues.toLocaleString('en-IN')}</span>
+												<button
+													onClick={() => setViewingKpiModal(null)}
+													className="rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer"
+												>
+													Close Radar
+												</button>
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
 						)
 					)}
 
