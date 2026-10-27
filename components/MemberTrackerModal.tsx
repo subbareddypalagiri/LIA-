@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @next/next/no-img-element */
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -42,17 +43,14 @@ export interface MemberTrackerModalProps {
 	renderTrigger?: (open: () => void, expiringCount: number) => React.ReactNode
 }
 
-export default function MemberTrackerModal({
-	className,
-	renderTrigger
-}: MemberTrackerModalProps = {}) {
-	const [isOpen, setIsOpen] = useState(false)
-	const [isMounted, setIsMounted] = useState(false)
+export function MemberTrackerView({
+	showToast: parentToast,
+	onClose
+}: {
+	showToast?: (msg: string) => void
+	onClose?: () => void
+}) {
 	const [members, setMembers] = useState<GymMember[]>([])
-
-	useEffect(() => {
-		setIsMounted(true)
-	}, [])
 	const [filter, setFilter] = useState<'all' | 'expiring' | 'active' | 'expired'>('all')
 	const [search, setSearch] = useState('')
 
@@ -93,7 +91,7 @@ export default function MemberTrackerModal({
 		fetchOwnerProfileData().then((prof) => {
 			setOwnerProfile(prof)
 		})
-	}, [isOpen])
+	}, [])
 
 	const saveMembers = (newMembers: GymMember[]) => {
 		setMembers(newMembers)
@@ -107,6 +105,7 @@ export default function MemberTrackerModal({
 
 	const showToast = (msg: string) => {
 		setToastMsg(msg)
+		if (parentToast) parentToast(msg)
 		setTimeout(() => setToastMsg(null), 4000)
 	}
 
@@ -272,125 +271,73 @@ export default function MemberTrackerModal({
 	})
 
 	return (
-		<>
-			{/* Trigger Button in Top Nav */}
-			{renderTrigger ? (
-				renderTrigger(() => setIsOpen(true), expiringCount)
-			) : (
-				<button
-					type="button"
-					onClick={() => setIsOpen(true)}
-					className={`group relative flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold tracking-wider text-neutral-200 backdrop-blur-xl transition-all duration-200 hover:border-amber-400/50 hover:bg-white/10 hover:text-white cursor-pointer select-none ${
-						className || ''
-					}`}
-				>
-					<span className="relative flex size-2 shrink-0">
-						{expiringCount > 0 ? (
-							<>
-								<span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
-								<span className="relative inline-flex size-2 rounded-full bg-amber-400"></span>
-							</>
-						) : (
-							<span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
-						)}
-					</span>
-					<span className="uppercase">Members</span>
-					{expiringCount > 0 ? (
-						<span className="rounded-full bg-amber-500/25 px-1.5 py-0.2 text-[10px] font-bold text-amber-300">
-							{expiringCount} Due
-						</span>
-					) : (
-						<span className="hidden sm:inline-block rounded-full bg-emerald-500/15 px-1.5 py-0.2 text-[9px] font-medium text-emerald-300">
-							Live
-						</span>
-					)}
-				</button>
+		<div className="space-y-4 font-sans text-white">
+			{/* Toast */}
+			{toastMsg && (
+				<div className="fixed top-6 left-1/2 z-[110] -translate-x-1/2 rounded-full border border-amber-400/40 bg-neutral-900/95 px-5 py-2.5 text-xs font-semibold text-amber-300 shadow-2xl backdrop-blur-xl animate-in fade-in">
+					{toastMsg}
+				</div>
 			)}
 
-			{/* Portaled Modal Overlay to root document.body to avoid parent transform clipping */}
-			{isMounted && typeof document !== 'undefined' && createPortal(
-				<>
-					{/* Main Modal Overlay - Centered Executive Dashboard Architecture & Mobile Bottom-Sheet */}
-					{isOpen && (
-				<div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-5 overflow-y-auto">
-					<div
-						className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
-						onClick={() => setIsOpen(false)}
-					/>
+			{/* Header Bar */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+				<div>
+					<div className="flex items-center gap-2 mb-1">
+						<h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-sans">
+							Athlete Roster & Passes
+						</h2>
+						<span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+							{members.length} Enrolled
+						</span>
+						{isCloudSyncEnabled() && (
+							<span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-semibold text-emerald-400">
+								<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+								Cloud Active
+							</span>
+						)}
+					</div>
+					<p className="text-xs text-neutral-400">
+						Duration tracking, instant WhatsApp fee reminders, member edit & photo induction.
+					</p>
+				</div>
 
-					<div className="relative z-10 flex h-[95dvh] sm:h-[92vh] sm:max-h-[820px] w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/20 bg-neutral-950 shadow-2xl backdrop-blur-2xl my-0 sm:my-auto">
-						{/* Mobile Pull Handle Indicator */}
-						<div className="flex sm:hidden justify-center pt-2.5 pb-1 bg-neutral-950 shrink-0">
-							<div className="h-1 w-10 rounded-full bg-white/25" />
-						</div>
+				<div className="flex items-center gap-2 shrink-0">
+					<button
+						onClick={() => {
+							exportMembersToCsv(members, ownerProfile)
+							showToast('Member roster & revenue ledger exported to CSV successfully!')
+						}}
+						title="Export Members to Excel/CSV"
+						className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all shadow-sm active:scale-95"
+					>
+						<svg className="size-3.5 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+							<polyline points="7 10 12 15 17 10" />
+							<line x1="12" x2="12" y1="15" y2="3" />
+						</svg>
+						<span>Export CSV</span>
+					</button>
 
-						{/* Header Bar */}
-						<div className="flex items-center justify-between border-b border-white/10 px-3.5 py-2.5 sm:px-6 sm:py-3 bg-neutral-950">
-							<div className="min-w-0 pr-2">
-								<div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
-									<h2 className="text-base sm:text-xl font-bold tracking-tight text-white uppercase truncate">
-										LIA IRON CLUB
-									</h2>
-									<span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold tracking-wider text-amber-400 uppercase whitespace-nowrap">
-										Membership Command
-									</span>
-									<span
-										className={`hidden xs:inline-flex items-center gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${
-											isCloudSyncEnabled()
-												? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
-												: 'bg-white/5 text-white/50 border border-white/15'
-										}`}
-									>
-										<span
-											className={`size-1.5 rounded-full ${
-												isCloudSyncEnabled() ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-											}`}
-										/>
-										{isCloudSyncEnabled() ? 'Cloud Sync Active' : 'Local Storage Mode'}
-									</span>
-								</div>
-								<p className="mt-0.5 text-[10.5px] sm:text-xs text-white/50 line-clamp-1 sm:line-clamp-none">
-									Athlete duration management, fee expiry tracking, and 1-click WhatsApp payment alerts.
-								</p>
-							</div>
+					<button
+						onClick={() => setIsAddingNew(true)}
+						className="flex items-center gap-1.5 rounded-xl border border-amber-400 bg-amber-400 px-3.5 py-2 text-xs font-bold text-black shadow-md hover:bg-amber-300 active:scale-95 transition-all"
+					>
+						<svg className="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+							<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+						</svg>
+						<span>+ Add Athlete</span>
+					</button>
 
-							<div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-								<button
-									onClick={() => {
-										exportMembersToCsv(members, ownerProfile)
-										showToast('Member roster & revenue ledger exported to CSV successfully!')
-									}}
-									title="Export Members & Revenue Ledger to CSV/Excel"
-									className="flex items-center gap-1 sm:gap-1.5 rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all shadow-md active:scale-[0.98] whitespace-nowrap"
-								>
-									<svg className="size-3.5 sm:size-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-										<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-										<polyline points="7 10 12 15 17 10" />
-										<line x1="12" x2="12" y1="15" y2="3" />
-									</svg>
-									<span className="hidden xs:inline">Export CSV</span>
-								</button>
-
-								<button
-									onClick={() => setIsAddingNew(true)}
-									className="flex items-center gap-1 sm:gap-1.5 rounded-xl border border-amber-400 bg-amber-400 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-black uppercase tracking-wider transition-all hover:bg-amber-300 shadow-md active:scale-[0.98] whitespace-nowrap"
-								>
-									<svg className="size-3.5 sm:size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-										<path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-									</svg>
-									<span>Add Lifter</span>
-								</button>
-
-								<button
-									onClick={() => setIsOpen(false)}
-									className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/60 transition-all hover:border-white/30 hover:bg-white/10 hover:text-white shrink-0"
-								>
-									<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-										<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-									</svg>
-								</button>
-							</div>
-						</div>
+					{onClose && (
+						<button
+							onClick={onClose}
+							className="flex size-8 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-neutral-400 hover:text-white transition-all ml-1"
+						>
+							✕
+						</button>
+					)}
+				</div>
+			</div>
 
 						{/* Compact Cockpit KPI Ribbon */}
 						<div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.02] px-3.5 sm:px-6 py-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -557,7 +504,7 @@ export default function MemberTrackerModal({
 											<line x1="22" x2="16" y1="11" y2="11" />
 										</svg>
 									</div>
-									<h3 className="font-heading text-lg font-bold text-white mb-1">No Members Enrolled Yet</h3>
+									<h3 className="font-sans text-lg font-bold text-white mb-1">No Members Enrolled Yet</h3>
 									<p className="text-xs text-white/50 mb-5 text-center">
 										Your athlete roster is currently clean. Click below to onboard your first lifter.
 									</p>
@@ -724,13 +671,13 @@ export default function MemberTrackerModal({
 														</div>
 													</div>
 
-													{/* Primary Dispatch & Edit Action Buttons */}
-													<div className="grid grid-cols-12 gap-1.5 sm:gap-2 pt-0.5">
+													{/* Primary Dispatch, Edit & Delete Action Buttons */}
+													<div className="grid grid-cols-4 gap-1.5 pt-0.5">
 														{/* Direct 1-Click WhatsApp Reminder Button */}
 														<button
 															onClick={() => dispatchDirectWhatsApp(member)}
 															title={`Direct 1-Click WhatsApp reminder to ${member.name} (${member.phone})`}
-															className="col-span-6 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 sm:py-2 text-xs font-bold text-white shadow-md shadow-emerald-950/50 hover:bg-emerald-500 transition-all active:scale-[0.98]"
+															className="flex items-center justify-center gap-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 text-xs font-semibold shadow-sm active:scale-95 transition-all"
 														>
 															<svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
 																<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
@@ -738,39 +685,44 @@ export default function MemberTrackerModal({
 															<span>WhatsApp</span>
 														</button>
 
-														{/* UPI QR Standee & Preview Button */}
+														{/* Direct +30 Days Renewal */}
 														<button
-															onClick={() => openWhatsAppModal(member)}
-															title="View Payment QR Standee & WhatsApp Preview"
-															className="col-span-3 flex items-center justify-center gap-1 rounded-xl border border-amber-400/30 bg-amber-400/10 px-2 py-1.5 sm:py-2 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all"
+															onClick={() => extendDuration(member.id, 30)}
+															title="Extend pass by 30 days"
+															className="flex items-center justify-center gap-1 rounded-xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 py-1.5 text-xs font-semibold active:scale-95 transition-all"
 														>
-															<svg className="size-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-																<rect width="5" height="5" x="3" y="3" rx="1" />
-																<rect width="5" height="5" x="16" y="3" rx="1" />
-																<rect width="5" height="5" x="3" y="16" rx="1" />
-																<path d="M21 16h-3a2 2 0 0 0-2 2v3" />
-																<path d="M21 21v.01" />
-																<path d="M12 7v3a2 2 0 0 1-2 2H7" />
-																<path d="M3 12h.01" />
-																<path d="M12 3h.01" />
-																<path d="M12 16v.01" />
-																<path d="M16 12h1" />
-																<path d="M21 12v.01" />
-																<path d="M12 21v-1" />
-															</svg>
-															<span>QR Standee</span>
+															<span>+30 Days</span>
 														</button>
 
 														{/* Edit Button */}
 														<button
 															onClick={() => setEditingMember(member)}
-															title="Edit lifter"
-															className="col-span-3 flex items-center justify-center gap-1 rounded-xl border border-white/15 bg-white/5 px-2 py-1.5 sm:py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all"
+															title="Edit athlete profile, plan or dates"
+															className="flex items-center justify-center gap-1 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white py-1.5 text-xs font-semibold active:scale-95 transition-all"
 														>
-															<svg className="size-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+															<svg className="size-3.5 text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 																<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
 															</svg>
 															<span>Edit</span>
+														</button>
+
+														{/* Direct Delete Button */}
+														<button
+															onClick={() => {
+																if (confirm(`Are you sure you want to delete "${member.name}" from gym roster?`)) {
+																	const next = members.filter((m) => m.id !== member.id)
+																	saveMembers(next)
+																	deleteMemberData(member.id)
+																	showToast(`Athlete ${member.name} removed from roster.`)
+																}
+															}}
+															title="Delete athlete from gym database"
+															className="flex items-center justify-center gap-1 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 py-1.5 text-xs font-semibold active:scale-95 transition-all"
+														>
+															<svg className="size-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+																<polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+															</svg>
+															<span>Delete</span>
 														</button>
 													</div>
 												</div>
@@ -779,10 +731,7 @@ export default function MemberTrackerModal({
 									})}
 								</div>
 							)}
-						</div>
-					</div>
-				</div>
-			)}
+			</div>
 
 			{/* Owner Edit Member Modal */}
 			{editingMember && (
@@ -844,7 +793,76 @@ export default function MemberTrackerModal({
 					}}
 				/>
 			)}
-				</>,
+		</div>
+	)
+}
+
+export default function MemberTrackerModal({
+	className,
+	renderTrigger
+}: MemberTrackerModalProps = {}) {
+	const [isOpen, setIsOpen] = useState(false)
+	const [isMounted, setIsMounted] = useState(false)
+	const [members, setMembers] = useState<GymMember[]>([])
+
+	useEffect(() => {
+		setIsMounted(true)
+		fetchMembersData(INITIAL_MEMBERS).then((data) => {
+			setMembers(data)
+		})
+	}, [isOpen])
+
+	const expiringCount = members.filter((m) => {
+		const diff = new Date(m.expiryDate).getTime() - new Date().setHours(0, 0, 0, 0)
+		const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
+		return days >= 0 && days <= 3
+	}).length
+
+	return (
+		<>
+			{renderTrigger ? (
+				renderTrigger(() => setIsOpen(true), expiringCount)
+			) : (
+				<button
+					type="button"
+					onClick={() => setIsOpen(true)}
+					className={`group relative flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:border-amber-400/50 hover:bg-white/10 hover:text-white cursor-pointer select-none ${
+						className || ''
+					}`}
+				>
+					<span className="relative flex size-2 shrink-0">
+						{expiringCount > 0 ? (
+							<span className="relative inline-flex size-2 rounded-full bg-amber-400 animate-ping" />
+						) : (
+							<span className="size-2 rounded-full bg-emerald-400" />
+						)}
+					</span>
+					<span>Members</span>
+					{expiringCount > 0 && (
+						<span className="rounded-full bg-amber-500/25 px-1.5 py-0.2 text-[10px] font-bold text-amber-300">
+							{expiringCount} Due
+						</span>
+					)}
+				</button>
+			)}
+
+			{isMounted && typeof document !== 'undefined' && createPortal(
+				isOpen && (
+					<div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-5 overflow-y-auto font-sans">
+						<div
+							className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
+							onClick={() => setIsOpen(false)}
+						/>
+						<div className="relative z-10 flex h-[95dvh] sm:h-[92vh] sm:max-h-[840px] w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/20 bg-neutral-950 p-4 sm:p-6 shadow-2xl backdrop-blur-2xl my-0 sm:my-auto text-white">
+							<div className="flex sm:hidden justify-center pt-1 pb-2 shrink-0">
+								<div className="h-1 w-10 rounded-full bg-white/25" />
+							</div>
+							<div className="flex-1 overflow-y-auto">
+								<MemberTrackerView onClose={() => setIsOpen(false)} />
+							</div>
+						</div>
+					</div>
+				),
 				document.body
 			)}
 		</>
@@ -869,7 +887,8 @@ function EditMemberDialog({
 	const [plan, setPlan] = useState(member.plan)
 	const [expiryDate, setExpiryDate] = useState(member.expiryDate)
 	const [photoUrl, setPhotoUrl] = useState(member.photoUrl)
-	const fileInputRef = useRef<HTMLInputElement>(null)
+	const cameraInputRef = useRef<HTMLInputElement>(null)
+	const galleryInputRef = useRef<HTMLInputElement>(null)
 
 	const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]
@@ -885,15 +904,18 @@ function EditMemberDialog({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-			<div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-			<div className="relative w-full max-w-lg rounded-2xl sm:rounded-3xl border border-white/20 bg-neutral-950 p-4 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] overflow-y-auto my-auto">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans">
+			<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
+			<div className="relative w-full max-w-lg rounded-3xl border border-amber-400/30 bg-neutral-950 p-5 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] overflow-y-auto my-auto text-white">
 				<div className="flex items-center justify-between border-b border-white/10 pb-4">
 					<div>
-						<h3 className="font-serif text-xl font-bold text-white">Edit Gym Member</h3>
-						<p className="text-xs text-white/50">Owner administrative controls</p>
+						<h3 className="text-lg font-bold text-white font-sans flex items-center gap-2">
+							<span>Edit Athlete Credentials</span>
+							<span className="size-2 rounded-full bg-amber-400" />
+						</h3>
+						<p className="text-xs text-neutral-400">Update lifter details, plan duration or capture new photo.</p>
 					</div>
-					<button onClick={onClose} className="text-white/50 hover:text-white">
+					<button onClick={onClose} className="text-neutral-400 hover:text-white text-sm p-1">
 						✕
 					</button>
 				</div>
@@ -911,89 +933,116 @@ function EditMemberDialog({
 							photoUrl
 						})
 					}}
-					className="mt-5 space-y-4 text-xs"
+					className="mt-4 space-y-4 text-xs font-sans"
 				>
-					{/* Photo Picker */}
-					<div className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-3">
-						<div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-neutral-800">
+					{/* Photo Picker with Camera + Gallery */}
+					<div className="flex items-center gap-3.5 rounded-2xl border border-amber-400/20 bg-white/[0.03] p-3">
+						<div className="relative size-16 shrink-0 overflow-hidden rounded-full border-2 border-amber-400 p-0.5 bg-neutral-900 shadow-md">
 							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img src={photoUrl || 'https://via.placeholder.com/150'} alt="Avatar" className="size-full object-cover" />
+							<img src={photoUrl || 'https://via.placeholder.com/150'} alt="Avatar" className="size-full rounded-full object-cover" />
 						</div>
-						<div>
-							<button
-								type="button"
-								onClick={() => fileInputRef.current?.click()}
-								className="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
-							>
-								Upload New Photo
-							</button>
+						<div className="flex-1 min-w-0">
+							<div className="text-xs font-bold text-white mb-1.5">Athlete Profile Photo</div>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={() => cameraInputRef.current?.click()}
+									className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-black px-3 py-1.5 text-[11px] font-bold shadow-sm active:scale-95 transition-all flex items-center gap-1"
+								>
+									<svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+										<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+										<circle cx="12" cy="13" r="4" />
+									</svg>
+									<span>Take Photo</span>
+								</button>
+								<button
+									type="button"
+									onClick={() => galleryInputRef.current?.click()}
+									className="rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 text-[11px] font-semibold active:scale-95 transition-all flex items-center gap-1"
+								>
+									<svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+										<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+										<circle cx="8.5" cy="8.5" r="1.5" />
+										<polyline points="21 15 16 10 5 21" />
+									</svg>
+									<span>Gallery</span>
+								</button>
+							</div>
 							<input
-								ref={fileInputRef}
+								ref={cameraInputRef}
+								type="file"
+								accept="image/*"
+								capture="user"
+								onChange={handlePhotoUpload}
+								className="hidden"
+							/>
+							<input
+								ref={galleryInputRef}
 								type="file"
 								accept="image/*"
 								onChange={handlePhotoUpload}
 								className="hidden"
 							/>
-							<p className="mt-1 text-[11px] text-white/40">Upload member profile or transformation photo</p>
 						</div>
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<label className="text-white/60">Full Name</label>
+							<label className="text-neutral-400 font-medium block mb-1">Athlete Full Name</label>
 							<input
 								type="text"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
 								required
-								className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
 							/>
 						</div>
 						<div>
-							<label className="text-white/60">Phone Number</label>
+							<label className="text-neutral-400 font-medium block mb-1">WhatsApp Phone Number</label>
 							<input
 								type="text"
 								value={phone}
 								onChange={(e) => setPhone(e.target.value)}
 								required
-								className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white focus:border-amber-400 focus:outline-none font-mono"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label className="text-white/60">Registered Email Address (for 3-day alerts)</label>
+						<label className="text-neutral-400 font-medium block mb-1">Registered Email Address (for Alerts)</label>
 						<input
 							type="email"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							required
-							className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+							className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white focus:border-amber-400 focus:outline-none font-mono"
 						/>
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<label className="text-white/60">Membership Plan</label>
+							<label className="text-neutral-400 font-medium block mb-1">Membership Plan</label>
 							<select
 								value={plan}
 								onChange={(e) => setPlan(e.target.value)}
-								className="mt-1 w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
 							>
-								<option value="1 Month Kickstart">1 Month Kickstart</option>
-								<option value="3 Months Hypertrophy">3 Months Hypertrophy</option>
-								<option value="6 Months Classic Iron">6 Months Classic Iron</option>
-								<option value="Annual Elite Athlete">Annual Elite Athlete</option>
+								<option value="1 Month Kickstart (₹1,500)">1 Month Kickstart (₹1,500)</option>
+								<option value="3 Months Hypertrophy (₹4,000)">3 Months Hypertrophy (₹4,000)</option>
+								<option value="6 Months Classic Iron (₹7,000)">6 Months Classic Iron (₹7,000)</option>
+								<option value="1 Year Elite Athlete (₹12,000)">1 Year Elite Athlete (₹12,000)</option>
+								<option value="Personal Training 1-on-1 (₹6,000/mo)">Personal Training (₹6,000/mo)</option>
 							</select>
 						</div>
 						<div>
-							<label className="text-white/60">Expiry Date</label>
+							<label className="text-neutral-400 font-medium block mb-1">Expiry Date</label>
 							<input
 								type="date"
 								value={expiryDate}
 								onChange={(e) => setExpiryDate(e.target.value)}
 								required
-								className="mt-1 w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
 							/>
 						</div>
 					</div>
@@ -1002,25 +1051,28 @@ function EditMemberDialog({
 						<button
 							type="button"
 							onClick={() => {
-								if (confirm('Are you sure you want to delete this member?')) {
+								if (confirm(`Are you sure you want to delete athlete "${member.name}" from gym roster?`)) {
 									onDelete(member.id)
 								}
 							}}
-							className="rounded-xl border border-red-500/30 px-3 py-2 text-red-400 hover:bg-red-500/10"
+							className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-3.5 py-2 text-rose-300 hover:bg-rose-500/20 font-bold active:scale-95 transition-all flex items-center gap-1.5"
 						>
-							Delete Member
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+								<polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+							</svg>
+							<span>Delete Member</span>
 						</button>
 						<div className="flex gap-2">
 							<button
 								type="button"
 								onClick={onClose}
-								className="rounded-xl border border-white/10 px-4 py-2 text-white/60 hover:text-white"
+								className="rounded-xl border border-white/15 px-4 py-2 text-neutral-400 hover:text-white"
 							>
 								Cancel
 							</button>
 							<button
 								type="submit"
-								className="rounded-xl bg-white px-5 py-2 font-semibold text-black hover:bg-white/90"
+								className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-5 py-2 font-bold text-black hover:brightness-105 active:scale-95 transition-all shadow-md"
 							>
 								Save Changes
 							</button>
@@ -1032,7 +1084,7 @@ function EditMemberDialog({
 	)
 }
 
-// Dialog: Add New Member (Gym Owner)
+// Dialog: Add New Member (Athlete Induction Suite)
 function AddNewMemberDialog({
 	onClose,
 	onAdd
@@ -1043,10 +1095,11 @@ function AddNewMemberDialog({
 	const [name, setName] = useState('')
 	const [email, setEmail] = useState('')
 	const [phone, setPhone] = useState('')
-	const [plan, setPlan] = useState('3 Months Hypertrophy')
+	const [plan, setPlan] = useState('3 Months Hypertrophy (₹4,000)')
 	const [durationMonths, setDurationMonths] = useState(3)
 	const [photoUrl, setPhotoUrl] = useState('')
-	const fileInputRef = useRef<HTMLInputElement>(null)
+	const cameraInputRef = useRef<HTMLInputElement>(null)
+	const galleryInputRef = useRef<HTMLInputElement>(null)
 
 	const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]
@@ -1063,14 +1116,16 @@ function AddNewMemberDialog({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
+		if (!name.trim()) return
+
 		const now = new Date()
 		const expiry = new Date(now.getTime() + durationMonths * 30 * 24 * 60 * 60 * 1000)
 
 		const newMember: GymMember = {
 			id: 'mem-' + Date.now(),
 			name,
-			email,
-			phone,
+			email: email || `${name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`,
+			phone: phone || '+91 98765 00000',
 			plan,
 			photoUrl:
 				photoUrl ||
@@ -1082,89 +1137,129 @@ function AddNewMemberDialog({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-			<div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-			<div className="relative w-full max-w-lg rounded-2xl sm:rounded-3xl border border-white/20 bg-neutral-950 p-4 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] overflow-y-auto my-auto">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans">
+			<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
+			<div className="relative w-full max-w-lg rounded-3xl border border-amber-400/30 bg-neutral-950 p-5 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] overflow-y-auto my-auto text-white">
 				<div className="flex items-center justify-between border-b border-white/10 pb-4">
 					<div>
-						<h3 className="font-serif text-xl font-bold text-white">Register New Member</h3>
-						<p className="text-xs text-white/50">Capture photo, track duration, and set alert email</p>
+						<h3 className="text-lg font-bold text-white font-sans flex items-center gap-2">
+							<span>Athlete Induction Suite</span>
+							<span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+						</h3>
+						<p className="text-xs text-neutral-400">Live camera snap, WhatsApp credentials & instant digital pass.</p>
 					</div>
-					<button onClick={onClose} className="text-white/50 hover:text-white">
+					<button onClick={onClose} className="text-neutral-400 hover:text-white text-sm p-1">
 						✕
 					</button>
 				</div>
 
-				<form onSubmit={handleSubmit} className="mt-5 space-y-4 text-xs">
-					{/* Photo Upload */}
-					<div className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-3">
-						<div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-neutral-800">
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src={photoUrl || 'https://via.placeholder.com/150?text=Photo'}
-								alt="Avatar"
-								className="size-full object-cover"
-							/>
+				<form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs font-sans">
+					{/* Photo Capture & Preview */}
+					<div className="p-3.5 rounded-2xl border border-amber-400/30 bg-black/60 flex flex-col items-center text-center">
+						<div className="relative size-20 rounded-full border-2 border-amber-400 p-0.5 shadow-md mb-2 bg-neutral-900">
+							{photoUrl ? (
+								/* eslint-disable-next-line @next/next/no-img-element */
+								<img src={photoUrl} alt="Athlete Snap" className="size-full rounded-full object-cover" />
+							) : (
+								<div className="size-full rounded-full bg-neutral-900 flex items-center justify-center text-neutral-400">
+									<svg className="size-7 text-amber-400/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+										<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+										<circle cx="12" cy="7" r="4" />
+									</svg>
+								</div>
+							)}
+							{photoUrl && (
+								<span className="absolute bottom-0 right-0 size-5 rounded-full bg-amber-400 text-black flex items-center justify-center text-[10px] font-black shadow">
+									✓
+								</span>
+							)}
 						</div>
-						<div>
+
+						<span className="text-xs font-bold text-white block">Athlete Profile Photo</span>
+						<span className="text-[10px] text-neutral-400 mb-2.5 block">Take direct live camera snapshot or choose from gallery</span>
+
+						<div className="flex items-center gap-2 w-full">
 							<button
 								type="button"
-								onClick={() => fileInputRef.current?.click()}
-								className="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+								onClick={() => cameraInputRef.current?.click()}
+								className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition"
 							>
-								Upload Member Photo
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+									<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+									<circle cx="12" cy="13" r="4" />
+								</svg>
+								<span>Take Photo</span>
 							</button>
-							<input
-								ref={fileInputRef}
-								type="file"
-								accept="image/*"
-								onChange={handlePhotoUpload}
-								className="hidden"
-							/>
-							<p className="mt-1 text-[11px] text-white/40">Upload headshot or check-in photo</p>
+							<button
+								type="button"
+								onClick={() => galleryInputRef.current?.click()}
+								className="flex-1 py-2 px-3 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 active:scale-95 transition"
+							>
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+									<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+									<circle cx="8.5" cy="8.5" r="1.5" />
+									<polyline points="21 15 16 10 5 21" />
+								</svg>
+								<span>Gallery</span>
+							</button>
 						</div>
+
+						<input
+							ref={cameraInputRef}
+							type="file"
+							accept="image/*"
+							capture="user"
+							onChange={handlePhotoUpload}
+							className="hidden"
+						/>
+						<input
+							ref={galleryInputRef}
+							type="file"
+							accept="image/*"
+							onChange={handlePhotoUpload}
+							className="hidden"
+						/>
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<label className="text-white/60">Full Name</label>
+							<label className="text-neutral-400 font-medium block mb-1">Athlete Full Name *</label>
 							<input
 								type="text"
 								placeholder="e.g. Varun Teja"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
 								required
-								className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
 							/>
 						</div>
 						<div>
-							<label className="text-white/60">Phone</label>
+							<label className="text-neutral-400 font-medium block mb-1">WhatsApp Phone *</label>
 							<input
 								type="text"
 								placeholder="+91 98765 00000"
 								value={phone}
 								onChange={(e) => setPhone(e.target.value)}
 								required
-								className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white focus:border-amber-400 focus:outline-none font-mono"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label className="text-white/60">Registered Email (Alerts will be sent here)</label>
+						<label className="text-neutral-400 font-medium block mb-1">Email Address (Optional)</label>
 						<input
 							type="email"
-							placeholder="member@gmail.com"
+							placeholder="athlete@gmail.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
-							required
-							className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+							className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white focus:border-amber-400 focus:outline-none font-mono"
 						/>
 					</div>
 
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<label className="text-white/60">Select Plan</label>
+							<label className="text-neutral-400 font-medium block mb-1">Select Membership Plan</label>
 							<select
 								value={plan}
 								onChange={(e) => {
@@ -1172,42 +1267,43 @@ function AddNewMemberDialog({
 									if (e.target.value.includes('1 Month')) setDurationMonths(1)
 									if (e.target.value.includes('3 Months')) setDurationMonths(3)
 									if (e.target.value.includes('6 Months')) setDurationMonths(6)
-									if (e.target.value.includes('Annual')) setDurationMonths(12)
+									if (e.target.value.includes('1 Year') || e.target.value.includes('Annual')) setDurationMonths(12)
 								}}
-								className="mt-1 w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
 							>
-								<option value="1 Month Kickstart">1 Month Kickstart</option>
-								<option value="3 Months Hypertrophy">3 Months Hypertrophy</option>
-								<option value="6 Months Classic Iron">6 Months Classic Iron</option>
-								<option value="Annual Elite Athlete">Annual Elite Athlete</option>
+								<option value="1 Month Kickstart (₹1,500)">1 Month Kickstart (₹1,500)</option>
+								<option value="3 Months Hypertrophy (₹4,000)">3 Months Hypertrophy (₹4,000)</option>
+								<option value="6 Months Classic Iron (₹7,000)">6 Months Classic Iron (₹7,000)</option>
+								<option value="1 Year Elite Athlete (₹12,000)">1 Year Elite Athlete (₹12,000)</option>
+								<option value="Personal Training 1-on-1 (₹6,000/mo)">Personal Training (₹6,000/mo)</option>
 							</select>
 						</div>
 						<div>
-							<label className="text-white/60">Duration (Months)</label>
+							<label className="text-neutral-400 font-medium block mb-1">Duration (Months)</label>
 							<input
 								type="number"
 								min="1"
 								max="24"
 								value={durationMonths}
 								onChange={(e) => setDurationMonths(Number(e.target.value))}
-								className="mt-1 w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-white focus:border-white/30 focus:outline-none"
+								className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
 							/>
 						</div>
 					</div>
 
-					<div className="flex justify-end gap-2 border-t border-white/10 pt-4">
+					<div className="flex items-center justify-end gap-2 border-t border-white/10 pt-4">
 						<button
 							type="button"
 							onClick={onClose}
-							className="rounded-xl border border-white/10 px-4 py-2 text-white/60 hover:text-white"
+							className="rounded-xl border border-white/15 px-4 py-2.5 text-neutral-400 hover:text-white"
 						>
 							Cancel
 						</button>
 						<button
 							type="submit"
-							className="rounded-xl bg-white px-5 py-2 font-semibold text-black hover:bg-white/90"
+							className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-5 py-2.5 font-bold text-black hover:brightness-105 active:scale-95 transition-all shadow-md flex items-center gap-1.5"
 						>
-							Register Member
+							<span>⚡ Authorize & Issue Digital Pass</span>
 						</button>
 					</div>
 				</form>
@@ -1274,7 +1370,7 @@ function EmailPreviewModal({
 				<div className="p-6">
 					<div className="rounded-2xl border border-white/15 bg-black p-6 text-white shadow-inner">
 						<div className="border-b border-white/10 pb-4 text-center">
-							<h1 className="font-serif text-2xl font-bold tracking-wider text-white">LIA IRON CLUB</h1>
+							<h1 className="font-sans text-2xl font-bold tracking-wider text-white">LIA IRON CLUB</h1>
 							<p className="text-[10px] tracking-widest text-amber-400 uppercase">
 								Elite Physique & Training Sanctum
 							</p>
@@ -1414,7 +1510,7 @@ function WhatsAppDispatchModal({
 							</svg>
 						</div>
 						<div>
-							<h3 className="font-serif text-lg sm:text-xl font-bold text-white tracking-wide">
+							<h3 className="font-sans text-lg sm:text-xl font-bold text-white tracking-wide">
 								WhatsApp Expiry Alert & Instant QR
 							</h3>
 							<p className="text-xs text-white/50">

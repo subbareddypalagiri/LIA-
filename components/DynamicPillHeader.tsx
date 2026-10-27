@@ -598,7 +598,33 @@ export default function DynamicPillHeader() {
 								</svg>
 							</button>
 
-							
+							{/* 6. Members Portal */}
+							<button
+								onClick={() => handleNavAction('members')}
+								className="w-full flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition-all hover:border-amber-400/50 hover:bg-neutral-900 active:scale-[0.98]"
+							>
+								<div className="flex items-center gap-3">
+									<div className="flex size-9 items-center justify-center rounded-xl bg-amber-400/15 border border-amber-400/30 text-amber-300">
+										<svg className="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+											<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+											<circle cx="9" cy="7" r="4" />
+											<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+											<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+										</svg>
+									</div>
+									<div>
+										<div className="text-xs font-bold text-white flex items-center gap-1.5">
+											<span>Members Portal</span>
+											<span className="rounded bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-semibold text-emerald-300">
+												Roster & Passes
+											</span>
+										</div>
+									</div>
+								</div>
+								<svg className="size-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+									<path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+								</svg>
+							</button>
 						</div>
 
 						{/* Secondary Utilities: Studio, Members Tracker, PWA */}

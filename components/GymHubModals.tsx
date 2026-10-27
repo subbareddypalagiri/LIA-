@@ -9,6 +9,7 @@ import ExerciseVaultView from './ExerciseVaultView'
 import AuthModal from './AuthModal'
 import MemberProfileModal from './MemberProfileModal'
 import AthleteNutritionModal, { AthleteNutritionView } from './AthleteNutritionModal'
+import MemberTrackerModal, { MemberTrackerView } from './MemberTrackerModal'
 import { exportMembersToCsv } from '@/lib/exportCsv'
 import { useAuth, updateSessionUser } from '@/store/authStore'
 import { generateUpiQrDataUrl } from '@/lib/upiQr'
@@ -445,6 +446,25 @@ export default function GymHubModals() {
 							<span>Timings</span>
 						</button>
 
+						<button
+							onClick={() => openModal('members')}
+							className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
+								activeModal === 'members'
+									? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
+									: 'border border-white/10 bg-white/[0.03] text-neutral-300 hover:text-white hover:bg-white/[0.08]'
+							}`}
+						>
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+								<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+								<circle cx="9" cy="7" r="4" />
+								<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+								<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+							</svg>
+							<span>Members</span>
+							<span className="size-1.5 rounded-full bg-emerald-400" />
+						</button>
+
+
 						{/* Role-Based Tab: LIA Command if owner, My Pass if member, or Login if guest */}
 						{isOwner && (
 							<button
@@ -815,6 +835,13 @@ export default function GymHubModals() {
 									Direct Trainer Hotline: <span className="text-white font-mono font-bold">+91 98765 43210</span>
 								</div>
 							</div>
+						</div>
+					)}
+
+					{/* 6. ATHLETE ROSTER & MEMBERS PORTAL */}
+					{activeModal === 'members' && (
+						<div className="font-sans">
+							<MemberTrackerView showToast={showToast} onClose={closeModal} />
 						</div>
 					)}
 
@@ -1387,16 +1414,16 @@ export default function GymHubModals() {
 									</div>
 								</div>
 								<button
-									onClick={() => {
-										closeModal()
-										// Open Member Tracker button in header
-										const btn = document.querySelector('header button[title*="Members"], header button:has(span)') as HTMLButtonElement
-										btn?.click()
-									}}
-									className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-2 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shrink-0"
+									onClick={() => openModal('members')}
+									className="rounded-xl border border-amber-400 bg-amber-400 px-4 py-2 text-xs font-bold text-black uppercase tracking-wider hover:bg-amber-300 transition-all shrink-0 cursor-pointer shadow-md"
 								>
 									Open Members Portal →
 								</button>
+							</div>
+
+							{/* Direct Embedded Athlete Roster inside LIA Command */}
+							<div className="mt-8 border-t border-white/10 pt-6">
+								<MemberTrackerView showToast={showToast} />
 							</div>
 
 						</div>
