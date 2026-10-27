@@ -21,7 +21,7 @@ interface AthleteNutritionModalProps {
 	showToast?: (msg: string) => void
 }
 
-export default function AthleteNutritionModal({ onClose, showToast }: AthleteNutritionModalProps) {
+export function AthleteNutritionView({ showToast }: { showToast?: (msg: string) => void }) {
 	// Inputs
 	const [gender, setGender] = useState<'male' | 'female'>('male')
 	const [age, setAge] = useState<number>(25)
@@ -206,77 +206,57 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 	})
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-y-auto">
-			{/* Backdrop */}
-			<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
-
-			{/* Modal Dialog */}
-			<div className="relative z-10 flex h-[95dvh] sm:h-[92vh] sm:max-h-[860px] w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/20 bg-neutral-950 shadow-2xl backdrop-blur-2xl my-0 sm:my-auto text-white">
-				{/* Mobile Grab Handle */}
-				<div className="flex sm:hidden justify-center pt-2.5 pb-1 bg-neutral-950 shrink-0">
-					<div className="h-1 w-10 rounded-full bg-white/25" />
+		<div className="space-y-5 font-sans">
+			{/* Nutrition Header */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+				<div className="flex items-center gap-3">
+					<div className="flex size-10 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/10 text-amber-300 shrink-0">
+						<svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+							<path d="M18 6 6 18" />
+							<path d="m20 10-4-4" />
+							<path d="m4 14 4 4" />
+							<circle cx="12" cy="12" r="3" />
+						</svg>
+					</div>
+					<div>
+						<div className="flex items-center gap-2">
+							<h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-sans">
+								Macro & Hypertrophy Architect
+							</h2>
+							<span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[9px] font-bold text-amber-300">
+								Mifflin-St Jeor
+							</span>
+						</div>
+						<p className="text-xs text-neutral-400 mt-0.5">
+							Compute personalized caloric targets, daily protein threshold & macronutrient partitioning.
+						</p>
+					</div>
 				</div>
 
-				{/* Header */}
-				<div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6 sm:py-3.5 bg-neutral-950 shrink-0">
-					<div className="flex items-center gap-2.5 sm:gap-3">
-						<div className="flex size-9 sm:size-10 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/10 text-amber-300">
-							<svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-								<path d="M18 6 6 18" />
-								<path d="m20 10-4-4" />
-								<path d="m4 14 4 4" />
-								<circle cx="12" cy="12" r="3" />
+				<button
+					onClick={handleCopy}
+					className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-1.5 self-start sm:self-center active:scale-95 shrink-0"
+				>
+					{copied ? (
+						<>
+							<svg className="size-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+								<path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
 							</svg>
-						</div>
-						<div>
-							<div className="flex items-center gap-2">
-								<h2 className="text-base sm:text-xl font-bold tracking-tight text-white">
-									Macro Hypertrophy Architect
-								</h2>
-								<span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[9px] font-bold text-amber-300 uppercase">
-									Mifflin-St Jeor Engine
-								</span>
-							</div>
-							<p className="text-[11px] sm:text-xs text-white/50">
-								Calculate customized calories, protein synthesis threshold, and macro partitioning.
-							</p>
-						</div>
-					</div>
+							<span className="text-emerald-400 font-bold">Copied!</span>
+						</>
+					) : (
+						<>
+							<svg className="size-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+								<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+								<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+							</svg>
+							<span>Copy Macro Plan</span>
+						</>
+					)}
+				</button>
+			</div>
 
-					<div className="flex items-center gap-2">
-						<button
-							onClick={handleCopy}
-							className="rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all hidden xs:flex items-center gap-1.5"
-						>
-							{copied ? (
-								<>
-									<svg className="size-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-										<path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-									</svg>
-									<span className="text-emerald-400">Copied</span>
-								</>
-							) : (
-								<>
-									<svg className="size-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-										<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-										<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-									</svg>
-									<span>Copy Plan</span>
-								</>
-							)}
-						</button>
-
-						<button
-							onClick={onClose}
-							className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/60 hover:border-white/30 hover:bg-white/10 hover:text-white transition-all shrink-0"
-						>
-							✕
-						</button>
-					</div>
-				</div>
-
-				{/* Scrollable Body */}
-				<div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-5 bg-black/20">
+			<div className="space-y-5">
 					{/* Dual Column Layout: Left = Inputs, Right = Results */}
 					<div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 						{/* LEFT COLUMN: Input Parameters */}
@@ -675,6 +655,29 @@ Per-Meal Breakdown (${mealCount} Meals/day):
 							</div>
 						</div>
 					</div>
+			</div>
+		</div>
+	)
+}
+
+export default function AthleteNutritionModal({ onClose, showToast }: AthleteNutritionModalProps) {
+	return (
+		<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-y-auto">
+			<div className="fixed inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
+			<div className="relative z-10 flex h-[95dvh] sm:h-[92vh] sm:max-h-[860px] w-full max-w-5xl flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/20 bg-neutral-950 p-4 sm:p-6 shadow-2xl backdrop-blur-2xl my-0 sm:my-auto text-white">
+				<div className="flex sm:hidden justify-center pt-1 pb-2 shrink-0">
+					<div className="h-1 w-10 rounded-full bg-white/25" />
+				</div>
+				<div className="flex justify-end mb-2">
+					<button
+						onClick={onClose}
+						className="flex size-8 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/60 hover:text-white"
+					>
+						✕
+					</button>
+				</div>
+				<div className="flex-1 overflow-y-auto pr-1">
+					<AthleteNutritionView showToast={showToast} />
 				</div>
 			</div>
 		</div>

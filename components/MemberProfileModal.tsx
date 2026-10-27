@@ -149,7 +149,7 @@ export default function MemberProfileModal({ showToast }: MemberProfileModalProp
 							</div>
 
 							<div className="text-right">
-								<div className="font-bebas text-lg tracking-wider text-amber-400">LIA IRON CLUB</div>
+								<div className="font-sans font-black text-sm tracking-widest text-amber-300">LIA IRON CLUB</div>
 								<div className="text-[9px] uppercase tracking-widest text-white/40">Tier Membership</div>
 							</div>
 						</div>

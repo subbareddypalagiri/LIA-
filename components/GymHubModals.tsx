@@ -8,7 +8,7 @@ import ExerciseBiomechanicsEngine from './ExerciseBiomechanicsEngine'
 import ExerciseVaultView from './ExerciseVaultView'
 import AuthModal from './AuthModal'
 import MemberProfileModal from './MemberProfileModal'
-import AthleteNutritionModal from './AthleteNutritionModal'
+import AthleteNutritionModal, { AthleteNutritionView } from './AthleteNutritionModal'
 import { exportMembersToCsv } from '@/lib/exportCsv'
 import { useAuth, updateSessionUser } from '@/store/authStore'
 import { generateUpiQrDataUrl } from '@/lib/upiQr'
@@ -350,9 +350,7 @@ export default function GymHubModals() {
 		return <MemberProfileModal showToast={showToast} />
 	}
 
-	if (activeModal === 'nutrition') {
-		return <AthleteNutritionModal onClose={closeModal} showToast={showToast} />
-	}
+
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
@@ -373,52 +371,56 @@ export default function GymHubModals() {
 			<div className="relative z-10 w-full max-w-5xl lg:max-w-6xl max-h-[92dvh] overflow-hidden rounded-3xl border border-white/20 bg-neutral-950/98 shadow-2xl backdrop-blur-2xl flex flex-col text-white">
 				
 				{/* Top Bar with Navigation Tabs */}
-				<div className="flex items-center justify-between border-b border-white/10 px-4 sm:px-6 py-3.5 bg-white/[0.02]">
-					<div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+				<div className="flex items-center justify-between border-b border-white/10 px-3.5 sm:px-6 py-2.5 sm:py-3 bg-neutral-950/90 font-sans">
+					<div className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 pr-2">
 						<button
 							onClick={() => openModal('exercises')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'exercises'
-									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
-									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+									? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
+									: 'border border-white/10 bg-white/[0.03] text-neutral-300 hover:text-white hover:bg-white/[0.08]'
 							}`}
 						>
-							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 								<path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12" />
 							</svg>
 							<span>Exercises</span>
 						</button>
 						<button
 							onClick={() => openModal('splits')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'splits'
-									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
-									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+									? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
+									: 'border border-white/10 bg-white/[0.03] text-neutral-300 hover:text-white hover:bg-white/[0.08]'
 							}`}
 						>
-							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 								<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
 								<rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
 								<path d="M9 14l2 2 4-4" />
 							</svg>
-							<span>Workout Splits</span>
+							<span>Splits</span>
 						</button>
 						<button
 							onClick={() => openModal('equipment')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'equipment'
-									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
-									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+									? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
+									: 'border border-white/10 bg-white/[0.03] text-neutral-300 hover:text-white hover:bg-white/[0.08]'
 							}`}
 						>
-							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 								<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
 							</svg>
 							<span>Equipment</span>
 						</button>
 						<button
 							onClick={() => openModal('nutrition')}
-							className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+							className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
+								activeModal === 'nutrition'
+									? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
+									: 'border border-white/10 bg-white/[0.03] text-neutral-300 hover:text-white hover:bg-white/[0.08]'
+							}`}
 						>
 							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 								<path d="M18 6 6 18" />
@@ -430,29 +432,30 @@ export default function GymHubModals() {
 						</button>
 						<button
 							onClick={() => openModal('timings')}
-							className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
+							className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
 								activeModal === 'timings'
-									? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
-									: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+									? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
+									: 'border border-white/10 bg-white/[0.03] text-neutral-300 hover:text-white hover:bg-white/[0.08]'
 							}`}
 						>
-							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+							<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 								<circle cx="12" cy="12" r="10" />
 								<polyline points="12 6 12 12 16 14" />
 							</svg>
 							<span>Timings</span>
 						</button>
+
 						{/* Role-Based Tab: LIA Command if owner, My Pass if member, or Login if guest */}
 						{isOwner && (
 							<button
 								onClick={() => openModal('owner')}
-								className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 ${
+								className={`rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 ${
 									activeModal === 'owner'
-										? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
+										? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
 										: 'border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
 								}`}
 							>
-								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 									<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
 								</svg>
 								<span>LIA Command</span>
@@ -463,9 +466,9 @@ export default function GymHubModals() {
 						{isMember && (
 							<button
 								onClick={() => openModal('my-membership')}
-								className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+								className="rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
 							>
-								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 									<rect width="18" height="18" x="3" y="3" rx="2" />
 									<circle cx="12" cy="10" r="3" />
 									<path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
@@ -478,33 +481,20 @@ export default function GymHubModals() {
 						{!user && (
 							<button
 								onClick={() => openModal('auth')}
-								className="rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5 border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20"
+								className="rounded-xl px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20"
 							>
-								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 									<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
 									<path d="M7 11V7a5 5 0 0 1 10 0v4" />
 								</svg>
-								<span>Login / Pass</span>
-							</button>
-						)}
-
-						{user && (
-							<button
-								onClick={() => {
-									logout()
-									showToast('Signed out successfully')
-								}}
-								className="rounded-xl px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-rose-300 transition-colors shrink-0"
-								title="Sign out"
-							>
-								Sign Out
+								<span>Login</span>
 							</button>
 						)}
 					</div>
 
 					<button
 						onClick={closeModal}
-						className="ml-3 rounded-full border border-white/10 p-2 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+						className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10 hover:text-white transition-all ml-1.5"
 						title="Close Modal"
 					>
 						<svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -519,41 +509,42 @@ export default function GymHubModals() {
 					{/* 1. EXERCISES LIBRARY & 3D BIOMECHANICS STUDIO */}
 					{activeModal === 'exercises' && (
 						<div>
-							{/* Sub-View Switcher: 3D Biomechanics Studio vs Catalog */}
-							<div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4 mb-5">
-								<div className="flex items-center gap-2">
-									<button
-										onClick={() => setExerciseSubView('studio')}
-										className={`rounded-xl px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-											exerciseSubView === 'studio'
-												? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
-												: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
-										}`}
-									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-											<line x1="4" x2="4" y1="21" y2="14" /><line x1="4" x2="4" y1="10" y2="3" /><line x1="12" x2="12" y1="21" y2="12" /><line x1="12" x2="12" y1="8" y2="3" /><line x1="20" x2="20" y1="21" y2="16" /><line x1="20" x2="20" y1="12" y2="3" /><line x1="1" x2="7" y1="14" y2="14" /><line x1="9" x2="15" y1="8" y2="8" /><line x1="17" x2="23" y1="16" y2="16" />
-										</svg>
-										<span>3D Biomechanics Studio</span>
-										<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-									</button>
+							{/* Sleek Segmented Switcher */}
+							<div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+								<div className="p-1 rounded-2xl bg-neutral-900/90 border border-white/10 flex items-center gap-1 w-full sm:w-auto max-w-md">
 									<button
 										onClick={() => setExerciseSubView('list')}
-										className={`rounded-xl px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+										className={`flex-1 sm:flex-initial py-2 px-3.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
 											exerciseSubView === 'list'
-												? 'bg-amber-400 text-black shadow-lg shadow-amber-400/20'
-												: 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+												? 'bg-amber-400 text-black font-bold shadow-sm'
+												: 'text-neutral-400 hover:text-white'
 										}`}
 									>
-										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 											<rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" />
 										</svg>
-										<span>Exercise Vault (609)</span>
+										<span>Movement Library (609)</span>
+									</button>
+									<button
+										onClick={() => setExerciseSubView('studio')}
+										className={`flex-1 sm:flex-initial py-2 px-3.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
+											exerciseSubView === 'studio'
+												? 'bg-amber-400 text-black font-bold shadow-sm'
+												: 'text-neutral-400 hover:text-white'
+										}`}
+									>
+										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+											<line x1="4" x2="4" y1="21" y2="14" /><line x1="4" x2="4" y1="10" y2="3" /><line x1="12" x2="12" y1="21" y2="12" /><line x1="12" x2="12" y1="8" y2="3" /><line x1="20" x2="20" y1="21" y2="16" /><line x1="20" x2="20" y1="12" y2="3" />
+										</svg>
+										<span>3D Studio</span>
+										<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
 									</button>
 								</div>
-								<div className="text-[11px] text-white/50">
+
+								<div className="text-[11px] text-neutral-400 hidden sm:block">
 									{exerciseSubView === 'studio'
-										? 'Interactive rep scrubber, muscle heatmap & joint angles'
-										: 'Browse 609 movement protocols & dual-phase forms'}
+										? 'Interactive 3D rep scrubber & biomechanics'
+										: '609 illustrated exercise protocols & contraction cues'}
 								</div>
 							</div>
 
@@ -576,18 +567,18 @@ export default function GymHubModals() {
 
 					{/* 2. WORKOUT SPLITS */}
 					{activeModal === 'splits' && (
-						<div>
-							<div className="mb-6">
-								<h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-									Battle-Tested Training Splits
+						<div className="font-sans">
+							<div className="mb-4">
+								<h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-sans">
+									Training Splits
 								</h2>
-								<p className="text-xs text-neutral-400 mt-1">
-									Select your preferred training frequency and execution blueprint.
+								<p className="text-xs text-neutral-400 mt-0.5">
+									Select your preferred training frequency and daily compound blueprint.
 								</p>
 							</div>
 
 							{/* Split Selector Bento Grid */}
-							<BentoGrid className="mb-8 auto-rows-[16rem] md:auto-rows-[17.5rem]">
+							<BentoGrid className="mb-6 auto-rows-[13rem] sm:auto-rows-[16rem] md:auto-rows-[17.5rem]">
 								{SPLIT_PROGRAMS.map((prog) => {
 									const isCurrent = activeSplitId === prog.id
 									const ProgIcon =
@@ -697,36 +688,36 @@ export default function GymHubModals() {
 
 					{/* 3. EQUIPMENT VAULT */}
 					{activeModal === 'equipment' && (
-						<div>
-							<div className="mb-6">
-								<h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-									Heavy Iron & Biomechanical Gear
+						<div className="font-sans">
+							<div className="mb-5">
+								<h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-sans">
+									Heavy Iron & Biomechanical Stations
 								</h2>
-								<p className="text-xs text-neutral-400 mt-1">
-									Every barbell, cable stack, and plate-loaded station is calibrated for zero joint shearing and optimal resistance curves.
+								<p className="text-xs text-neutral-400 mt-0.5">
+									Every barbell, cable stack, and plate-loaded station calibrated for joint safety and optimal resistance curves.
 								</p>
 							</div>
 
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 								{EQUIPMENT_DATA.map((eq, i) => (
 									<div
 										key={i}
-										className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-amber-400/40 hover:bg-neutral-900/90 transition-all"
+										className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 hover:border-amber-400/40 hover:bg-neutral-900/90 transition-all"
 									>
 										<div className="flex items-start justify-between gap-2 mb-2">
 											<div>
-												<span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-0.5">
+												<span className="text-[10px] font-bold text-amber-300 uppercase tracking-wide block mb-0.5">
 													{eq.category}
 												</span>
-												<h3 className="text-base font-bold text-white tracking-tight">{eq.name}</h3>
+												<h3 className="text-sm sm:text-base font-semibold text-white tracking-tight">{eq.name}</h3>
 											</div>
-											<span className="rounded bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 shrink-0">
+											<span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 shrink-0">
 												{eq.status}
 											</span>
 										</div>
 										<p className="text-xs text-neutral-300 mb-3 leading-relaxed">{eq.specs}</p>
-										<div className="rounded-xl bg-black/40 p-2.5 text-[11px] font-mono text-white/80 border border-white/5 flex items-center gap-2">
-											<span className="text-amber-400">Inventory:</span>
+										<div className="rounded-xl bg-black/40 p-2 text-[11px] font-mono text-neutral-300 border border-white/5 flex items-center gap-2">
+											<span className="text-amber-400 font-bold">Inventory:</span>
 											<span>{eq.quantity}</span>
 										</div>
 									</div>
@@ -735,14 +726,21 @@ export default function GymHubModals() {
 						</div>
 					)}
 
-					{/* 4. TIMINGS & BATCHES */}
-					{activeModal === 'timings' && (
+					{/* 4. ATHLETE NUTRITION ARCHITECT */}
+					{activeModal === 'nutrition' && (
 						<div>
-							<div className="mb-6">
-								<h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+							<AthleteNutritionView showToast={showToast} />
+						</div>
+					)}
+
+					{/* 5. TIMINGS & BATCHES */}
+					{activeModal === 'timings' && (
+						<div className="font-sans">
+							<div className="mb-4">
+								<h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-sans">
 									Training Batches & Operating Hours
 								</h2>
-								<p className="text-xs text-neutral-400 mt-1">
+								<p className="text-xs text-neutral-400 mt-0.5">
 									Structured training slots with dedicated floor coaches and biomechanics guidance.
 								</p>
 							</div>

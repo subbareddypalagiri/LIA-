@@ -122,39 +122,39 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 
 	return (
 		<div>
-			{/* Header & Search */}
-			<div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+			{/* Top Bar: Title & Search in one responsive row */}
+			<div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
 				<div>
-					<div className="flex items-center gap-2.5 mb-1">
-						<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
-							Exercise Vault (600+)
+					<div className="flex items-center gap-2">
+						<h2 className="text-lg sm:text-xl font-bold tracking-tight text-white font-sans">
+							Movement Library
 						</h2>
-						<span className="rounded-full bg-amber-400/10 border border-amber-400/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
-							609 Protocols
+						<span className="rounded-full bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+							609 Movements
 						</span>
 					</div>
-					<p className="text-xs text-white/60">
-						Complete movement library with uniform 2D illustrations, dual-phase start & peak contractions, and step-by-step form cues.
+					<p className="text-xs text-neutral-400 mt-0.5">
+						Illustrated movement protocols with dual-phase start & peak contraction cues.
 					</p>
 				</div>
 
-				{/* Search Bar */}
-				<div className="relative min-w-[280px]">
+				{/* Search Bar - Responsive, Clean & Non-truncated */}
+				<div className="relative w-full sm:w-72 shrink-0">
 					<input
 						type="text"
 						value={exerciseSearch}
 						onChange={(e) => setExerciseSearch(e.target.value)}
-						placeholder="Search 600+ exercises, muscles, equipment..."
-						className="w-full rounded-xl border border-white/15 bg-white/5 pl-9 pr-8 py-2.5 text-xs text-white placeholder-white/40 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition-all"
+						placeholder="Search exercises, muscles..."
+						className="w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-8 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition-all font-sans"
 					/>
-					<svg className="absolute left-3 top-3 size-3.5 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+					<svg className="absolute left-3 top-2.5 size-3.5 text-neutral-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 						<circle cx="11" cy="11" r="8" />
 						<path d="m21 21-4.3-4.3" />
 					</svg>
 					{exerciseSearch && (
 						<button
 							onClick={() => setExerciseSearch('')}
-							className="absolute right-2.5 top-2.5 text-xs text-white/40 hover:text-white p-1"
+							className="absolute right-2.5 top-2 text-xs text-neutral-400 hover:text-white p-0.5"
 						>
 							✕
 						</button>
@@ -162,8 +162,8 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 				</div>
 			</div>
 
-			{/* Muscle Category Filter Pills (Horizontal swipe on mobile, wrap on desktop) */}
-			<div className="mb-3.5 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar sm:flex-wrap pb-1">
+			{/* Muscle Category Filter Pills (Smooth swipe on mobile) */}
+			<div className="mb-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
 				{MUSCLE_CATEGORIES.map((cat) => {
 					const count = muscleCounts[cat.value] || 0
 					const isActive = selectedMuscle === cat.value
@@ -171,16 +171,16 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 						<button
 							key={cat.value}
 							onClick={() => setSelectedMuscle(cat.value)}
-							className={`rounded-full px-3 py-1.5 text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 shrink-0 ${
+							className={`rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
 								isActive
-									? 'bg-amber-400 text-black shadow-md font-bold'
-									: 'border border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white'
+									? 'bg-amber-400 text-black font-bold shadow-sm shadow-amber-400/20'
+									: 'border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:text-white'
 							}`}
 						>
 							<span>{cat.label}</span>
 							<span
 								className={`text-[10px] rounded-full px-1.5 py-0.2 ${
-									isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-white/50'
+									isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-neutral-400'
 								}`}
 							>
 								{count}
@@ -190,9 +190,9 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 				})}
 			</div>
 
-			{/* Equipment Filter Bar (Horizontal swipe on mobile) */}
-			<div className="mb-5 flex items-center gap-1.5 text-[11px] border-b border-white/10 pb-3 overflow-x-auto no-scrollbar sm:flex-wrap">
-				<span className="text-white/40 mr-1 font-semibold uppercase tracking-wider text-[10px] shrink-0">
+			{/* Equipment Filter Bar (Smooth horizontal swipe) */}
+			<div className="mb-3.5 flex items-center gap-1.5 text-xs border-b border-white/[0.08] pb-3 overflow-x-auto no-scrollbar">
+				<span className="text-neutral-400 font-semibold text-[11px] shrink-0 mr-1">
 					Equipment:
 				</span>
 				{EQUIPMENT_FILTERS.map((eq) => {
@@ -201,10 +201,10 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 						<button
 							key={eq}
 							onClick={() => setSelectedEquipment(eq)}
-							className={`rounded-lg px-2.5 py-1 capitalize transition-all shrink-0 ${
+							className={`rounded-lg px-2.5 py-1 text-xs whitespace-nowrap transition-all shrink-0 capitalize ${
 								isActive
-									? 'bg-white/20 text-amber-300 font-bold border border-amber-400/40'
-									: 'text-white/60 hover:text-white hover:bg-white/5'
+									? 'bg-amber-400/15 text-amber-300 font-bold border border-amber-400/40'
+									: 'text-neutral-400 hover:text-white hover:bg-white/5'
 							}`}
 						>
 							{eq}
@@ -214,13 +214,13 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 			</div>
 
 			{/* Active Count & Feedback */}
-			<div className="mb-4 flex items-center justify-between text-xs text-white/50">
+			<div className="mb-3 flex items-center justify-between text-xs text-neutral-400">
 				<div>
-					Showing <span className="font-bold text-white">{displayedExercises.length}</span> of{' '}
-					<span className="font-bold text-amber-400">{filteredExercises.length}</span> matching exercises
+					Showing <span className="font-semibold text-white">{displayedExercises.length}</span> of{' '}
+					<span className="font-semibold text-amber-300">{filteredExercises.length}</span> exercises
 				</div>
 				{filteredExercises.length === 0 && (
-					<div className="text-amber-400/80">No exercises found. Try adjusting search or filters.</div>
+					<div className="text-amber-400">No exercises found for current filters.</div>
 				)}
 			</div>
 
@@ -334,7 +334,7 @@ export default function ExerciseVaultView({ onOpenStudio, showToast }: ExerciseV
 
 									{/* Exercise Name & Primary Muscle */}
 									<div className="space-y-1 mb-2">
-										<h4 className="text-xs sm:text-sm font-bold tracking-tight text-white group-hover:text-amber-300 transition-colors line-clamp-2">
+										<h4 className="text-xs sm:text-sm font-semibold tracking-tight text-white group-hover:text-amber-300 transition-colors line-clamp-1">
 											{ex.name}
 										</h4>
 										<div className="flex flex-wrap items-center gap-1">
