@@ -221,7 +221,7 @@ export default function DynamicPillHeader() {
 									className="rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold text-xs px-3.5 sm:px-4 py-1.5 sm:py-2 shadow-md hover:from-amber-300 hover:to-amber-400 transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0 font-sans"
 								>
 									<span className="size-1.5 rounded-full bg-black animate-pulse" />
-									<span>Owner Desk</span>
+									<span>LIA Command</span>
 								</button>
 								<button
 									type="button"
@@ -367,40 +367,42 @@ export default function DynamicPillHeader() {
 
 						{/* Athlete & Owner Status Card */}
 						{isOwner ? (
-							<div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.05] p-3 flex items-center justify-between">
-								<div className="flex items-center gap-2.5">
-									<span className="relative flex size-2.5">
-										<span className="inline-flex size-full rounded-full bg-amber-400 animate-ping" />
-										<span className="relative inline-flex size-2.5 rounded-full bg-amber-400" />
-									</span>
-									<div>
-										<div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-											<span>{user?.name || 'Palagiri Subbareddy'}</span>
-											<span className="rounded bg-amber-400/20 border border-amber-400/30 px-1.5 py-0.2 text-[9px] font-bold text-amber-300 uppercase">
-												Owner
-											</span>
+							<div className="rounded-3xl border border-amber-400/40 bg-gradient-to-br from-neutral-900/95 via-[#131109] to-neutral-950 p-4 shadow-[0_8px_32px_rgba(245,158,11,0.12)] space-y-3.5">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-3">
+										<div className="size-11 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-300 flex items-center justify-center font-bold text-base shadow-inner shrink-0">
+											👑
 										</div>
-										<div className="text-[10px] text-white/50">Club Admin Authority</div>
+										<div>
+											<div className="text-sm font-black text-white tracking-tight">
+												{user?.name || 'Palagiri Subbareddy'}
+											</div>
+											<div className="text-[10px] text-amber-300 font-bold uppercase tracking-widest mt-0.5">
+												Founder & Managing Director
+											</div>
+										</div>
 									</div>
-								</div>
-
-								<div className="flex items-center gap-1.5">
-									<button
-										onClick={() => handleNavAction('owner')}
-										className="rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-black px-3.5 py-2 text-xs font-bold active:scale-95 transition-all shadow-sm min-h-[38px] flex items-center justify-center"
-									>
-										Owner Desk
-									</button>
 									<button
 										onClick={handleLogout}
-										className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-3 py-2 text-xs font-semibold active:scale-95 transition-all min-h-[38px] flex items-center justify-center"
-										title="Sign out of Owner Account"
+										className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 px-3 py-1.5 text-xs font-semibold active:scale-95 transition-all shrink-0"
+										title="Sign out of Account"
 									>
-										Logout
+										Sign Out
 									</button>
 								</div>
-							</div>
-						) : isMember ? (
+
+								{/* Big Executive Champagne Gold Launch Button */}
+								<button
+									onClick={() => handleNavAction('owner')}
+									className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#FDE68A] via-[#F59E0B] to-[#D97706] text-black font-extrabold text-xs uppercase tracking-wider shadow-lg hover:brightness-105 active:scale-95 transition flex items-center justify-center gap-2"
+								>
+									<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+										<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+										<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+									</svg>
+									<span>Launch LIA Command</span>
+								</button>
+							</div>) : isMember ? (
 							<div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3 flex items-center justify-between">
 								<div className="flex items-center gap-2.5">
 									<span className="relative flex size-2.5">
@@ -478,7 +480,7 @@ export default function DynamicPillHeader() {
 												609 Protocols
 											</span>
 										</div>
-										<p className="text-[11px] text-white/50">2D Start ⇄ Peak contractions & anatomy</p>
+										
 									</div>
 								</div>
 								<svg className="size-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -506,7 +508,7 @@ export default function DynamicPillHeader() {
 												Hypertrophy
 											</span>
 										</div>
-										<p className="text-[11px] text-white/50">PPL, Arnold, Upper/Lower 6-day programs</p>
+										
 									</div>
 								</div>
 								<svg className="size-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -532,7 +534,7 @@ export default function DynamicPillHeader() {
 												Ergonomics
 											</span>
 										</div>
-										<p className="text-[11px] text-white/50">Machine setups, resistance arcs & form cues</p>
+										
 									</div>
 								</div>
 								<svg className="size-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -561,7 +563,7 @@ export default function DynamicPillHeader() {
 												PRO
 											</span>
 										</div>
-										<p className="text-[11px] text-white/50">BMR/TDEE macros & high-protein fuel</p>
+										
 									</div>
 								</div>
 								<svg className="size-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -588,7 +590,7 @@ export default function DynamicPillHeader() {
 												5:00 AM – 10:30 PM
 											</span>
 										</div>
-										<p className="text-[11px] text-white/50">Peak rush hours & optimal training times</p>
+										
 									</div>
 								</div>
 								<svg className="size-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -596,33 +598,7 @@ export default function DynamicPillHeader() {
 								</svg>
 							</button>
 
-							{/* 6. Club Owner Desk (Visible when Owner is Authenticated) */}
-							{isOwner && (
-								<button
-									onClick={() => handleNavAction('owner')}
-									className="w-full flex items-center justify-between rounded-2xl border border-amber-400/60 bg-amber-400/10 hover:bg-amber-400/15 p-3 text-left transition-all active:scale-[0.98]"
-								>
-									<div className="flex items-center gap-3">
-										<div className="flex size-9 items-center justify-center rounded-xl border bg-amber-400 text-black border-amber-300 font-bold">
-											<svg className="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-												<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-											</svg>
-										</div>
-										<div>
-											<div className="text-xs font-bold text-white flex items-center gap-1.5">
-												<span>Club Owner Desk</span>
-												<span className="rounded bg-amber-400 text-black px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider">
-													Active Admin
-												</span>
-											</div>
-											<p className="text-[11px] text-white/50">Revenue ledger, attendance & athlete billing</p>
-										</div>
-									</div>
-									<svg className="size-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-										<path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-									</svg>
-								</button>
-							)}
+							
 						</div>
 
 						{/* Secondary Utilities: Studio, Members Tracker, PWA */}
@@ -697,7 +673,7 @@ export default function DynamicPillHeader() {
 										<svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
 											<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
 										</svg>
-										<span>Sign Out of {isOwner ? 'Owner Desk' : 'Athlete Account'}</span>
+										<span>Sign Out of {isOwner ? 'LIA Command' : 'Athlete Account'}</span>
 									</button>
 								</div>
 							)}

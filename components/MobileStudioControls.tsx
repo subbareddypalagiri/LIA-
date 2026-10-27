@@ -216,8 +216,8 @@ export default function MobileStudioControls() {
 												</svg>
 											</div>
 											<div>
-												<div className="text-xs font-bold text-amber-200">Owner Desk</div>
-												<div className="text-[10px] text-white/70">Revenue, pending fees & attendance</div>
+												<div className="text-xs font-bold text-amber-200">LIA Command</div>
+												<div className="text-[10px] text-white/70">Executive suite, revenue & athlete induction</div>
 											</div>
 										</div>
 										<span className="rounded bg-black/40 px-2 py-0.5 text-[10px] font-bold text-amber-300">

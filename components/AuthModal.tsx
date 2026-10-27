@@ -86,7 +86,7 @@ export default function AuthModal({ onSuccess }: AuthModalProps) {
 				}
 				closeModal()
 				if (onSuccess) onSuccess()
-				// Automatically route Owner to Owner Desk, and Athletes to Member Pass!
+				// Automatically route Owner to LIA Command, and Athletes to Member Pass!
 				if (res.role === 'owner') {
 					openModal('owner')
 				} else {

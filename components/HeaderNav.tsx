@@ -80,13 +80,13 @@ export default function HeaderNav() {
 				<Nav.Item
 					active={activeModal === 'owner'}
 					onClick={() => openGymModal('owner')}
-					title="Gym Owner Desk: Revenue, Fees, Attendance & Onboarding"
+					title="LIA Command: Revenue, Fees, Attendance & Onboarding"
 					className="flex items-center gap-1.5 font-bold text-amber-300 hover:text-amber-200"
 				>
 					<svg className="size-3.5 stroke-[1.75]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 						<path strokeLinecap="round" strokeLinejoin="round" d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
 					</svg>
-					<span>Owner Desk</span>
+					<span>LIA Command</span>
 				</Nav.Item>
 			)}
 

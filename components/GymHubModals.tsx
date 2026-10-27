@@ -241,6 +241,27 @@ export default function GymHubModals() {
 	const [newMemberName, setNewMemberName] = useState('')
 	const [newMemberPhone, setNewMemberPhone] = useState('')
 	const [newMemberPlan, setNewMemberPlan] = useState('3 Months Hypertrophy (₹4,000)')
+	const [newMemberPhoto, setNewMemberPhoto] = useState<string>('')
+	const memberCameraInputRef = useRef<HTMLInputElement>(null)
+	const memberGalleryInputRef = useRef<HTMLInputElement>(null)
+
+	const handleMemberPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (file) {
+			if (file.size > 5 * 1024 * 1024) {
+				showToast('Image too large. Please select a photo under 5MB.')
+				return
+			}
+			const reader = new FileReader()
+			reader.onload = (event) => {
+				if (event.target?.result) {
+					setNewMemberPhoto(event.target.result as string)
+					showToast('Athlete photo captured successfully!')
+				}
+			}
+			reader.readAsDataURL(file)
+		}
+	}
 	const [maintenanceLogged, setMaintenanceLogged] = useState(false)
 	const [membersList, setMembersList] = useState<GymMember[]>([])
 
@@ -421,7 +442,7 @@ export default function GymHubModals() {
 							</svg>
 							<span>Timings</span>
 						</button>
-						{/* Role-Based Tab: Owner Desk if owner, My Pass if member, or Login if guest */}
+						{/* Role-Based Tab: LIA Command if owner, My Pass if member, or Login if guest */}
 						{isOwner && (
 							<button
 								onClick={() => openModal('owner')}
@@ -434,7 +455,7 @@ export default function GymHubModals() {
 								<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 									<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
 								</svg>
-								<span>Owner Desk</span>
+								<span>LIA Command</span>
 								<span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
 							</button>
 						)}
@@ -799,7 +820,7 @@ export default function GymHubModals() {
 						</div>
 					)}
 
-					{/* 5. OWNER DESK (OWNER KI USE AYYE OPTIONS) */}
+					{/* 5. LIA COMMAND (EXECUTIVE MANAGEMENT SUITE) */}
 					{activeModal === 'owner' && (
 						!isOwner ? (
 							<div className="rounded-3xl border border-amber-400/30 bg-neutral-900/90 p-8 text-center max-w-md mx-auto my-12 space-y-4">
@@ -810,10 +831,10 @@ export default function GymHubModals() {
 								</div>
 								<div>
 									<h3 className="font-heading text-xl font-bold uppercase text-white tracking-wide">
-										Owner Access Restricted
+										LIA Command Restricted
 									</h3>
 									<p className="text-xs text-white/60 mt-1.5">
-										Owner Desk contains financial targets, revenue ledger, and member management. Only authenticated gym owners can access this view.
+										LIA Command contains financial targets, revenue ledger, and member management. Only authenticated gym founders can access this suite.
 									</p>
 								</div>
 								<div className="pt-2">
@@ -825,7 +846,7 @@ export default function GymHubModals() {
 											<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
 											<path d="M7 11V7a5 5 0 0 1 10 0v4" />
 										</svg>
-										<span>Sign In as Owner</span>
+										<span>Authenticate LIA Command</span>
 									</button>
 								</div>
 							</div>
@@ -835,32 +856,32 @@ export default function GymHubModals() {
 								<div>
 									<div className="flex items-center gap-2 mb-1">
 										<h2 className="font-heading text-2xl font-black uppercase tracking-wide text-white">
-											LIA Iron Club — Owner Desk
+											LIA Iron Club — LIA Command
 										</h2>
 										<span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
 											Admin Verified
 										</span>
 									</div>
 									<p className="text-xs text-white/60">
-										Gym operational metrics, revenue ledger, daily attendance, and new member onboarding.
+										Executive operational suite: daily turnstile check-ins, revenue target ledger, and athlete induction.
 									</p>
 								</div>
-								<div className="flex items-center gap-2 self-start sm:self-center">
+								<div className="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
 									<button
 										type="button"
 										onClick={() => {
 											exportMembersToCsv(membersList, ownerProfile)
 											showToast('Gym Athlete Roster & Revenue Ledger exported to CSV!')
 										}}
-										className="rounded-xl border border-white/15 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white px-3.5 py-2 text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md active:scale-[0.98]"
+										className="rounded-xl border border-white/15 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white px-2 sm:px-3.5 py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1 sm:gap-1.5 shadow-md active:scale-[0.98]"
 										title="Download Excel/CSV Member Ledger"
 									>
-										<svg className="size-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+										<svg className="size-3.5 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 											<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
 											<polyline points="7 10 12 15 17 10" />
 											<line x1="12" x2="12" y1="15" y2="3" />
 										</svg>
-										<span>Export CSV</span>
+										<span>Export</span>
 									</button>
 								{/* Quick Entry Logger */}
 								<button
@@ -872,26 +893,26 @@ export default function GymHubModals() {
 										})
 										showToast(`Logged member entry! Total today: ${checkInCount + 1}`)
 									}}
-									className="rounded-xl border border-amber-400 bg-amber-400 text-black px-4 py-2 text-xs font-bold uppercase tracking-wider shadow-lg hover:bg-amber-300 transition-all flex items-center gap-1.5 self-start sm:self-center"
+									className="rounded-xl border border-amber-400 bg-amber-400 text-black px-2 sm:px-4 py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-lg hover:bg-amber-300 transition-all flex items-center justify-center gap-1 sm:gap-1.5 active:scale-[0.98]"
 								>
-									<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+									<svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
 										<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
 									</svg>
-									<span>Quick Check-in</span>
-									<span className="rounded-full bg-black/20 px-1.5 py-0.2 text-[10px]">+{checkInCount}</span>
+									<span>Check-in</span>
+									<span className="rounded-full bg-black/20 px-1 py-0.2 text-[9px] sm:text-[10px]">+{checkInCount}</span>
 								</button>
 								{/* Owner Sign Out Button */}
 								<button
 									type="button"
 									onClick={() => {
 										logout()
-										showToast('Signed out of Owner Desk')
+										showToast('Signed out of LIA Command')
 										closeModal()
 									}}
-									className="rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md active:scale-[0.98]"
+									className="rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 px-2 sm:px-3.5 py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 sm:gap-1.5 shadow-md active:scale-[0.98]"
 									title="Sign out of Owner Account"
 								>
-									<svg className="size-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+									<svg className="size-3.5 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
 										<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
 									</svg>
 									<span>Sign Out</span>
@@ -923,9 +944,9 @@ export default function GymHubModals() {
 									</div>
 								</div>
 
-								<div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+								<div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
 									<span
-										className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+										className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
 											cloudSyncActive
 												? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
 												: 'bg-white/5 text-white/50 border border-white/10'
@@ -937,33 +958,18 @@ export default function GymHubModals() {
 										}
 									>
 										<span className={`size-1.5 rounded-full ${cloudSyncActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-										{cloudSyncActive ? 'Cloud Sync: Connected' : 'Local Storage Mode'}
+										{cloudSyncActive ? 'Cloud Sync' : 'Local Storage'}
 									</span>
 
 									<button
 										type="button"
 										onClick={() => setIsEditingProfile(!isEditingProfile)}
-										className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all shrink-0 flex items-center gap-1.5"
+										className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-all shrink-0 flex items-center gap-1.5 active:scale-95"
 									>
 										<svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 											<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
 										</svg>
 										<span>{isEditingProfile ? 'Close' : 'Edit Credentials'}</span>
-									</button>
-									<button
-										type="button"
-										onClick={() => {
-											logout()
-											showToast('Signed out of Owner Desk')
-											closeModal()
-										}}
-										className="rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all shrink-0 flex items-center gap-1.5"
-										title="Sign out of Owner Account"
-									>
-										<svg className="size-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-											<path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-										</svg>
-										<span>Sign Out</span>
 									</button>
 								</div>
 							</div>
@@ -1307,7 +1313,7 @@ export default function GymHubModals() {
 											type="submit"
 											className="w-full rounded-xl border border-amber-400 bg-amber-400/20 py-2.5 text-xs font-bold text-amber-300 hover:bg-amber-400/30 transition-all flex items-center justify-center gap-1.5"
 										>
-											<span>+ Register Lifter & Send Receipt</span>
+											<span>⚡ Authorize & Issue Digital Pass</span>
 										</button>
 									</form>
 								</div>

@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 		template: '%s | LIA Iron Club',
 		default: 'LIA Iron Club | Elite Physique Sanctum'
 	},
-	description: 'High-performance gym membership, athlete roster, UPI payments, hypertrophy nutrition, and owner desk.',
+	description: 'High-performance gym membership, athlete roster, UPI payments, hypertrophy nutrition, and executive command suite.',
 	manifest: '/manifest.json',
 	appleWebApp: {
 		capable: true,
